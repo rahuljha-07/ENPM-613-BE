@@ -7,14 +7,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import java.util.Collection;
+import java.util.ArrayList;
 
 @Configuration
 @RequiredArgsConstructor
@@ -29,7 +28,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)                            // Disable CSRF
-            .authorizeHttpRequests(authz -> authz                             // authorization rules
+            .authorizeHttpRequests(auth -> auth                               // authorization rules
                 .requestMatchers("/auth/**").permitAll()                    // Permit all requests to auth endpoints
                 .requestMatchers("/admin/**").hasRole("ADMIN")              // Secure admin endpoints
                 .requestMatchers("/instructor/**").hasRole("INSTRUCTOR")    // Secure instructor endpoints
@@ -59,7 +58,7 @@ public class SecurityConfig {
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
             String userId = jwt.getSubject();
             UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
-            return (Collection<GrantedAuthority>) userDetails.getAuthorities(); // needed cast
+            return new ArrayList<>(userDetails.getAuthorities());
         });
         return converter;
     }

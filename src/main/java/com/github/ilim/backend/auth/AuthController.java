@@ -6,7 +6,6 @@ import com.github.ilim.backend.dto.ResetPasswordDto;
 import com.github.ilim.backend.dto.SignInDto;
 import com.github.ilim.backend.dto.SignUpDto;
 import com.github.ilim.backend.dto.VerifyAccountDto;
-import com.github.ilim.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

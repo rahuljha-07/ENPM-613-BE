@@ -6,7 +6,4 @@ public class MissingEmailOrPasswordException extends RuntimeException {
         super("Both email and password are required");
     }
 
-    public MissingEmailOrPasswordException(String message) {
-        super(message);
-    }
 }
