@@ -229,6 +229,8 @@ In the project, navigates to `src/main/resources/application-local.properties`, 
 aws.cognito.userPoolId=YOUR_USER_POOL_ID_FROM_OUTPUT
 aws.cognito.clientId=YOUR_USER_POOL_CLIENT_ID_FROM_OUTPUT
 aws.cognito.region=us-east-1  # Or your selected region
+aws.cognito.jwkUrl={{JWK_URL}} # You can find it in AWS Console page for your user pool
+
 ```
 
 **Note**: Ensure that the `aws.cognito.region` matches the region where you deployed the stack, which should be us-east-1

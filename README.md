@@ -3,6 +3,40 @@
 Welcome to the **ilim-backend**! 
 So far, the server provides authentication and user management services using AWS Cognito, AWS SDK, and PostgreSQL, with good exception handling.
 
+
+## Prerequisites
+Before you begin, ensure you have the following installed on your local development machine:
+
+- **Java Development Kit (JDK) 17** or higher
+- **Maven** for building the project
+- **Git** for version control
+- **Docker && Docker Compose** for running PostgreSQL locally
+
+##  How to Run the Server locally
+1. **Setting up your local environment**
+   1. Create `./src/main/resources/application-local.properties`
+   2. Put these properties inside it
+    ```yaml
+    spring.datasource.url=jdbc:postgresql://localhost:5432/ilim-local-db
+    spring.datasource.username=postgres
+    spring.datasource.password=postgres
+    spring.datasource.driver-class-name=org.postgresql.Driver
+    
+    # JPA and Hibernate
+    spring.jpa.hibernate.ddl-auto=update
+    spring.jpa.show-sql=true
+    ```
+   3. Open your terminal and navigate to `./devops/local-db`
+   4. Run this command to start the PostgreSQL Container:
+      ```bash
+      docker-compose up -d
+      ```
+2. **Setting Up AWS Account and infrastructure** 
+   1. Go to the root directory of this project then open 'devops/setting-up-aws.md' using any markdown viewer.
+   2. Follow the instructions there and complete `application-local.properties`.
+
+3. Start the server from IntelliJ or using build it using maven and run the JAR file.
+
 ---
 ## Project Overview
 
@@ -17,75 +51,18 @@ The **ilim** application is a backend service that handles user authentication a
 
 ---
 
-## Prerequisites
-
-Before you begin, ensure you have the following installed on your local development machine:
-
-- **Java Development Kit (JDK) 17** or higher
-- **Maven** for building the project
-- **Git** for version control
-- **AWS CLI** for interacting with AWS services
-- **Docker** (optional, for running PostgreSQL locally)
-- **An AWS Account** See the How-To document at `./devops/setting-up-aws`
-
----
-
-## Application Configuration
-
-Configure the application by setting the necessary properties.
-
-### Using `application.properties`
-
-Create the `application-local.properties` file in the `src/main/resources` directory to set up your local env.
-
-Paste this and replace the placeholders in double {}
-
-```yaml
-spring.datasource.url=jdbc:postgresql://localhost:5432/ilim-local-db
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-spring.datasource.driver-class-name=org.postgresql.Driver
-
-# JPA and Hibernate
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-
-# Cognito (follow the tutorial in ./devops/setting-up-aws.md)
-aws.cognito.userPoolId={{USER_POOL_ID}}
-aws.cognito.clientId={{CLIENT_ID}}
-aws.cognito.region=us-east-1
-aws.cognito.jwkUrl={{JWK_URL}}
-
-```
-
-## Running the Application
-
-### Setting Up the Local Database
-
-For local development, you can use a local PostgreSQL database.
-
-1. **Go to `./devops/local-db` directory.
-
-2. **Start the PostgreSQL Container**:
-
-   ```bash
-   docker-compose up -d
-   ```
-
----
 
 ## Testing and Development
 
-- **API Endpoints**: You can test the API endpoints using tools like **Bruno** or **Postman**.
-- The project will add Swagger-UI to expose all endpoints and their details in a nice GUI.
+- **API Endpoints**: You can see (and try) all the available API endpoints by going to `http://localhost:8099/swagger-ui/index.html` after starting the server.
+For Example:
+![img.png](swagger-ui.png)
+
+- You can also use tools like **Bruno** or **Postman** for testing the API.
 
 ---
 
-## Security Considerations
-
-- **HTTPS**:
-
-  - For production, ensure the application uses HTTPS to encrypt data in transit.
+## AWS Notes
 
 - **Cognito User Pool**:
 
