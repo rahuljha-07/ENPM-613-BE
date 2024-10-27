@@ -13,5 +13,4 @@ public interface InstructorApplicationRepo extends JpaRepository<InstructorAppli
 
     List<InstructorApplication> findByUserId(String userId);
 
-    boolean existsByUserId(String id);
 }
