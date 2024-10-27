@@ -1,9 +1,9 @@
 package com.github.ilim.backend.service;
 
-import com.github.ilim.backend.entity.InstructorApplication;
+import com.github.ilim.backend.entity.InstructorApp;
 import com.github.ilim.backend.enums.ApplicationStatus;
 import com.github.ilim.backend.exception.exceptions.InstructorAppNotFoundException;
-import com.github.ilim.backend.repo.InstructorApplicationRepo;
+import com.github.ilim.backend.repo.InstructorAppRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,36 +12,36 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class InstructorApplicationService {
-    private final InstructorApplicationRepo appRepo;
+public class InstructorAppService {
+    private final InstructorAppRepo appRepo;
 
     public boolean existPendingApplicationForUser(String userId) {
         return appRepo.findByUserId(userId).stream()
             .anyMatch(application -> application.getStatus() == ApplicationStatus.PENDING);
     }
 
-    public void saveInstructorApplication(InstructorApplication application) {
+    public void saveInstructorApp(InstructorApp application) {
         appRepo.save(application);
     }
 
-    public List<InstructorApplication> findByUserId(String id) {
+    public List<InstructorApp> findByUserId(String id) {
         return appRepo.findByUserId(id);
     }
 
-    public InstructorApplication findById(UUID id) {
-        return appRepo.findById(id)
-            .orElseThrow(() -> new InstructorAppNotFoundException(id.toString()));
+    public InstructorApp findById(String id) {
+        return appRepo.findById(UUID.fromString(id))
+            .orElseThrow(() -> new InstructorAppNotFoundException(id));
     }
 
-    public List<InstructorApplication> findAll() {
+    public List<InstructorApp> findAll() {
         return appRepo.findAll();
     }
 
-    public List<InstructorApplication> findPendingApplications() {
+    public List<InstructorApp> findPendingApplications() {
         return appRepo.findByStatus(ApplicationStatus.PENDING);
     }
 
-    public void update(InstructorApplication application) {
+    public void update(InstructorApp application) {
         appRepo.save(application);
     }
 

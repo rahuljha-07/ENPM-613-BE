@@ -1,6 +1,6 @@
 package com.github.ilim.backend.entity;
 
-import com.github.ilim.backend.dto.InstructorApplicationDto;
+import com.github.ilim.backend.dto.InstructorAppDto;
 import com.github.ilim.backend.enums.ApplicationStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,7 +21,7 @@ import java.util.UUID;
 @Table(name = "instructor_applications")
 @Data
 @NoArgsConstructor
-public class InstructorApplication {
+public class InstructorApp {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -57,8 +57,8 @@ public class InstructorApplication {
     private LocalDateTime submittedAt;
     private LocalDateTime reviewedAt;
 
-    public static InstructorApplication from(InstructorApplicationDto dto) {
-        var application = new InstructorApplication();
+    public static InstructorApp from(InstructorAppDto dto) {
+        var application = new InstructorApp();
         application.profileImageUrl = dto.getProfileImageUrl();
         application.schoolName = dto.getSchoolName();
         application.degreeTitle = dto.getDegreeTitle();

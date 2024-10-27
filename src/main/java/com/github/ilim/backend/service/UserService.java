@@ -1,6 +1,8 @@
 package com.github.ilim.backend.service;
 
+import com.github.ilim.backend.entity.InstructorApp;
 import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.UserNotFoundException;
 import com.github.ilim.backend.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,21 @@ public class UserService {
 
     public User create(@NonNull User user) {
         return userRepo.save(user);
+    }
+
+    public void updateUserRole(String userId, UserRole role) {
+        var user = findById(userId);
+        user.setRole(role);
+        userRepo.save(user);
+    }
+
+    public void promoteToInstructor(InstructorApp application) {
+        var user = findById(application.getUserId());
+        user.setProfileImageUrl(application.getProfileImageUrl());
+        user.setInstructorBio(application.getInstructorBio());
+        user.setInstructorTitle(application.getInstructorTitle());
+        user.setRole(UserRole.INSTRUCTOR);
+        userRepo.save(user);
     }
 
 //    public User update(String userId,@NonNull User updatedUser) {

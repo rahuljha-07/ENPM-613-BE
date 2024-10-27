@@ -1,8 +1,10 @@
 package com.github.ilim.backend.entity;
 
-import com.github.ilim.backend.enums.Role;
+import com.github.ilim.backend.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -30,24 +32,15 @@ public class User {
     private LocalDate birthdate;
 
     @Column(nullable = false)
-    private Role role = Role.STUDENT;
+    @Enumerated(EnumType.STRING)
+    private UserRole role = UserRole.STUDENT;
 
     private String profileImageUrl;
 
-    private String schoolName;
-    private String degreeTitle;
-    private LocalDate graduateDate;
-
-    private String professionalTitle;
-    private int experienceYears;
-    private String resumeUrl;
-
-    private String teachingExperience;
-
     private String instructorTitle;
-    private String instructorBio;
 
-    private String videoApplicationUrl;
+    @Column(length = 2000)
+    private String instructorBio;
 
     public static User from(AdminGetUserResponse cognitoUser) {
         User user = new User();

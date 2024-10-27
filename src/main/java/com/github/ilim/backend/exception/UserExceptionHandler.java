@@ -21,7 +21,7 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.UsernameExi
 
 import java.util.logging.Logger;
 
-import static com.github.ilim.backend.util.ErrorUtil.cleanMessage;
+import static com.github.ilim.backend.util.ErrorUtil.prepMsg;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
@@ -31,7 +31,7 @@ public class UserExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(cleanMessage(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(prepMsg(e.getMessage()));
     }
 
     @ExceptionHandler(UsernameExistsException.class)
@@ -43,55 +43,55 @@ public class UserExceptionHandler {
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<String> handleInvalidPasswordException(InvalidPasswordException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(cleanMessage(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(prepMsg(e.getMessage()));
     }
 
     @ExceptionHandler(InvalidParameterException.class)
     public ResponseEntity<String> handleInvalidParameterException(InvalidParameterException e) {
         logger.warning(e.getMessage());
         var message = e.getMessage().replaceAll("username", "email");
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cleanMessage(message));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(prepMsg(message));
     }
 
     @ExceptionHandler(MissingBirthdateException.class)
     public ResponseEntity<String> handleUserBirthdateMissing(MissingBirthdateException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cleanMessage(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(prepMsg(e.getMessage()));
     }
 
     @ExceptionHandler(UserNotConfirmedException.class)
     public ResponseEntity<String> handleUserNotConfirmedException(UserNotConfirmedException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(cleanMessage(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(prepMsg(e.getMessage()));
     }
 
     @ExceptionHandler(NotAuthorizedException.class)
     public ResponseEntity<String> handleNotAuthorizedException(NotAuthorizedException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(cleanMessage(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(prepMsg(e.getMessage()));
     }
 
     @ExceptionHandler(MissingEmailOrPasswordException.class)
     public ResponseEntity<String> handleMissingEmailOrPasswordException(MissingEmailOrPasswordException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(cleanMessage(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(prepMsg(e.getMessage()));
     }
 
     @ExceptionHandler(ExpiredCodeException.class)
     public ResponseEntity<String> handleExpiredCodeException(ExpiredCodeException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(cleanMessage(e.getMessage()) + " Or invalid email");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(prepMsg(e.getMessage()) + " Or invalid email");
     }
 
     @ExceptionHandler(CodeMismatchException.class)
     public ResponseEntity<String> handleCodeMismatchException(CodeMismatchException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(cleanMessage(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(prepMsg(e.getMessage()));
     }
 
     @ExceptionHandler(LimitExceededException.class)
     public ResponseEntity<String> handleLimitExceededException(LimitExceededException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(cleanMessage(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(prepMsg(e.getMessage()));
     }
 }
