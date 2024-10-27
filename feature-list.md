@@ -8,7 +8,7 @@
 - [ ] Update Account
 
 ### Student
-- [ ] Request to be an instructor
+- [x] Request to be an instructor
 - [ ] Browse Courses
 - [ ] Search Courses
 - [ ] Buy Courses
@@ -28,7 +28,7 @@
 - [ ] See Simple Course Analytics
 ### Admin
 - [x] Get a list of all users
-- [ ] Approve Instructors
+- [x] Approve Instructors
 - [ ] Approve Courses
 - [ ] Block User
 - [ ] Handle Support Issues
