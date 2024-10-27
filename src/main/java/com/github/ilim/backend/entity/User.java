@@ -29,10 +29,10 @@ public class User {
     @Column(nullable = false)
     private LocalDate birthdate;
 
-    private String profileImageUrl;
-
     @Column(nullable = false)
     private Role role = Role.STUDENT;
+
+    private String profileImageUrl;
 
     private String schoolName;
     private String degreeTitle;
@@ -47,7 +47,7 @@ public class User {
     private String instructorTitle;
     private String instructorBio;
 
-    private String videoApplication;
+    private String videoApplicationUrl;
 
     public static User from(AdminGetUserResponse cognitoUser) {
         User user = new User();
