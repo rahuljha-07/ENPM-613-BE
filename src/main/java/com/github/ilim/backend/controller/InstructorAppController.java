@@ -8,9 +8,11 @@ import com.github.ilim.backend.exception.exceptions.InstructorAppAlreadyExistsEx
 import com.github.ilim.backend.exception.exceptions.UserAlreadyInstructorException;
 import com.github.ilim.backend.service.InstructorAppService;
 import com.github.ilim.backend.service.UserService;
+import com.github.ilim.backend.util.response.ApiRes;
+import com.github.ilim.backend.util.response.Reply;
+import com.github.ilim.backend.util.response.Res;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,22 +32,22 @@ public class InstructorAppController {
     private final UserService userService;
 
     @GetMapping
-    private List<InstructorApp> getCurrentUserInstructorApp(@AuthenticationPrincipal Jwt jwt) {
-        return appService.findByUserId(jwt.getSubject());
+    private ApiRes<Res<List<InstructorApp>>> getCurrentUserInstructorApp(@AuthenticationPrincipal Jwt jwt) {
+        return Reply.ok(appService.findByUserId(jwt.getSubject()));
     }
 
     @GetMapping("/all")
-    private List<InstructorApp> getAll() {
-        return appService.findAll();
+    private  ApiRes<Res<List<InstructorApp>>> getAll() {
+        return Reply.ok(appService.findAll());
     }
 
     @GetMapping("/all-pending")
-    private List<InstructorApp> getAllPending() {
-        return appService.findPendingApplications();
+    private ApiRes<Res<List<InstructorApp>>> getAllPending() {
+        return Reply.ok(appService.findPendingApplications());
     }
 
     @PostMapping("/submit")
-    private ResponseEntity<String> submitInstructorApp(
+    private ApiRes<Res<String>> submitInstructorApp(
         @AuthenticationPrincipal Jwt jwt,
         @Valid @RequestBody InstructorAppDto dto
     ) {
@@ -63,6 +65,6 @@ public class InstructorAppController {
         var application = InstructorApp.from(dto);
         application.setUserId(user.getId());
         appService.saveInstructorApp(application);
-        return ResponseEntity.ok("Application submitted successfully");
+        return Reply.ok("Application submitted successfully");
     }
 }

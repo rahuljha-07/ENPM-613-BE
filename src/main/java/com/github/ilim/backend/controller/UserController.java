@@ -2,6 +2,9 @@ package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.service.UserService;
+import com.github.ilim.backend.util.response.ApiRes;
+import com.github.ilim.backend.util.response.Reply;
+import com.github.ilim.backend.util.response.Res;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -19,14 +22,14 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/all")
-    public List<User> getAllUsers() {
-        return userService.getAll();
+    public ApiRes<Res<List<User>>> getAllUsers() {
+        return Reply.ok(userService.getAll());
     }
 
     @GetMapping
-    public User getUserProfile(@AuthenticationPrincipal Jwt jwt) {
+    public ApiRes<Res<User>> getUserProfile(@AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getSubject();
-        return userService.findById(userId);
+        return Reply.ok(userService.findById(userId));
     }
 
 }

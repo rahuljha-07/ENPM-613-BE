@@ -30,12 +30,6 @@ public class UserService {
         return userRepo.save(user);
     }
 
-    public void updateUserRole(String userId, UserRole role) {
-        var user = findById(userId);
-        user.setRole(role);
-        userRepo.save(user);
-    }
-
     public void promoteToInstructor(InstructorApp application) {
         var user = findById(application.getUserId());
         user.setProfileImageUrl(application.getProfileImageUrl());

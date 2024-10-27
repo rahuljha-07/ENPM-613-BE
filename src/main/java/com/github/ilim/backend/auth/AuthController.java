@@ -6,6 +6,9 @@ import com.github.ilim.backend.dto.ResetPasswordDto;
 import com.github.ilim.backend.dto.SignInDto;
 import com.github.ilim.backend.dto.SignUpDto;
 import com.github.ilim.backend.dto.VerifyAccountDto;
+import com.github.ilim.backend.util.response.ApiRes;
+import com.github.ilim.backend.util.response.Reply;
+import com.github.ilim.backend.util.response.Res;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,15 +26,15 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signUp(@Valid @RequestBody SignUpDto signUpRequest) {
+    public ApiRes<Res<String>> signUp(@Valid @RequestBody SignUpDto signUpRequest) {
         authService.signUp(signUpRequest);
-        return ResponseEntity.ok("Sign-up successful. Please verify your email.");
+        return Reply.ok("Sign-up successful. Please verify your email.");
     }
 
     @PostMapping("/verify-account")
-    public ResponseEntity<String> verifyAccount(@Valid @RequestBody VerifyAccountDto dto) {
+    public ApiRes<Res<String>> verifyAccount(@Valid @RequestBody VerifyAccountDto dto) {
         authService.verifyAccount(dto.getEmail(), dto.getConfirmationCode());
-        return ResponseEntity.ok("User confirmed successfully.");
+        return Reply.ok("User confirmed successfully.");
     }
 
     @PostMapping("/signin")
@@ -47,29 +50,29 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@Valid @RequestBody String email) {
+    public ApiRes<Res<String>> forgotPassword(@Valid @RequestBody String email) {
         authService.ForgotPassword(email);
-        return ResponseEntity.ok("Password reset initiated. Check your email for the verification code.");
+        return Reply.ok("Password reset initiated. Check your email for the verification code.");
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> confirmForgotPassword(@Valid @RequestBody ResetPasswordDto dto) {
+    public ApiRes<Res<String>> confirmForgotPassword(@Valid @RequestBody ResetPasswordDto dto) {
         authService.resetPassword(
             dto.getEmail(),
             dto.getConfirmationCode(),
             dto.getNewPassword()
         );
-        return ResponseEntity.ok("Password has been reset successfully.");
+        return Reply.ok("Password has been reset successfully.");
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(
+    public ApiRes<Res<String>> changePassword(
         @Valid @RequestBody ChangePasswordDto requestDto,
         @RequestHeader("Authorization") String authorizationHeader
     ) {
         String accessToken = authorizationHeader.replace("Bearer ", "");
         authService.changePassword(accessToken, requestDto.getOldPassword(), requestDto.getNewPassword());
-        return ResponseEntity.ok("Password changed successfully.");
+        return Reply.ok("Password changed successfully.");
     }
 }
 

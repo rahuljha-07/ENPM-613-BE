@@ -2,7 +2,6 @@ package com.github.ilim.backend.service;
 
 import com.github.ilim.backend.entity.InstructorApp;
 import com.github.ilim.backend.enums.ApplicationStatus;
-import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

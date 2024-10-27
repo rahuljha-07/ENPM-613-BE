@@ -4,10 +4,12 @@ package com.github.ilim.backend.exception;
 import com.github.ilim.backend.exception.exceptions.MissingBirthdateException;
 import com.github.ilim.backend.exception.exceptions.MissingEmailOrPasswordException;
 import com.github.ilim.backend.exception.exceptions.UserNotFoundException;
+import com.github.ilim.backend.util.response.ApiRes;
+import com.github.ilim.backend.util.response.Reply;
+import com.github.ilim.backend.util.response.Res;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.CodeMismatchException;
@@ -21,77 +23,75 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.UsernameExi
 
 import java.util.logging.Logger;
 
-import static com.github.ilim.backend.util.ErrorUtil.prepMsg;
-
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class UserExceptionHandler {
     private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException e) {
+    public ApiRes<Res<String>> handleUserNotFoundException(UserNotFoundException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(prepMsg(e.getMessage()));
+        return Reply.notFound(e.getMessage());
     }
 
     @ExceptionHandler(UsernameExistsException.class)
-    public ResponseEntity<String> handleUsernameExistsException(UsernameExistsException e) {
+    public ApiRes<Res<String>> handleUsernameExistsException(UsernameExistsException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("User with this email already exists");
+        return Reply.conflict("User with this email already exists");
     }
 
     @ExceptionHandler(InvalidPasswordException.class)
-    public ResponseEntity<String> handleInvalidPasswordException(InvalidPasswordException e) {
+    public ApiRes<Res<String>> handleInvalidPasswordException(InvalidPasswordException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(prepMsg(e.getMessage()));
+        return Reply.create(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
     }
 
     @ExceptionHandler(InvalidParameterException.class)
-    public ResponseEntity<String> handleInvalidParameterException(InvalidParameterException e) {
+    public ApiRes<Res<String>> handleInvalidParameterException(InvalidParameterException e) {
         logger.warning(e.getMessage());
         var message = e.getMessage().replaceAll("username", "email");
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(prepMsg(message));
+        return Reply.badRequest(message);
     }
 
     @ExceptionHandler(MissingBirthdateException.class)
-    public ResponseEntity<String> handleUserBirthdateMissing(MissingBirthdateException e) {
+    public ApiRes<Res<String>> handleUserBirthdateMissing(MissingBirthdateException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(prepMsg(e.getMessage()));
+        return Reply.badRequest(e.getMessage());
     }
 
     @ExceptionHandler(UserNotConfirmedException.class)
-    public ResponseEntity<String> handleUserNotConfirmedException(UserNotConfirmedException e) {
+    public ApiRes<Res<String>> handleUserNotConfirmedException(UserNotConfirmedException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(prepMsg(e.getMessage()));
+        return Reply.unauthorized(e.getMessage());
     }
 
     @ExceptionHandler(NotAuthorizedException.class)
-    public ResponseEntity<String> handleNotAuthorizedException(NotAuthorizedException e) {
+    public ApiRes<Res<String>> handleNotAuthorizedException(NotAuthorizedException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(prepMsg(e.getMessage()));
+        return Reply.unauthorized(e.getMessage());
     }
 
     @ExceptionHandler(MissingEmailOrPasswordException.class)
-    public ResponseEntity<String> handleMissingEmailOrPasswordException(MissingEmailOrPasswordException e) {
+    public ApiRes<Res<String>> handleMissingEmailOrPasswordException(MissingEmailOrPasswordException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(prepMsg(e.getMessage()));
+        return Reply.unauthorized(e.getMessage());
     }
 
     @ExceptionHandler(ExpiredCodeException.class)
-    public ResponseEntity<String> handleExpiredCodeException(ExpiredCodeException e) {
+    public ApiRes<Res<String>> handleExpiredCodeException(ExpiredCodeException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(prepMsg(e.getMessage()) + " Or invalid email");
+        return Reply.unauthorized(e.getMessage() + " Or invalid email");
     }
 
     @ExceptionHandler(CodeMismatchException.class)
-    public ResponseEntity<String> handleCodeMismatchException(CodeMismatchException e) {
+    public ApiRes<Res<String>> handleCodeMismatchException(CodeMismatchException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(prepMsg(e.getMessage()));
+        return Reply.unauthorized(e.getMessage());
     }
 
     @ExceptionHandler(LimitExceededException.class)
-    public ResponseEntity<String> handleLimitExceededException(LimitExceededException e) {
+    public ApiRes<Res<String>> handleLimitExceededException(LimitExceededException e) {
         logger.warning(e.getMessage());
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(prepMsg(e.getMessage()));
+        return Reply.create(HttpStatus.TOO_MANY_REQUESTS, e.getMessage());
     }
 }
