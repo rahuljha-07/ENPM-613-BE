@@ -9,7 +9,7 @@ public class Reply {
     }
 
     public static <T> ApiRes<Res<T>> create(HttpStatus status, T message) {
-        return new ApiRes(Res.of(status, message), status);
+        return new ApiRes<Res<T>>(Res.of(status, message), status);
     }
 
     public static ApiRes<Res<String>> ok() {

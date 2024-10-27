@@ -9,7 +9,7 @@ public record Res<T>(
     HttpStatus status,
     T body
 ) {
-    public static <E> Res of(HttpStatus status, E body) {
-        return new Res(LocalDateTime.now(), status, body);
+    public static <E> Res<E> of(HttpStatus status, E body) {
+        return new Res<E>(LocalDateTime.now(), status, body);
     }
 }
