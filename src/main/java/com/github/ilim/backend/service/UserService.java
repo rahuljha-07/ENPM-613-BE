@@ -33,8 +33,8 @@ public class UserService {
     public void promoteToInstructor(InstructorApp application) {
         var user = findById(application.getUserId());
         user.setProfileImageUrl(application.getProfileImageUrl());
-        user.setInstructorBio(application.getInstructorBio());
-        user.setInstructorTitle(application.getInstructorTitle());
+        user.setBio(application.getInstructorBio());
+        user.setTitle(application.getInstructorTitle());
         user.setRole(UserRole.INSTRUCTOR);
         userRepo.save(user);
     }

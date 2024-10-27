@@ -37,10 +37,10 @@ public class User {
 
     private String profileImageUrl;
 
-    private String instructorTitle;
+    private String title;
 
     @Column(length = 2000)
-    private String instructorBio;
+    private String bio;
 
     public static User from(AdminGetUserResponse cognitoUser) {
         User user = new User();
