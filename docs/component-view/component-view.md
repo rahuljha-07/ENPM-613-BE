@@ -1,98 +1,93 @@
 ```plantuml
 @startuml
-' Skin parameters for better visual appearance
-skinparam componentStyle uml2
-skinparam interfaceStyle uml2
+
 skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam interfaceStyle rectangle
 
-' Actors
-actor "Student" as student
-actor "Instructor" as instructor
-actor "Admin" as admin
+' Define Interfaces
+interface "I_HTTP_Service" as http_service
+interface "I_Authentication" as auth
+interface "I_Backend_Service" as backend_service
+interface "I_Backend_DB" as db_interface
+interface "I_Storage" as storage_interface
+interface "I_Payment_Gateway" as payment_gateway_interface
+interface "I_Email_Service" as email_service_interface
 
-' Frontend Component
-package "Frontend" {
-    component "ilim-frontend" as frontend
+' Frontend_Layer Package
+package "Frontend_Layer" {
+    [Student]
+    [Instructor]
+    [Admin]
 
-    ' Provided and Required Interfaces
-    interface "I_Frontend_UI" as I_Frontend_UI <<provided>>
-    interface "I_Backend_API" as I_Backend_API <<required>>
-
-    frontend -right- I_Frontend_UI : provides
-    frontend_req -up- frontend : requires
-
-    ' Users interact with the frontend
-    student --> I_Frontend_UI
-    instructor --> I_Frontend_UI
-    admin --> I_Frontend_UI
+    [Student] --> [Frontend] : Uses
+    [Instructor] --> [Frontend] : Uses
+    [Admin] --> [Frontend] : Uses
 }
 
-' Backend Component
-package "Backend" {
-    component "ilim-backend" as backend
+' Infrastructure Layer
+package "Infrastructure_Layer" {
+    component "ALB" as ALB
+    component "AWS WAF" as WAF
+    component "EC2 Instances" as EC2
+    component "AWS ASG" as ASG
+    component "AWS Cognito" as Cognito
 
-    ' Provided and Required Interfaces
-    interface "I_Backend_Service" as I_Backend_Service <<provided>>
-    interface "I_Authentication_Service" as I_Authentication_Service <<required>>
-    interface "I_File_Storage_Service" as I_File_Storage_Service <<required>>
-    interface "I_Database_Service" as I_Database_Service <<required>>
-    interface "I_Email_Service" as I_Email_Service <<required>>
-    interface "I_Payment_Service" as I_Payment_Service <<required>>
+    ALB --> http_service : requires
+    EC2 --> backend_service : provides
+    ALB --> backend_service : requires
+    Cognito --> auth : provides
 
-    backend -right- I_Backend_Service : provides
-
-    ' Backend requires several services
-    backend ..> I_Authentication_Service : requires
-    backend ..> I_File_Storage_Service : requires
-    backend ..> I_Database_Service : requires
-    backend ..> I_Email_Service : requires
-    backend ..> I_Payment_Service : requires
+    Frontend --> ALB : HTTP/HTTPS
+    ALB --> WAF : Forwards
+    WAF --> EC2 : Forwards
 }
 
-' AWS Cognito Component
-component "AWS Cognito" as cognito
-interface "I_Authentication_Service" as I_Authentication_Service <<provided>>
-cognito -up- I_Authentication_Service : provides
+' Backend Layer
+package "Backend_Layer" {
+    component "ilim-backend" as Backend
+    component "PaymentService" as PaymentService
+    component "EmailSendingService" as EmailService
 
-' AWS S3 Component
-component "AWS S3" as s3
-interface "I_File_Storage_Service" as I_File_Storage_Service <<provided>>
-s3 -up- I_File_Storage_Service : provides
+    Backend --> db_interface : requires
+    Backend --> storage_interface : requires
+    Backend --> auth : requires
 
-' Database Component
-component "PostgreSQL/AWS RDS" as database
-interface "I_Database_Service" as I_Database_Service <<provided>>
-database -up- I_Database_Service : provides
+    Backend --> PaymentService : Calls
+    Backend --> EmailService : Calls
 
-' Email Service Component
-component "Email Service" as emailService
-interface "I_Email_Service" as I_Email_Service <<provided>>
-emailService -up- I_Email_Service : provides
+    PaymentService --> payment_gateway_interface : requires
+    PaymentService --> auth : requires
 
-' Payment Gateway Component
-component "Payment Gateway (Stripe)" as paymentGateway
-interface "I_Payment_Service" as I_Payment_Service <<provided>>
-paymentGateway -up- I_Payment_Service : provides
+    EmailService --> email_service_interface : requires
+    EmailService --> auth : requires
+}
 
-' Connections between components
-frontend ..> I_Backend_Service : uses
-I_Backend_Service .. backend
+' Data Layer
+package "Data_Layer" {
+    component "PostgreSQL / AWS RDS" as Database
+    component "AWS S3" as Storage
 
-backend ..> I_Authentication_Service
-I_Authentication_Service .. cognito
+    Database --> db_interface : provides
+    Storage --> storage_interface : provides
+}
 
-backend ..> I_File_Storage_Service
-I_File_Storage_Service .. s3
+' External Services
+package "External_Services" {
+    component "Payment Gateways" as PaymentGateway
+    component "Email Service" as ExternalEmailService
 
-backend ..> I_Database_Service
-I_Database_Service .. database
+    PaymentGateway --> payment_gateway_interface : provides
+    ExternalEmailService --> email_service_interface : provides
+}
 
-backend ..> I_Email_Service
-I_Email_Service .. emailService
-
-backend ..> I_Payment_Service
-I_Payment_Service .. paymentGateway
+' Authentication Interactions
+Frontend ..> Cognito : Authenticates via
+Backend ..> Cognito : Validates Tokens with
+PaymentService ..> Cognito : Validates Tokens with
+EmailService ..> Cognito : Validates Tokens with
 
 @enduml
+
 
 ```

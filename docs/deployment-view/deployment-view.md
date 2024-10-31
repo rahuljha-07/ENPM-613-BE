@@ -1,68 +1,73 @@
 ```plantuml
 @startuml
-' Skin parameters for better visual appearance
-skinparam componentStyle uml2
-skinparam nodeStyle uml2
-
-' Users
-actor "Student" as student
-actor "Instructor" as instructor
-actor "Admin" as admin
-
-' Nodes
-node "User Devices" {
-    [ilim-frontend] as frontend
-}
-
-node "AWS Cloud" {
-    node "AWS WAF" as waf
-    node "Application Load Balancer" as alb
-    node "Auto Scaling Group" as asg {
-        node "EC2 Instances" as ec2 {
-            [ilim-backend] as backend
-        }
+package "Client Side" {
+    node "Web Browser" <<device>> {
+        [Student] <<component>>
+        [Instructor] <<component>>
+        [Admin] <<component>>
     }
-    node "AWS Cognito" as cognito
-    node "AWS S3" as s3
-    node "AWS RDS (PostgreSQL)" as rds
 }
 
-node "External Services" {
-    [Payment Gateway (Stripe)] as paymentGateway
-    [Email Service] as emailService
+package "AWS Services" {
+    node "AWS S3 Bucket" <<device>> {
+        [Course Content] <<component>>
+        [Transcripts] <<component>>
+    }
+    
+    node "Authentication" <<device>> {
+        [AWS Cognito] <<component>>
+    }
+    
+    database "Database" <<device>> {
+        [AWS RDS] <<component>>
+    }
 }
 
-' User interactions
-student --> frontend
-instructor --> frontend
-admin --> frontend
+package "Backend" {
+    node "Application Server" <<device>> {
+        [PaymentService] <<component>>
+        [TranscriptionService] <<component>>
+        [ilim-backend] <<component>>
+        [EmailSender] <<component>>
+    }
+}
 
-' Frontend to AWS Cloud
-frontend --> alb : HTTP/HTTPS
-alb --> waf
-waf --> alb
-alb --> ec2
+package "External Services" {
+    node "External Payment Gateway" <<device>> {
+        [PaymentGateway] <<component>>
+    }
+    
+    node "Email Service" <<device>> {
+        [EmailGateway] <<component>>
+    }
+}
 
-' Backend interactions
-backend --> cognito : Authenticates with
-backend --> s3 : Stores/Retrieves files from
-backend --> rds : Reads/Writes data to
-backend --> paymentGateway : Processes payments via
-backend --> emailService : Sends emails via
+[Student] --> [Web Browser] : Login/Access Course
+[Instructor] --> [Web Browser] : Login/Upload Content
+[Admin] --> [Web Browser] : Login/Approve Content/Manage Users
 
-' Additional AWS Services
-backend --> waf : Protected by
-backend --> alb : Load Balanced by
+[Web Browser] --> [Application Server] : HTTPS (Course Search/Enrollment)
 
-' Notes for clarity
-note right of frontend
-  ilim-frontend runs on user devices
-end note
+[Application Server] --> [AWS Cognito] : TCP/IP (Authentication)
+[Application Server] --> [AWS RDS] : TCP/IP (Data Storage)
+[Application Server] --> [AWS S3 Bucket] : HTTPS (Content Management)
+[Application Server] --> [PaymentService] : HTTPS (Payment Processing)
+[Application Server] --> [TranscriptionService] : HTTP (Video Transcription)
 
-note right of ec2
-  ilim-backend runs on EC2 instances
-end note
+[PaymentService] --> [PaymentGateway] : HTTPS (External Payment)
+[PaymentService] --> [AWS RDS] : TCP/IP (Store Payment Data)
+[PaymentService] --> [EmailSender] : HTTPS (Payment Confirmation Email)
 
+[ilim-backend] --> [AWS S3 Bucket] : HTTP (Store/Approve/Reject Content)
+[ilim-backend] --> [EmailSender] : HTTPS (Course Update Email)
+[TranscriptionService] --> [AWS S3 Bucket] : HTTP (Upload Transcripts)
+
+[EmailSender] --> [EmailGateway] : HTTPS (Send Email)
+[EmailGateway] --> [EmailSender] : SMTP (Send Actual Email)
+
+[Admin] --> [ilim-backend] : Approve/Delete Courses
+[Instructor] --> [ilim-backend] : Upload Content
+[Student] --> [PaymentService] : Enroll in Course/Payment
 @enduml
 
 ```
