@@ -13,7 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -25,7 +24,7 @@ import java.util.UUID;
     }
 )
 @NoArgsConstructor
-public class QuizAttempt {
+public class QuizAttempt extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -45,9 +44,4 @@ public class QuizAttempt {
     @Column(nullable = false)
     private boolean isPassed;
 
-    @Column(nullable = false)
-    private LocalDateTime startedAt;
-
-    @Column(nullable = false)
-    private LocalDateTime completedAt;
 }

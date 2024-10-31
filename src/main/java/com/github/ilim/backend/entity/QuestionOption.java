@@ -18,7 +18,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "question_options")
 @NoArgsConstructor
-public class QuestionOption {
+public class QuestionOption extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -36,11 +36,5 @@ public class QuestionOption {
 
     @Column(nullable = false)
     private int orderNumber;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
 
 }

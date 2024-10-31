@@ -14,15 +14,19 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name = "videos")
-@Data
 @NoArgsConstructor
-public class Video {
+public class Video extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @ManyToOne
+    @JoinColumn(name = "module_id")
+    private Module module;
 
     private String title;
 
@@ -37,13 +41,4 @@ public class Video {
     @Column(nullable = false)
     private int durationInSeconds;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
-
-    @ManyToOne
-    @JoinColumn(name = "module_id")
-    private Module module;
 }

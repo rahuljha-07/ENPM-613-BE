@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name = "modules")
-@Data
 @NoArgsConstructor
-public class Module {
+public class Module extends AuditEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

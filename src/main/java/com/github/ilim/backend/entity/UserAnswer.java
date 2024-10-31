@@ -21,7 +21,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "user_answers")
 @NoArgsConstructor
-public class UserAnswer {
+public class UserAnswer extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

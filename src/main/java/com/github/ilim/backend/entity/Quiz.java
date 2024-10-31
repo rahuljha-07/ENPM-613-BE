@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name = "quizzes")
-@Data
 @NoArgsConstructor
-public class Quiz {
+public class Quiz extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -16,7 +16,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "user_answer_options")
 @NonNull
-public class UserAnswerOption {
+public class UserAnswerOption extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

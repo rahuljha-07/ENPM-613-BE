@@ -13,11 +13,12 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminGetUse
 
 import java.time.LocalDate;
 
+
 @Data
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class User {
+public class User extends AuditEntity {
 
     @Id
     private String id;      // Cognito user 'sub' identifier

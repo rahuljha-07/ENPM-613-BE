@@ -24,9 +24,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "courses")
-@Data
 @NoArgsConstructor
-public class Course {
+public class Course extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -55,9 +54,4 @@ public class Course {
     @JoinColumn(name = "instructor_id")
     private User instructor;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
 }
