@@ -20,6 +20,14 @@ public class Reply {
         return create(HttpStatus.OK, body);
     }
 
+    public static <T> ApiRes<Res<T>> created() {
+        return created(null);
+    }
+
+    public static <T> ApiRes<Res<T>> created(T body) {
+        return create(HttpStatus.CREATED, body);
+    }
+
     public static ApiRes<Res<String>> badRequest() {
         return badRequest(null);
     }

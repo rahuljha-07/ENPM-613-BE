@@ -52,19 +52,7 @@ public class InstructorAppController {
         @Valid @RequestBody InstructorAppDto dto
     ) {
         var user = userService.findById(jwt.getSubject());
-        if (user.getRole() == UserRole.INSTRUCTOR) {
-            throw new UserAlreadyInstructorException(user.getId());
-        }
-        else if (user.getRole() == UserRole.ADMIN) {
-            throw new AdminCannotBeInstructorException(user.getId());
-        }
-        else if (appService.existPendingApplicationForUser(user.getId())) {
-            throw new InstructorAppAlreadyExistsException(user.getId());
-        }
-
-        var application = InstructorApp.from(dto);
-        application.setUserId(user.getId());
-        appService.saveInstructorApp(application);
-        return Reply.ok("Application submitted successfully");
+        appService.saveInstructorApp(user, dto);
+        return Reply.created("Application submitted successfully");
     }
 }

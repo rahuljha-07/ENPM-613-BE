@@ -28,7 +28,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ApiRes<Res<String>> signUp(@Valid @RequestBody SignUpDto signUpRequest) {
         authService.signUp(signUpRequest);
-        return Reply.ok("Sign-up successful. Please verify your email.");
+        return Reply.created("Sign-up successful. Please verify your email.");
     }
 
     @PostMapping("/verify-account")
