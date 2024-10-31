@@ -42,6 +42,9 @@ public class User {
     @Column(length = 2000)
     private String bio;
 
+    @Column(nullable = false)
+    private boolean isBlocked = false;
+
     public static User from(AdminGetUserResponse cognitoUser) {
         User user = new User();
         for (var attribute : cognitoUser.userAttributes()) {
