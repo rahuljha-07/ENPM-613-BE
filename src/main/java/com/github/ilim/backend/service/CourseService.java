@@ -43,7 +43,7 @@ public class CourseService {
     }
 
     private boolean userHasAccessToCourse(User user, UUID courseId) {
-        // TODO: we should check also if he is the creator of the course, he should have access also
+        // TODO: we should check also if he is the creator of the course or the admin, they should have access also
         return purchaseService.findByUserAndCourseId(user, courseId).isPresent();
     }
 }
