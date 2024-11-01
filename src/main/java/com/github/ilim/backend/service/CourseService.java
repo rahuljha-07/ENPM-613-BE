@@ -26,7 +26,7 @@ public class CourseService {
 
     @Transactional
     public ApiRes<Res<Course>> create(User user, CourseDto dto) {
-        if (user.getRole() != UserRole.STUDENT) {
+        if (user.getRole() != UserRole.INSTRUCTOR) {
             throw new UserCannotCreateCourseException(user.getRole());
         }
         var course = Course.from(dto);
