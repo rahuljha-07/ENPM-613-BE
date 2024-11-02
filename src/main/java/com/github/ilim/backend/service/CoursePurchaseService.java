@@ -1,5 +1,6 @@
 package com.github.ilim.backend.service;
 
+import com.github.ilim.backend.entity.Course;
 import com.github.ilim.backend.entity.CoursePurchase;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.repo.CoursePurchaseRepo;
@@ -17,8 +18,8 @@ public class CoursePurchaseService {
     private final UserRepo userRepo;
     private final CoursePurchaseRepo purchaseRepo;
 
-    public Optional<CoursePurchase> findByUserAndCourseId(User user, UUID courseId) {
-        return purchaseRepo.findByStudentAndCourse_Id(user, courseId);
+    public Optional<CoursePurchase> findByUserAndCourseId(User user, Course course) {
+        return purchaseRepo.findByStudentAndCourse(user, course);
     }
 
 }

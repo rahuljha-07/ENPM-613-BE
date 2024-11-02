@@ -35,15 +35,22 @@ public class CourseService {
     }
 
     public Course findById(User user, UUID courseId) {
-        if (!userHasAccessToCourse(user, courseId)) {
+        var course = courseRepo.findById(courseId)
+            .orElseThrow(() -> new CourseNotFoundException(courseId));
+        if (!userHasAccessToCourse(user, course)) {
             throw new UserHasNoAccessToCourseException(user.getId(), courseId);
         }
-        return courseRepo.findById(courseId)
-            .orElseThrow(() -> new CourseNotFoundException(courseId));
+        return course;
     }
 
-    private boolean userHasAccessToCourse(User user, UUID courseId) {
-        // TODO: we should check also if he is the creator of the course or the admin, they should have access also
-        return purchaseService.findByUserAndCourseId(user, courseId).isPresent();
+    private boolean userHasAccessToCourse(User user, Course course) {
+        if (user.getRole() == UserRole.ADMIN) {
+            return true;
+        }
+        // is user is the creator of the course?
+        if (user.getId().equals(course.getInstructor().getId())) {
+            return true;
+        }
+        return purchaseService.findByUserAndCourseId(user, course).isPresent();
     }
 }
