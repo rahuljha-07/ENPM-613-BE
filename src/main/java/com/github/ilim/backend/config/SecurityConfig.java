@@ -27,15 +27,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)                            // Disable CSRF
-            .authorizeHttpRequests(auth -> auth                               // authorization rules
-                .requestMatchers("/auth/**").permitAll()                    // Permit all requests to auth endpoints
-                .requestMatchers("/admin/**").hasRole("ADMIN")              // Secure admin endpoints
-                .requestMatchers("/instructor/**").hasRole("INSTRUCTOR")    // Secure instructor endpoints
-                .requestMatchers("/student/**").hasRole("STUDENT")          // Secure student endpoints
-                .requestMatchers("/user/all").hasRole("ADMIN")              // Only admin sees all users
-                .requestMatchers("/user/**").authenticated()                // Secure user endpoints
-                .anyRequest().permitAll()                                     // Permit all other requests
+            .csrf(AbstractHttpConfigurer::disable)                                           // Disable CSRF
+            .authorizeHttpRequests(auth -> auth                                              // authorization rules
+                .requestMatchers("/auth/**").permitAll()                                   // Permit all requests to auth endpoints
+                .requestMatchers("/admin/**").hasRole("ADMIN")                             // Secure admin endpoints
+                .requestMatchers("/instructor/**").hasRole("INSTRUCTOR")                   // Secure instructor endpoints
+                .requestMatchers("/student/instructor-application/all**").hasRole("ADMIN") // Only admin sees all instructor-applications
+                .requestMatchers("/student/**").authenticated()                            // Secure student endpoints
+                .requestMatchers("/user/all**").hasRole("ADMIN")                           // Only admin sees all users
+                .requestMatchers("/user/**").authenticated()                               // Secure user endpoints
+                .requestMatchers("/course/**").authenticated()                             // Secure user endpoints
+                .anyRequest().permitAll()                                                    // Permit all other requests
             )
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt

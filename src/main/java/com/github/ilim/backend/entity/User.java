@@ -1,8 +1,10 @@
 package com.github.ilim.backend.entity;
 
-import com.github.ilim.backend.enums.Role;
+import com.github.ilim.backend.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -11,11 +13,12 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminGetUse
 
 import java.time.LocalDate;
 
+
 @Data
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class User {
+public class User extends AuditEntity {
 
     @Id
     private String id;      // Cognito user 'sub' identifier
@@ -29,25 +32,19 @@ public class User {
     @Column(nullable = false)
     private LocalDate birthdate;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserRole role = UserRole.STUDENT;
+
     private String profileImageUrl;
 
+    private String title;
+
+    @Column(length = 2000)
+    private String bio;
+
     @Column(nullable = false)
-    private Role role = Role.STUDENT;
-
-    private String schoolName;
-    private String degreeTitle;
-    private LocalDate graduateDate;
-
-    private String professionalTitle;
-    private int experienceYears;
-    private String resumeUrl;
-
-    private String teachingExperience;
-
-    private String instructorTitle;
-    private String instructorBio;
-
-    private String videoApplication;
+    private boolean isBlocked = false;
 
     public static User from(AdminGetUserResponse cognitoUser) {
         User user = new User();
