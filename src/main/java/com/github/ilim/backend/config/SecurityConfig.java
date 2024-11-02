@@ -31,7 +31,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth                                              // authorization rules
                 .requestMatchers("/auth/**").permitAll()                                   // Permit all requests to auth endpoints
                 .requestMatchers("/admin/**").hasRole("ADMIN")                             // Secure admin endpoints
-                .requestMatchers("/instructor/**").hasRole("LINSTRUCTOR")                  // Secure instructor endpoints
+                .requestMatchers("/instructor/**").hasRole("INSTRUCTOR")                   // Secure instructor endpoints
                 .requestMatchers("/student/instructor-application/all**").hasRole("ADMIN") // Only admin sees all instructor-applications
                 .requestMatchers("/student/**").authenticated()                            // Secure student endpoints
                 .requestMatchers("/user/all**").hasRole("ADMIN")                           // Only admin sees all users
