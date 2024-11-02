@@ -24,4 +24,7 @@ public class CoursePurchaseService {
         return purchaseRepo.findByStudentAndCourse(student, course);
     }
 
+    public void save(CoursePurchase coursePurchase) {
+        purchaseRepo.save(coursePurchase);
+    }
 }

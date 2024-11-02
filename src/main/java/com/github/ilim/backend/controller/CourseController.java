@@ -54,7 +54,7 @@ public class CourseController {
     }
 
     @GetMapping("/student/course")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasAnyRole('Student', 'INSTRUCTOR')")
     public ApiRes<Res<List<Course>>> findPurchasedCourses(@AuthenticationPrincipal Jwt jwt) {
         var user = userService.findById(jwt.getClaim("sub").toString());
         var courses = courseService.findPurchasedCourses(user);
@@ -94,6 +94,14 @@ public class CourseController {
     public ApiRes<Res<String>> deleteCourseAsAdmin(@PathVariable UUID courseId) {
         courseService.deleteCourseAsAdmin(courseId);
         return Reply.ok("Course deleted successfully");
+    }
+
+    @PostMapping("/student/course/{courseId}/purchase")
+    @PreAuthorize("hasAnyRole('Student', 'INSTRUCTOR')")
+    public ApiRes<Res<String>> purchaseCourse(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        courseService.purchaseCourse(user, courseId);
+        return Reply.ok("[Development Mode] Purchased successfully");
     }
 
 }

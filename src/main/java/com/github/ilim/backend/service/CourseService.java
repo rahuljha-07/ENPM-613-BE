@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -108,5 +109,18 @@ public class CourseService {
         if (course.isDeleted()) {
             throw new AccessDeletedCourseException(course.getId());
         }
+    }
+
+    public void purchaseCourse(User student, UUID courseId) {
+        var course = findCourseByIdAndUser(student, courseId);
+        assertCourseNotDeleted(course);
+        // TODO: This should be implemented properly when the PaymentService is ready
+        var purchase = new CoursePurchase();
+        purchase.setCourse(course);
+        purchase.setPurchaseDate(LocalDateTime.now());
+        purchase.setPurchasePrice(course.getPrice());
+        purchase.setStudent(student);
+        purchase.setPaymentId(UUID.randomUUID().toString()); // TODO: should be taken from PaymentService
+        purchaseService.save(purchase);
     }
 }
