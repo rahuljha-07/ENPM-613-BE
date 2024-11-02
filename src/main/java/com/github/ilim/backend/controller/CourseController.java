@@ -30,6 +30,7 @@ public class CourseController {
     private final CourseService courseService;
     private final UserService userService;
 
+    // TODO: Use pagination for any `findAll` endpoints
 
     @GetMapping("/admin/course")
     @PreAuthorize("hasRole('ADMIN')")
