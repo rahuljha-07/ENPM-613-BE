@@ -48,6 +48,10 @@ public class CourseService {
         courseRepo.save(course);
     }
 
+    public Course save(Course course) {
+        return courseRepo.save(course);
+    }
+
     public Course findCourseByIdAndUser(@Nullable User user, UUID courseId) {
         var course = courseRepo.findById(courseId)
             .orElseThrow(() -> new CourseNotFoundException(courseId));

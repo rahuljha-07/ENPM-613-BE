@@ -1,7 +1,10 @@
 package com.github.ilim.backend.entity;
 
+import com.github.ilim.backend.enums.ModuleItemType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,29 +19,26 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "videos")
+@Table(name = "course_module_items")
 @NoArgsConstructor
-public class Video extends AuditEntity {
+public class CourseModuleItem extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "module_id")
+    @JoinColumn(name = "course_module_id")
     private CourseModule courseModule;
 
-    private String title;
-
-    @Column(length = 2000)
-    private String description;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ModuleItemType itemType;
 
     @Column(nullable = false)
-    private String videoUrl;
-
-    private String transcriptUrl;
+    private UUID itemId;
 
     @Column(nullable = false)
-    private int durationInSeconds;
+    private int orderIndex;
 
 }

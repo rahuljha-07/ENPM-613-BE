@@ -18,9 +18,9 @@
 ### Instructor
 - [x] Create Courses 
 - [x] Edit Courses
-- [ ] Create Modules
-- [ ] Edit Modules
-- [ ] Delete Modules
+- [x] Create Modules
+- [x] Edit Modules
+- [x] Delete Modules
 - [ ] Add Videos to Modules
 - [ ] Remove Videos from Modules
 - [ ] Add Quizzes to Modules

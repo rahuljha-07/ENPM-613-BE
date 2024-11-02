@@ -4,24 +4,26 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ilim.backend.dto.CourseDto;
 import com.github.ilim.backend.enums.CourseStatus;
+import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +46,8 @@ public class Course extends AuditEntity {
     private String description;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Module> modules = new ArrayList<>();
+    @OrderColumn(name = "orderIndex")
+    private List<CourseModule> courseModules = new ArrayList<>();
 
     private String transcriptUrl;
 
@@ -57,7 +60,7 @@ public class Course extends AuditEntity {
     @Column(nullable = false)
     private boolean isDeleted = false;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instructor_id")
     @JsonIgnore
     private User instructor;
@@ -87,5 +90,29 @@ public class Course extends AuditEntity {
         setDescription(dto.getDescription());
         setTranscriptUrl(dto.getTranscriptUrl());
         setPrice(dto.getPrice());
+    }
+
+    public void addCourseModule(CourseModule module) {
+        module.setOrderIndex(courseModules.size());
+        courseModules.add(module);
+        module.setCourse(this);
+    }
+
+    public void deleteCourseModule(CourseModule module) {
+        int deletedIndex = module.getOrderIndex();
+        courseModules.remove(module);
+        module.setCourse(null);
+
+        // Re-index the modules from the removed index
+        for (int i = deletedIndex; i < courseModules.size(); ++i) {
+            courseModules.get(i).setOrderIndex(i);
+        }
+    }
+
+    public CourseModule findModule(UUID moduleId) {
+        return courseModules.stream()
+            .filter(mod -> mod.getId().equals(moduleId))
+            .findFirst()
+            .orElseThrow(() -> new CourseModuleNotFoundException(moduleId));
     }
 }

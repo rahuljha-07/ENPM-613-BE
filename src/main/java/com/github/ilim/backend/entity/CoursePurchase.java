@@ -1,7 +1,11 @@
 package com.github.ilim.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,12 +29,15 @@ public class CoursePurchase {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
     private User student;
 
-    @ManyToOne
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
+    @JsonBackReference
     private Course course;
 
     @Column(nullable = false)
@@ -41,4 +48,14 @@ public class CoursePurchase {
 
     @Column(nullable = false)
     private String paymentId;
+
+    @JsonProperty("studentId")
+    public String getStudentId() {
+        return student.getId();
+    }
+
+    @JsonProperty("courseId")
+    public UUID geCourseId() {
+        return course.getId();
+    }
 }
