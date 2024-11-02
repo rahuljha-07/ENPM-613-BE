@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -76,5 +77,13 @@ public class Course extends AuditEntity {
         course.setTranscriptUrl(dto.getTranscriptUrl());
         course.setPrice(dto.getPrice());
         return course;
+    }
+
+    public void updateFrom(@Valid CourseDto dto) {
+        setTitle(dto.getTitle());
+        setThumbnailUrl(dto.getThumbnailUrl());
+        setDescription(dto.getDescription());
+        setTranscriptUrl(dto.getTranscriptUrl());
+        setPrice(dto.getPrice());
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,7 +48,7 @@ public class CourseController {
         var user = jwt == null
             ? null
             : userService.findById(jwt.getClaim("sub").toString());
-        var course = courseService.findCourseById(user, courseId);
+        var course = courseService.findCourseByIdAndUser(user, courseId);
         return Reply.ok(course);
     }
 
@@ -75,6 +76,17 @@ public class CourseController {
         return Reply.created("Course created successfully");
     }
 
+    @PutMapping("/course/{courseId}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    public ApiRes<Res<String>> updateCourse(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID courseId,
+        @Valid @RequestBody CourseDto dto
+    ) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        courseService.updateCourse(user, courseId, dto);
+        return Reply.ok("Course updated successfully");
+    }
 
 
 }

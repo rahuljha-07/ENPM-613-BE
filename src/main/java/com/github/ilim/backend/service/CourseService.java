@@ -15,6 +15,7 @@ import com.github.ilim.backend.util.response.Reply;
 import com.github.ilim.backend.util.response.Res;
 import jakarta.annotation.Nullable;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,16 +31,23 @@ public class CourseService {
     private final CoursePurchaseService purchaseService;
 
     @Transactional
-    public ApiRes<Res<Course>> create(User user, CourseDto dto) {
+    public Course create(User user, CourseDto dto) {
         if (user.getRole() != UserRole.INSTRUCTOR) {
             throw new UserCannotCreateCourseException(user.getRole());
         }
         var course = Course.from(dto);
         course.setInstructor(user);
-        return Reply.ok(courseRepo.save(course));
+        return courseRepo.save(course);
     }
 
-    public Course findCourseById(@Nullable User user, UUID courseId) {
+    @Transactional
+    public void updateCourse(User user, UUID courseId, @Valid CourseDto dto) {
+        var course = findCourseByIdAndUser(user, courseId);
+        course.updateFrom(dto);
+        courseRepo.save(course);
+    }
+
+    public Course findCourseByIdAndUser(@Nullable User user, UUID courseId) {
         var course = courseRepo.findById(courseId)
             .orElseThrow(() -> new CourseNotFoundException(courseId));
         if (!userHasAccessToCourse(user, course)) {
