@@ -54,6 +54,9 @@ public class Course extends AuditEntity {
     @Enumerated(EnumType.STRING)
     private CourseStatus status = CourseStatus.DRAFT;
 
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
     @ManyToOne
     @JoinColumn(name = "instructor_id")
     @JsonIgnore
@@ -63,7 +66,6 @@ public class Course extends AuditEntity {
     public String getInstructorId() {
         return instructor.getId(); // shouldn't check for null
     }
-
 
     public void setStatus(CourseStatus status) {
         this.status = status != null ? status : CourseStatus.DRAFT;

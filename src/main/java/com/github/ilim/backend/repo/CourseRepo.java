@@ -10,9 +10,9 @@ import java.util.UUID;
 
 public interface CourseRepo extends JpaRepository<Course, UUID> {
 
-    List<Course> findAllByStatus(CourseStatus status);
+    List<Course> findAllByStatusAndIsDeleted(CourseStatus status, boolean deleted);
 
-    List<Course> findAllByIdIn(List<UUID> ids);
+    List<Course> findAllByIdInAndIsDeleted(List<UUID> ids, boolean deleted);
 
-    List<Course> findAllByInstructor(User instructor);
+    List<Course> findAllByInstructorAndIsDeleted(User instructor, boolean deleted);
 }

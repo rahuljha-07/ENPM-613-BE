@@ -6,17 +6,16 @@ import com.github.ilim.backend.entity.CoursePurchase;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.CourseStatus;
 import com.github.ilim.backend.enums.UserRole;
+import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
 import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
 import com.github.ilim.backend.repo.CourseRepo;
-import com.github.ilim.backend.util.response.ApiRes;
-import com.github.ilim.backend.util.response.Reply;
-import com.github.ilim.backend.util.response.Res;
 import jakarta.annotation.Nullable;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,6 +42,7 @@ public class CourseService {
     @Transactional
     public void updateCourse(User user, UUID courseId, @Valid CourseDto dto) {
         var course = findCourseByIdAndUser(user, courseId);
+        assertCourseNotDeleted(course);
         course.updateFrom(dto);
         courseRepo.save(course);
     }
@@ -57,6 +57,7 @@ public class CourseService {
     }
 
     private boolean userHasAccessToCourse(@Nullable User user, Course course) {
+        assertCourseNotDeleted(course);
         // No need for further checks if it's a published course
         if (course.getStatus().equals(CourseStatus.PUBLISHED)) {
             return true;
@@ -77,19 +78,35 @@ public class CourseService {
     }
 
     public List<Course> findPublishedCourses() {
-        return courseRepo.findAllByStatus(CourseStatus.PUBLISHED);
+        boolean isDeleted = false;
+        return courseRepo.findAllByStatusAndIsDeleted(CourseStatus.PUBLISHED, isDeleted);
     }
 
     public List<Course> findPurchasedCourses(User user) {
+        boolean isDeleted = false;
         var purchasedCoursesIds = purchaseService.findAllByStudent(user).stream()
             .map(CoursePurchase::getCourse)
             .filter(Objects::nonNull)
             .map(Course::getId)
             .toList();
-        return courseRepo.findAllByIdIn(purchasedCoursesIds);
+        return courseRepo.findAllByIdInAndIsDeleted(purchasedCoursesIds, isDeleted);
     }
 
     public List<Course> findCreatedCourses(User instructor) {
-        return courseRepo.findAllByInstructor(instructor);
+        boolean isDeleted = false;
+        return courseRepo.findAllByInstructorAndIsDeleted(instructor, isDeleted);
+    }
+
+    public void deleteCourseAsAdmin(UUID courseId) {
+        var course = courseRepo.findById(courseId)
+            .orElseThrow(() -> new CourseNotFoundException(courseId));
+        course.setDeleted(true);
+        courseRepo.save(course);
+    }
+
+    private static void assertCourseNotDeleted(@NonNull Course course) {
+        if (course.isDeleted()) {
+            throw new AccessDeletedCourseException(course.getId());
+        }
     }
 }
