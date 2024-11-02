@@ -115,4 +115,5 @@ public class Course extends AuditEntity {
             .findFirst()
             .orElseThrow(() -> new CourseModuleNotFoundException(moduleId));
     }
+
 }

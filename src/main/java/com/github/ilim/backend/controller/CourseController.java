@@ -105,4 +105,16 @@ public class CourseController {
         return Reply.ok("[Development Mode] Purchased successfully");
     }
 
+    @PutMapping("/instructor/course/{courseId}/module/reorder")
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    public ApiRes<Res<String>> reorderCourseModules(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID courseId,
+        @RequestBody List<UUID> modulesOrder
+    ) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        courseService.reorderCourseModules(user, courseId, modulesOrder);
+        return Reply.ok("Course modules reordered successfully.");
+    }
+
 }

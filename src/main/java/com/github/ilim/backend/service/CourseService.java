@@ -7,6 +7,7 @@ import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.CourseStatus;
 import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
+import com.github.ilim.backend.exception.exceptions.BadRequestException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
 import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
@@ -19,6 +20,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -31,12 +33,12 @@ public class CourseService {
     private final CoursePurchaseService purchaseService;
 
     @Transactional
-    public Course create(User user, CourseDto dto) {
-        if (user.getRole() != UserRole.INSTRUCTOR) {
-            throw new UserCannotCreateCourseException(user.getRole());
+    public Course create(User instructor, CourseDto dto) {
+        if (instructor.getRole() != UserRole.INSTRUCTOR) {
+            throw new UserCannotCreateCourseException(instructor.getRole());
         }
         var course = Course.from(dto);
-        course.setInstructor(user);
+        course.setInstructor(instructor);
         return courseRepo.save(course);
     }
 
@@ -48,7 +50,7 @@ public class CourseService {
         courseRepo.save(course);
     }
 
-    public Course save(Course course) {
+    public Course saveCourse(Course course) {
         return courseRepo.save(course);
     }
 
@@ -126,5 +128,18 @@ public class CourseService {
         purchase.setStudent(student);
         purchase.setPaymentId(UUID.randomUUID().toString()); // TODO: should be taken from PaymentService
         purchaseService.save(purchase);
+    }
+
+    public void reorderCourseModules(User instructor, UUID courseId, List<UUID> modulesOrder) {
+        var course = findCourseByIdAndUser(instructor, courseId);
+        if (modulesOrder.size() != course.getCourseModules().size()) {
+            throw new BadRequestException("reorderModuleItems request must have exactly the same number of modules as the parent course!");
+        }
+        var modulesInNewOrder = modulesOrder.stream()
+            .map(course::findModule)
+            .toList();
+        course.getCourseModules().clear();
+        course.getCourseModules().addAll(modulesInNewOrder);
+        saveCourse(course);
     }
 }

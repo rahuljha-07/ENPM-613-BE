@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -62,5 +63,17 @@ public class ModuleController {
         var user = userService.findById(jwt.getClaimAsString("sub"));
         moduleService.deleteCourseModule(user, courseId, moduleId);
         return Reply.ok("Module deleted successfully.");
+    }
+
+    @PutMapping("/instructor/course/{courseId}/module/item/reorder")
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    public ApiRes<Res<String>> reorderCourseModules(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID courseId,
+        @RequestBody List<UUID> itemsOrder
+    ) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        moduleService.reorderModuleItems(user, courseId, itemsOrder);
+        return Reply.ok("Course modules reordered successfully.");
     }
 }
