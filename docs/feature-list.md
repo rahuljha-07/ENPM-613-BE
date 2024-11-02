@@ -8,7 +8,7 @@
 - [ ] Update Account
 ### Student
 - [x] Request to be an instructor
-- [ ] Browse Courses
+- [x] Browse Courses
 - [ ] Search Courses
 - [ ] Buy Courses
 - [ ] Access Course Materials
@@ -16,18 +16,25 @@
 - [ ] View Certificates
 - [ ] File a Support Issue
 ### Instructor
-- [ ] Create Courses 
-- [ ] Edit Courses
+- [x] Create Courses 
+- [x] Edit Courses
+- [ ] Create Modules
+- [ ] Edit Modules
+- [ ] Delete Modules
+- [ ] Add Videos to Modules
+- [ ] Remove Videos from Modules
+- [ ] Add Quizzes to Modules
+- [ ] Remove Quizzes from Modules
 ### Admin
 - [x] Get a list of all users
 - [x] Approve Instructors
 - [ ] Approve Courses
 - [ ] Block User
 - [ ] Handle Support Issues
-- [ ] Browse Courses
+- [x] Browse Courses
 - [ ] Search Courses
-- [ ] Edit Courses
-- [ ] Remove Courses
+- [x] Edit Courses
+- [x] Remove Courses
 - [ ] View User Profile Page
 - [ ] Edit the TOS for users
 ### System
