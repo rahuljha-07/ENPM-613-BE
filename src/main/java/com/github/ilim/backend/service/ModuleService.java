@@ -50,4 +50,8 @@ public class ModuleService {
         module.updateFrom(dto);
         courseService.saveCourse(course);
     }
+
+    public void saveModule(CourseModule module) {
+        moduleRepo.save(module);
+    }
 }
