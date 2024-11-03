@@ -54,4 +54,9 @@ public class ModuleService {
     public void saveModule(CourseModule module) {
         moduleRepo.save(module);
     }
+
+    public CourseModule getCourseModule(User user, UUID courseId, UUID moduleId) {
+        var course = courseService.findCourseByIdAndUser(user, courseId);
+        return course.findModule(moduleId);
+    }
 }

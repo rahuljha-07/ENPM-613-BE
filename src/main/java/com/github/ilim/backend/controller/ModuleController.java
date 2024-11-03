@@ -1,6 +1,7 @@
 package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.dto.ModuleDto;
+import com.github.ilim.backend.entity.CourseModule;
 import com.github.ilim.backend.service.ModuleService;
 import com.github.ilim.backend.service.UserService;
 import com.github.ilim.backend.util.response.ApiRes;
@@ -12,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,6 +29,18 @@ public class ModuleController {
 
     private final ModuleService moduleService;
     private final UserService userService;
+
+    @GetMapping("/course/{courseId}/module/{moduleId}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'ADMIN')")
+    public ApiRes<Res<CourseModule>> getCourseModule(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID courseId,
+        @PathVariable UUID moduleId
+    ) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        var module = moduleService.getCourseModule(user, courseId, moduleId);
+        return Reply.ok(module);
+    }
 
     @PostMapping("/instructor/course/{courseId}/module")
     @PreAuthorize("hasRole('INSTRUCTOR')")
