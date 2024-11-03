@@ -25,7 +25,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/signup")
+    @PostMapping("/sign-up")
     public ApiRes<Res<String>> signUp(@Valid @RequestBody SignUpDto signUpRequest) {
         authService.signUp(signUpRequest);
         return Reply.created("Sign-up successful. Please verify your email.");
@@ -37,7 +37,7 @@ public class AuthController {
         return Reply.ok("User confirmed successfully.");
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/sign-in")
     public ResponseEntity<AuthResponseDto> signIn(@Valid @RequestBody SignInDto signInRequest) {
         var authResponse = authService.signIn(signInRequest.getEmail(), signInRequest.getPassword());
 

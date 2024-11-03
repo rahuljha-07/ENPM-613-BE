@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -53,6 +54,9 @@ public class Course extends AuditEntity {
     @Enumerated(EnumType.STRING)
     private CourseStatus status = CourseStatus.DRAFT;
 
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
     @ManyToOne
     @JoinColumn(name = "instructor_id")
     @JsonIgnore
@@ -62,7 +66,6 @@ public class Course extends AuditEntity {
     public String getInstructorId() {
         return instructor.getId(); // shouldn't check for null
     }
-
 
     public void setStatus(CourseStatus status) {
         this.status = status != null ? status : CourseStatus.DRAFT;
@@ -76,5 +79,13 @@ public class Course extends AuditEntity {
         course.setTranscriptUrl(dto.getTranscriptUrl());
         course.setPrice(dto.getPrice());
         return course;
+    }
+
+    public void updateFrom(@Valid CourseDto dto) {
+        setTitle(dto.getTitle());
+        setThumbnailUrl(dto.getThumbnailUrl());
+        setDescription(dto.getDescription());
+        setTranscriptUrl(dto.getTranscriptUrl());
+        setPrice(dto.getPrice());
     }
 }
