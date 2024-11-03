@@ -3,7 +3,9 @@ package com.github.ilim.backend.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ilim.backend.dto.ModuleDto;
+import com.github.ilim.backend.enums.ModuleItemType;
 import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
+import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -109,5 +111,13 @@ public class CourseModule extends AuditEntity {
             .filter(it -> it.getId().equals(itemId))
             .findFirst()
             .orElseThrow(() -> new CourseModuleNotFoundException(itemId));
+    }
+
+    public CourseModuleItem findModuleItemByVideoId(UUID videoId) {
+        return moduleItems.stream()
+            .filter(it -> it.getItemType().equals(ModuleItemType.VIDEO))
+            .filter(it -> it.getVideo() != null && videoId.equals(it.getVideo().getId()))
+            .findFirst()
+            .orElseThrow(() -> new VideoNotFoundException(videoId));
     }
 }

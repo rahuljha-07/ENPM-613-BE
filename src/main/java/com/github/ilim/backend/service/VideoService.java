@@ -43,4 +43,20 @@ public class VideoService {
         module.removeModuleItem(moduleItem);
         videoRepo.delete(video);
     }
+
+    public Video getCourseModuleVideo(User user, UUID courseId, UUID moduleId, UUID videoId) {
+        var course = courseService.findCourseByIdAndUser(user, courseId);
+        var module = course.findModule(moduleId);
+        var moduleItem = module.findModuleItemByVideoId(videoId);
+        return moduleItem.getVideo();
+    }
+
+    public void updateVideo(User instructor, UUID courseId, UUID moduleId, UUID videoId, @Valid VideoDto dto) {
+        var course = courseService.findCourseByIdAndUser(instructor, courseId);
+        var module = course.findModule(moduleId);
+        var moduleItem = module.findModuleItemByVideoId(videoId);
+        var video = moduleItem.getVideo();
+        video.updateFrom(dto);
+        videoRepo.save(video);
+    }
 }

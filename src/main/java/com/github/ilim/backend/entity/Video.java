@@ -52,4 +52,12 @@ public class Video extends AuditEntity {
         video.setTranscriptUrl(dto.getTranscriptUrl());
         return video;
     }
+
+    public void updateFrom(@Valid VideoDto dto) {
+        title = dto.getTitle();
+        description = dto.getDescription();
+        videoUrl = dto.getVideoUrl();
+        durationInSeconds = dto.getDurationInSeconds();
+        transcriptUrl = dto.getTranscriptUrl();
+    }
 }

@@ -1,12 +1,9 @@
 package com.github.ilim.backend.exception;
 
 
-import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
 import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
-import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.ModuleItemNotFoundException;
-import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
-import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
+import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
 import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
 import com.github.ilim.backend.util.response.Res;
@@ -19,12 +16,18 @@ import java.util.logging.Logger;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
-public class CourseModuleExceptionHandler {
+public class ModuleItemExceptionHandler {
 
     private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 
-    @ExceptionHandler(CourseModuleNotFoundException.class)
-    public ApiRes<Res<String>> handleCourseModuleNotFoundException(CourseModuleNotFoundException e) {
+    @ExceptionHandler(VideoNotFoundException.class)
+    public ApiRes<Res<String>> handleVideoNotFoundException(VideoNotFoundException e) {
+        logger.warning(e.getMessage());
+        return Reply.notFound(e.getMessage());
+    }
+
+    @ExceptionHandler(ModuleItemNotFoundException.class)
+    public ApiRes<Res<String>> handleModuleItemNotFoundException(ModuleItemNotFoundException e) {
         logger.warning(e.getMessage());
         return Reply.notFound(e.getMessage());
     }
