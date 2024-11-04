@@ -3,6 +3,9 @@ package com.github.ilim.backend.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ilim.backend.dto.ModuleDto;
+import com.github.ilim.backend.enums.ModuleItemType;
+import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
+import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -49,6 +53,7 @@ public class CourseModule extends AuditEntity {
     private Course course;
 
     @OneToMany(mappedBy = "courseModule", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "orderIndex")
     private List<CourseModuleItem> moduleItems = new ArrayList<>();
 
     @JsonProperty("courseId")
@@ -64,6 +69,7 @@ public class CourseModule extends AuditEntity {
     }
 
     public void addModuleItem(CourseModuleItem item) {
+        item.setOrderIndex(moduleItems.size() + 1);
         moduleItems.add(item);
         item.setCourseModule(this);
     }
@@ -98,5 +104,20 @@ public class CourseModule extends AuditEntity {
                 // no need to manually sort modules due to @OrderColumn
             }
         }
+    }
+
+    public CourseModuleItem findModuleItem(UUID itemId) {
+        return moduleItems.stream()
+            .filter(it -> it.getId().equals(itemId))
+            .findFirst()
+            .orElseThrow(() -> new CourseModuleNotFoundException(itemId));
+    }
+
+    public CourseModuleItem findModuleItemByVideoId(UUID videoId) {
+        return moduleItems.stream()
+            .filter(it -> it.getItemType().equals(ModuleItemType.VIDEO))
+            .filter(it -> it.getVideo() != null && videoId.equals(it.getVideo().getId()))
+            .findFirst()
+            .orElseThrow(() -> new VideoNotFoundException(videoId));
     }
 }

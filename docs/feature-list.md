@@ -21,8 +21,8 @@
 - [x] Create Modules
 - [x] Edit Modules
 - [x] Delete Modules
-- [ ] Add Videos to Modules
-- [ ] Remove Videos from Modules
+- [x] Add Videos to Modules
+- [x] Remove Videos from Modules
 - [ ] Add Quizzes to Modules
 - [ ] Remove Quizzes from Modules
 ### Admin
