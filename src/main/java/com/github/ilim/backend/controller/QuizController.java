@@ -1,7 +1,6 @@
 package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.dto.QuizDto;
-import com.github.ilim.backend.entity.Quiz;
 import com.github.ilim.backend.service.QuizService;
 import com.github.ilim.backend.service.UserService;
 import com.github.ilim.backend.util.response.ApiRes;
@@ -30,10 +29,10 @@ public class QuizController {
     private final UserService userService;
 
     @GetMapping("/quiz/{quizId}")
-    public ApiRes<Res<Quiz>> findQuizById(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID quizId) {
+    public ApiRes<Res<QuizDto>> findQuizById(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID quizId) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
-        var quiz = quizService.findQuizById(user, quizId);
-        return Reply.ok(quiz);
+        var quizDto = quizService.getQuizDtoById(user, quizId);
+        return Reply.ok(quizDto);
     }
 
     @PostMapping("/instructor/module/{moduleId}/add-quiz")

@@ -80,6 +80,12 @@ public class CourseModule extends AuditEntity {
         item.setCourseModule(null);
     }
 
+    public void removeQuizModuleItemById(UUID quizId) {
+        var item = findModuleItemByQuizId(quizId);
+        moduleItems.remove(item);
+        item.setCourseModule(null);
+    }
+
     public void updateFrom(ModuleDto dto) {
         title = dto.getTitle();
         description = dto.getDescription();
