@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ilim.backend.dto.ModuleDto;
 import com.github.ilim.backend.enums.ModuleItemType;
 import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
+import com.github.ilim.backend.exception.exceptions.QuizNotFoundException;
 import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -112,5 +113,13 @@ public class CourseModule extends AuditEntity {
             .filter(it -> it.getVideo() != null && videoId.equals(it.getVideo().getId()))
             .findFirst()
             .orElseThrow(() -> new VideoNotFoundException(videoId));
+    }
+
+    public CourseModuleItem findModuleItemByQuizId(UUID quizId) {
+        return moduleItems.stream()
+            .filter(it -> it.getItemType().equals(ModuleItemType.QUIZ))
+            .filter(it -> it.getQuiz() != null && quizId.equals(it.getQuiz().getId()))
+            .findFirst()
+            .orElseThrow(() -> new QuizNotFoundException(quizId));
     }
 }

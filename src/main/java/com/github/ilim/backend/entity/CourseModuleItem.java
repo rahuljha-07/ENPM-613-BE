@@ -58,4 +58,12 @@ public class CourseModuleItem extends AuditEntity {
         item.video = video;
         return item;
     }
+
+    public static CourseModuleItem create(Quiz quiz) {
+        var item = new CourseModuleItem();
+        item.setCourseModule(quiz.getCourseModule());
+        item.itemType = ModuleItemType.QUIZ;
+        item.quiz = quiz;
+        return item;
+    }
 }

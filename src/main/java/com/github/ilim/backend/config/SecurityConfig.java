@@ -36,6 +36,9 @@ public class SecurityConfig {
                 .requestMatchers("/student/**").authenticated()                            // Secure student endpoints
                 .requestMatchers("/user/all**").hasRole("ADMIN")                           // Only admin sees all users
                 .requestMatchers("/user/**").authenticated()                               // Secure user endpoints
+                .requestMatchers("/quiz/**").authenticated()                               // Secure quiz endpoints
+                .requestMatchers("/module/**").authenticated()                             // Secure module endpoints
+                .requestMatchers("/video/**").authenticated()                              // Secure video endpoints
                 .anyRequest().permitAll()                                                    // Permit all other requests
             )
             .oauth2ResourceServer(oauth2 -> oauth2

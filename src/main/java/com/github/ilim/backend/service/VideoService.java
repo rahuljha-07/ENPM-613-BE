@@ -39,10 +39,10 @@ public class VideoService {
         moduleService.saveModule(module);
     }
 
-    public void removeVideoFromModule(User instructor, UUID itemId) {
-        var video = findVideoByIdAsInstructor(instructor, itemId);
+    public void removeVideoFromModule(User instructor, UUID quizId) {
+        var video = findVideoByIdAsInstructor(instructor, quizId);
         var module = video.getCourseModule();
-        var moduleItem = module.findModuleItemByVideoId(itemId);
+        var moduleItem = module.findModuleItemByVideoId(quizId);
         module.removeModuleItem(moduleItem);
         videoRepo.delete(video);
     }

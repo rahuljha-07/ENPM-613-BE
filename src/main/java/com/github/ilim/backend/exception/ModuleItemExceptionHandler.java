@@ -3,6 +3,7 @@ package com.github.ilim.backend.exception;
 
 import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
 import com.github.ilim.backend.exception.exceptions.ModuleItemNotFoundException;
+import com.github.ilim.backend.exception.exceptions.QuizNotFoundException;
 import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
 import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
@@ -22,6 +23,11 @@ public class ModuleItemExceptionHandler {
 
     @ExceptionHandler(VideoNotFoundException.class)
     public ApiRes<Res<String>> handleVideoNotFoundException(VideoNotFoundException e) {
+        logger.warning(e.getMessage());
+        return Reply.notFound(e.getMessage());
+    }
+    @ExceptionHandler(QuizNotFoundException.class)
+    public ApiRes<Res<String>> handleQuizNotFoundException(QuizNotFoundException e) {
         logger.warning(e.getMessage());
         return Reply.notFound(e.getMessage());
     }
