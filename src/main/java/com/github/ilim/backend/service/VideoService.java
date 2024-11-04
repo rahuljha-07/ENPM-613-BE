@@ -30,6 +30,7 @@ public class VideoService {
 
         // create video record
         var video = Video.from(dto);
+        video.setCourseModule(module);
         videoRepo.save(video);
 
         // add it to module
@@ -41,7 +42,7 @@ public class VideoService {
     public void removeVideoFromModule(User instructor, UUID itemId) {
         var video = findVideoByIdAsInstructor(instructor, itemId);
         var module = video.getCourseModule();
-        var moduleItem = module.findModuleItem(itemId);
+        var moduleItem = module.findModuleItemByVideoId(itemId);
         module.removeModuleItem(moduleItem);
         videoRepo.delete(video);
     }

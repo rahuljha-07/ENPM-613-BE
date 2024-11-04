@@ -58,7 +58,7 @@ public class VideoController {
     ) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
         videoService.updateVideo(user, videoId, dto);
-        return Reply.created("Video updated successfully");
+        return Reply.ok("Video updated successfully");
     }
 
     @DeleteMapping("/instructor/delete-video/{videoId}")
@@ -69,6 +69,6 @@ public class VideoController {
     ) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
         videoService.removeVideoFromModule(user, videoId);
-        return Reply.created("Video removed successfully from the module");
+        return Reply.ok("Video removed successfully from the module");
     }
 }

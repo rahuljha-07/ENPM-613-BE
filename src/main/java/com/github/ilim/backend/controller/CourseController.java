@@ -97,6 +97,14 @@ public class CourseController {
         return Reply.ok("Course deleted successfully");
     }
 
+    @PostMapping("/admin/approve-course/{courseId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiRes<Res<String>> approveCourse(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        courseService.approveCourse(user, courseId);
+        return Reply.ok("Course Approved successfully");
+    }
+
     @PostMapping("/student/purchase-course/{courseId}")
     @PreAuthorize("hasAnyRole('Student', 'INSTRUCTOR')")
     public ApiRes<Res<String>> purchaseCourse(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {

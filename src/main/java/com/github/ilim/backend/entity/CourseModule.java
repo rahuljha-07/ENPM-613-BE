@@ -106,13 +106,6 @@ public class CourseModule extends AuditEntity {
         }
     }
 
-    public CourseModuleItem findModuleItem(UUID itemId) {
-        return moduleItems.stream()
-            .filter(it -> it.getId().equals(itemId))
-            .findFirst()
-            .orElseThrow(() -> new CourseModuleNotFoundException(itemId));
-    }
-
     public CourseModuleItem findModuleItemByVideoId(UUID videoId) {
         return moduleItems.stream()
             .filter(it -> it.getItemType().equals(ModuleItemType.VIDEO))

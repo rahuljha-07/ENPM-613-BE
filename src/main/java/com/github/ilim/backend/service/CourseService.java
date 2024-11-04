@@ -44,6 +44,14 @@ public class CourseService {
     }
 
     @Transactional
+    public void approveCourse(User admin, UUID courseId) {
+        var course = findCourseByIdAndUser(admin, courseId);
+        assertCourseNotDeleted(course);
+        course.setStatus(CourseStatus.PUBLISHED);
+        courseRepo.save(course);
+    }
+
+    @Transactional
     public void updateCourse(User user, UUID courseId, @Valid CourseDto dto) {
         var course = findCourseByIdAndUser(user, courseId);
         assertCourseNotDeleted(course);
@@ -55,7 +63,7 @@ public class CourseService {
         return courseRepo.save(course);
     }
 
-    public Course findPublishedCourse(@Nullable User user, UUID courseId) {
+    public Course findPublishedCourse(UUID courseId) {
         return courseRepo.findByIdAndStatusAndIsDeleted(courseId, CourseStatus.PUBLISHED, false)
             .orElseThrow(() -> new CourseNotFoundException(courseId));
     }
@@ -156,7 +164,7 @@ public class CourseService {
     }
 
     public void purchaseCourse(User student, UUID courseId) {
-        var course = findPublishedCourse(student, courseId);
+        var course = findPublishedCourse(courseId);
         assertCourseNotDeleted(course);
         // TODO: This should be implemented properly when the PaymentService is ready
         var purchase = new CoursePurchase();

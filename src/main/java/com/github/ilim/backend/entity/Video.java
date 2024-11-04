@@ -1,5 +1,7 @@
 package com.github.ilim.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ilim.backend.dto.VideoDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,13 +22,14 @@ import java.util.UUID;
 @Entity
 @Table(name = "videos")
 @NoArgsConstructor
+@JsonIgnoreProperties({"courseModule"})
 public class Video extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "module_id")
     private CourseModule courseModule;
 
