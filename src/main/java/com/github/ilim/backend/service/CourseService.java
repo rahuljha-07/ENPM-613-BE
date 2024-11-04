@@ -9,6 +9,7 @@ import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
+import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
 import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
 import com.github.ilim.backend.repo.CourseRepo;
@@ -54,13 +55,22 @@ public class CourseService {
         return courseRepo.save(course);
     }
 
+    public Course findPublishedCourse(@Nullable User user, UUID courseId) {
+        return courseRepo.findByIdAndStatusAndIsDeleted(courseId, CourseStatus.PUBLISHED, false)
+            .orElseThrow(() -> new CourseNotFoundException(courseId));
+    }
+
     public Course findCourseByIdAndUser(@Nullable User user, UUID courseId) {
         var course = courseRepo.findById(courseId)
             .orElseThrow(() -> new CourseNotFoundException(courseId));
-        if (!userHasAccessToCourse(user, course)) {
-            throw new UserHasNoAccessToCourseException(user, courseId);
-        }
+        assertUserHasAccessToCourse(user, course);
         return course;
+    }
+
+    public void assertUserHasAccessToCourse(User user, Course course) {
+        if (!userHasAccessToCourse(user, course)) {
+            throw new UserHasNoAccessToCourseException(user, course.getId());
+        }
     }
 
     private boolean userHasAccessToCourse(@Nullable User user, Course course) {
@@ -78,6 +88,34 @@ public class CourseService {
         }
         // is user is the creator of the course?
         return user.getId().equals(course.getInstructor().getId());
+    }
+
+    public void assertUserHasAccessToCourseContent(User user, Course course) {
+        if (!userHasAccessToCourseContent(user, course)) {
+            throw new NoAccessToCourseContentException(user, course.getId());
+        }
+    }
+
+    private boolean userHasAccessToCourseContent(@Nullable User user, Course course) {
+        assertCourseNotDeleted(course);
+        // Visitors cannot access any course content
+        if (user == null) {
+            return false;
+        }
+        // Admin can access everything
+        if (user.getRole() == UserRole.ADMIN) {
+            return true;
+        }
+        // The instructor who created the course can access ite material
+        if (user.getId().equals(course.getInstructor().getId())){
+            return true;
+        }
+        // All other users cannot access DRAFT course content
+        if (course.getStatus().equals(CourseStatus.DRAFT)) {
+            return false;
+        }
+        // Finally, a student who purchase the course can access its content
+        return purchaseService.findByStudentAndCourse(user, course).isPresent();
     }
 
     public List<Course> findAllCourses() {
@@ -118,7 +156,7 @@ public class CourseService {
     }
 
     public void purchaseCourse(User student, UUID courseId) {
-        var course = findCourseByIdAndUser(student, courseId);
+        var course = findPublishedCourse(student, courseId);
         assertCourseNotDeleted(course);
         // TODO: This should be implemented properly when the PaymentService is ready
         var purchase = new CoursePurchase();

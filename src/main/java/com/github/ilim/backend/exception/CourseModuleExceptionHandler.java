@@ -1,12 +1,8 @@
 package com.github.ilim.backend.exception;
 
 
-import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
+import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
-import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
-import com.github.ilim.backend.exception.exceptions.ModuleItemNotFoundException;
-import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
-import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
 import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
 import com.github.ilim.backend.util.response.Res;
@@ -27,6 +23,12 @@ public class CourseModuleExceptionHandler {
     public ApiRes<Res<String>> handleCourseModuleNotFoundException(CourseModuleNotFoundException e) {
         logger.warning(e.getMessage());
         return Reply.notFound(e.getMessage());
+    }
+
+    @ExceptionHandler(NotCourseInstructorException.class)
+    public ApiRes<Res<String>> handleUserIsNotInstructorOfCourseException(NotCourseInstructorException e) {
+        logger.warning(e.getMessage());
+        return Reply.unauthorized(e.getMessage());
     }
 
 }

@@ -29,56 +29,46 @@ public class VideoController {
     private final VideoService videoService;
     private final UserService userService;
 
-    @GetMapping("/course/{courseId}/module/{moduleId}/video/{videoId}")
+    @GetMapping("/video/{videoId}")
     @PreAuthorize("isAuthenticated()")
-    public ApiRes<Res<Video>> getCourseModuleVideo(
-        @AuthenticationPrincipal Jwt jwt,
-        @PathVariable UUID courseId,
-        @PathVariable UUID moduleId,
-        @PathVariable UUID videoId
-    ) {
+    public ApiRes<Res<Video>> getCourseModuleVideo(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID videoId) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
-        var video = videoService.getCourseModuleVideo(user, courseId, moduleId, videoId);
+        var video = videoService.findVideoById(user, videoId);
         return Reply.ok(video);
     }
 
-    @PostMapping("/instructor/course/{courseId}/module/{moduleId}/video")
+    @PostMapping("/instructor/module/{moduleId}/add-video")
     @PreAuthorize("hasRole('INSTRUCTOR')")
     public ApiRes<Res<String>> addVideoToModule(
         @AuthenticationPrincipal Jwt jwt,
-        @PathVariable UUID courseId,
         @PathVariable UUID moduleId,
         @Valid @RequestBody VideoDto dto
     ) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
-        videoService.addVideoToModule(user, courseId, moduleId, dto);
+        videoService.addVideoToModule(user, moduleId, dto);
         return Reply.created("Video added successfully to the module");
     }
 
-    @PutMapping("/instructor/course/{courseId}/module/{moduleId}/video/{videoId}")
+    @PutMapping("/instructor/update-video/{videoId}")
     @PreAuthorize("hasRole('INSTRUCTOR')")
     public ApiRes<Res<String>> updateVideo(
         @AuthenticationPrincipal Jwt jwt,
-        @PathVariable UUID courseId,
-        @PathVariable UUID moduleId,
         @PathVariable UUID videoId,
         @Valid @RequestBody VideoDto dto
     ) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
-        videoService.updateVideo(user, courseId, moduleId, videoId, dto);
+        videoService.updateVideo(user, videoId, dto);
         return Reply.created("Video updated successfully");
     }
 
-    @DeleteMapping("/instructor/course/{courseId}/module/{moduleId}/video/{videoId}")
+    @DeleteMapping("/instructor/delete-video/{videoId}")
     @PreAuthorize("hasRole('INSTRUCTOR')")
     public ApiRes<Res<String>> removeVideoFromModule(
         @AuthenticationPrincipal Jwt jwt,
-        @PathVariable UUID courseId,
-        @PathVariable UUID moduleId,
         @PathVariable UUID videoId
     ) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
-        videoService.removeVideoFromModule(user, courseId, moduleId, videoId);
+        videoService.removeVideoFromModule(user, videoId);
         return Reply.created("Video removed successfully from the module");
     }
 }

@@ -4,6 +4,7 @@ package com.github.ilim.backend.exception;
 import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
+import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
 import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
 import com.github.ilim.backend.util.response.ApiRes;
@@ -31,6 +32,12 @@ public class CourseExceptionHandler {
 
     @ExceptionHandler(UserHasNoAccessToCourseException.class)
     public ApiRes<Res<String>> handleUserHasNoAccessToCourseException(UserHasNoAccessToCourseException e) {
+        logger.warning(e.getMessage());
+        return Reply.unauthorized(e.getMessage());
+    }
+
+    @ExceptionHandler(NoAccessToCourseContentException.class)
+    public ApiRes<Res<String>> handleNoAccessToCourseContentException(NoAccessToCourseContentException e) {
         logger.warning(e.getMessage());
         return Reply.unauthorized(e.getMessage());
     }

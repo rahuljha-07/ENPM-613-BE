@@ -3,7 +3,8 @@ package com.github.ilim.backend.service;
 import com.github.ilim.backend.dto.ModuleDto;
 import com.github.ilim.backend.entity.CourseModule;
 import com.github.ilim.backend.entity.User;
-import com.github.ilim.backend.exception.exceptions.BadRequestException;
+import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
+import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
 import com.github.ilim.backend.repo.ModuleRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +30,9 @@ public class ModuleService {
     }
 
     @Transactional
-    public void deleteCourseModule(User instructor, UUID courseId, UUID moduleId) {
-        var course = courseService.findCourseByIdAndUser(instructor, courseId);
-        var module = course.findModule(moduleId);
+    public void deleteCourseModule(User instructor, UUID moduleId) {
+        var module = findModuleByIdAsInstructor(instructor, moduleId);
+        var course = module.getCourse();
         course.deleteCourseModule(module);
         courseService.saveCourse(course);
     }
@@ -44,19 +45,29 @@ public class ModuleService {
         throw new NotImplementedException();
     }
 
-    public void updateCourseModule(User instructor, UUID courseId, UUID moduleId, ModuleDto dto) {
-        var course = courseService.findCourseByIdAndUser(instructor, courseId);
-        var module = course.findModule(moduleId);
+    public void updateCourseModule(User instructor, UUID moduleId, ModuleDto dto) {
+        var module = findModuleByIdAsInstructor(instructor, moduleId);
         module.updateFrom(dto);
-        courseService.saveCourse(course);
+        courseService.saveCourse(module.getCourse());
     }
 
     public void saveModule(CourseModule module) {
         moduleRepo.save(module);
     }
 
-    public CourseModule getCourseModule(User user, UUID courseId, UUID moduleId) {
-        var course = courseService.findCourseByIdAndUser(user, courseId);
-        return course.findModule(moduleId);
+    public CourseModule findModuleByIdAsInstructor(User instructor, UUID moduleId) {
+        var module = findModuleById(instructor, moduleId);
+        if (!module.getCourse().getInstructor().equals(instructor)) {
+            throw new NotCourseInstructorException(instructor, module);
+        }
+        return module;
+    }
+
+    public CourseModule findModuleById(User instructor, UUID moduleId) {
+        var module = moduleRepo.findById(moduleId)
+            .orElseThrow(() -> new CourseModuleNotFoundException(moduleId));
+
+        courseService.assertUserHasAccessToCourseContent(instructor, module.getCourse());
+        return module;
     }
 }
