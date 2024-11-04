@@ -18,6 +18,7 @@
 ### Instructor
 - [x] Create Courses 
 - [x] Edit Courses
+- [ ] Submit Course for Approval
 - [x] Create Modules
 - [x] Edit Modules
 - [x] Delete Modules
@@ -28,7 +29,7 @@
 ### Admin
 - [x] Get a list of all users
 - [x] Approve Instructors
-- [ ] Approve Courses
+- [x] Approve Courses
 - [ ] Block User
 - [ ] Handle Support Issues
 - [x] Browse Courses
