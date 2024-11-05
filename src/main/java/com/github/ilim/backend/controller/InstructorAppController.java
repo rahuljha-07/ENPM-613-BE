@@ -28,22 +28,22 @@ public class InstructorAppController {
     private final UserService userService;
 
     @GetMapping
-    private ApiRes<Res<List<InstructorApp>>> getCurrentUserInstructorApp(@AuthenticationPrincipal Jwt jwt) {
+    public ApiRes<Res<List<InstructorApp>>> getCurrentUserInstructorApp(@AuthenticationPrincipal Jwt jwt) {
         return Reply.ok(appService.findByUserId(jwt.getSubject()));
     }
 
     @GetMapping("/all")
-    private  ApiRes<Res<List<InstructorApp>>> getAll() {
+    public  ApiRes<Res<List<InstructorApp>>> getAll() {
         return Reply.ok(appService.findAll());
     }
 
     @GetMapping("/all-pending")
-    private ApiRes<Res<List<InstructorApp>>> getAllPending() {
+    public ApiRes<Res<List<InstructorApp>>> getAllPending() {
         return Reply.ok(appService.findPendingApplications());
     }
 
     @PostMapping("/submit")
-    private ApiRes<Res<String>> submitInstructorApp(
+    public ApiRes<Res<String>> submitInstructorApp(
         @AuthenticationPrincipal Jwt jwt,
         @Valid @RequestBody InstructorAppDto dto
     ) {

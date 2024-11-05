@@ -64,6 +64,7 @@ public class QuizAttemptService {
             .orElseThrow(() -> new QuizAttemptsNotFoundException(quizId));
         return QuizAttemptResultDto.from(lastAttempt);
     }
+
     public List<QuizAttempt> getAllQuizAttemptsForQuiz(User instructor, UUID quizId) {
         var quiz = quizService.findQuizById(instructor, quizId);
         return quizAttemptRepo.findQuizAttemptsByQuiz(quiz);

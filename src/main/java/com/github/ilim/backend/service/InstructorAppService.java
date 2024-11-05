@@ -10,6 +10,7 @@ import com.github.ilim.backend.exception.exceptions.InstructorAppAlreadyExistsEx
 import com.github.ilim.backend.exception.exceptions.InstructorAppNotFoundException;
 import com.github.ilim.backend.exception.exceptions.UserAlreadyInstructorException;
 import com.github.ilim.backend.repo.InstructorAppRepo;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class InstructorAppService {
             .anyMatch(application -> application.getStatus() == ApplicationStatus.PENDING);
     }
 
+    @Transactional
     public void saveInstructorApp(User user, @Valid InstructorAppDto dto) {
         if (user.getRole() == UserRole.INSTRUCTOR) {
             throw new UserAlreadyInstructorException(user.getId());
@@ -46,8 +48,8 @@ public class InstructorAppService {
         return appRepo.findByUserId(id);
     }
 
-    public InstructorApp findById(String id) {
-        return appRepo.findById(UUID.fromString(id))
+    public InstructorApp findById(UUID id) {
+        return appRepo.findById(id)
             .orElseThrow(() -> new InstructorAppNotFoundException(id));
     }
 
@@ -59,6 +61,7 @@ public class InstructorAppService {
         return appRepo.findByStatus(ApplicationStatus.PENDING);
     }
 
+    @Transactional
     public void update(InstructorApp application) {
         appRepo.save(application);
     }

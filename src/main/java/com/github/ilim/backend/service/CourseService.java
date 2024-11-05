@@ -10,6 +10,7 @@ import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException
 import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
 import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
+import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
@@ -60,8 +61,9 @@ public class CourseService {
         courseRepo.save(course);
     }
 
-    public Course saveCourse(Course course) {
-        return courseRepo.save(course);
+    @Transactional
+    public void saveCourse(Course course) {
+        courseRepo.save(course);
     }
 
     public Course findPublishedCourse(UUID courseId) {
@@ -151,6 +153,7 @@ public class CourseService {
         return courseRepo.findAllByInstructorAndIsDeleted(instructor, isDeleted);
     }
 
+    @Transactional
     public void deleteCourseAsAdmin(UUID courseId) {
         var course = courseRepo.findById(courseId)
             .orElseThrow(() -> new CourseNotFoundException(courseId));
@@ -164,6 +167,7 @@ public class CourseService {
         }
     }
 
+    @Transactional
     public void purchaseCourse(User student, UUID courseId) {
         var course = findPublishedCourse(courseId);
         if (purchaseService.findByStudentAndCourse(student, course).isPresent()) {
@@ -183,13 +187,22 @@ public class CourseService {
         purchaseService.save(purchase);
     }
 
+    @Transactional
     public void reorderCourseModules(User instructor, UUID courseId, List<UUID> modulesOrder) {
         var course = findCourseByIdAndUser(instructor, courseId);
         if (modulesOrder.size() != course.getCourseModules().size()) {
-            throw new BadRequestException("reorderModuleItems request must have exactly the same number of modules as the parent course!");
+            throw new BadRequestException(
+                "reorderCourseModules request must have exactly the same number of modules as the parent course!"
+            );
         }
         var modulesInNewOrder = modulesOrder.stream()
-            .map(course::findModule)
+            .map(id -> {
+                var module = course.findModule(id);
+                if (module == null) {
+                    throw new CourseModuleNotFoundException(id);
+                }
+                return module;
+            })
             .toList();
         course.getCourseModules().clear();
         course.getCourseModules().addAll(modulesInNewOrder);

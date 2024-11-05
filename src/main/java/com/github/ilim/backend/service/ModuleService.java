@@ -38,20 +38,22 @@ public class ModuleService {
         courseService.saveCourse(course);
     }
 
-    public void reorderModuleItems(User instructor, UUID courseId, List<UUID> itemsOrder) {
+    public void reorderModuleItems(User instructor, UUID moduleId, List<UUID> itemsOrder) {
         if (itemsOrder.isEmpty()) {
             return;
         }
-        var course = courseService.findCourseByIdAndUser(instructor, courseId);
+        // TODO: Implement this
         throw new NotImplementedException();
     }
 
+    @Transactional
     public void updateCourseModule(User instructor, UUID moduleId, ModuleDto dto) {
         var module = findModuleByIdAsInstructor(instructor, moduleId);
         module.updateFrom(dto);
         courseService.saveCourse(module.getCourse());
     }
 
+    @Transactional
     public void saveModule(CourseModule module) {
         moduleRepo.save(module);
     }

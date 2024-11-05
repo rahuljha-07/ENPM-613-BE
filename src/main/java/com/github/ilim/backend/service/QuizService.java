@@ -54,8 +54,8 @@ public class QuizService {
     }
 
     @Transactional
-    public void addQuizToModule(User instructor, UUID quizId, QuizDto dto) {
-        var module = moduleService.findModuleByIdAsInstructor(instructor, quizId);
+    public void addQuizToModule(User instructor, UUID moduleId, QuizDto dto) {
+        var module = moduleService.findModuleByIdAsInstructor(instructor, moduleId);
 
         // create quiz record
         var quiz = Quiz.from(dto);

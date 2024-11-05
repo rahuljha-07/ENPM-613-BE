@@ -4,6 +4,7 @@ import com.github.ilim.backend.entity.Course;
 import com.github.ilim.backend.entity.CoursePurchase;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.repo.CoursePurchaseRepo;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class CoursePurchaseService {
         return purchaseRepo.findByStudentAndCourse(student, course);
     }
 
+    @Transactional
     public void save(@NonNull CoursePurchase coursePurchase) {
         purchaseRepo.save(coursePurchase);
     }
