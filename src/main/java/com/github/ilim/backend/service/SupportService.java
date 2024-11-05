@@ -3,7 +3,6 @@ package com.github.ilim.backend.service;
 import com.github.ilim.backend.dto.EmailDto;
 import com.github.ilim.backend.dto.SupportIssueDto;
 import com.github.ilim.backend.entity.User;
-import com.github.ilim.backend.exception.exceptions.EmailSendingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,17 +26,12 @@ public class SupportService {
         String emailContent = buildEmailContent(user, supportIssueDto);
 
         EmailDto emailDto = new EmailDto();
-        emailDto.setTo(supportEmail);
+        emailDto.setToAddress(supportEmail);
         emailDto.setSubject(subject);
-        emailDto.setBody(emailContent);
+        emailDto.setContent(emailContent);
 
-        try {
-            emailSenderService.sendEmail(emailDto);
-            logger.info("Support issue email sent successfully to " + supportEmail);
-        } catch (Exception e) {
-            logger.warning("Failed to send support issue email: " + e.getMessage());
-            throw new EmailSendingException("Failed to send support issue email", e);
-        }
+        emailSenderService.sendEmail(emailDto);
+        logger.info("Support issue email sent successfully to " + supportEmail);
     }
 
     private String buildEmailContent(User user, SupportIssueDto supportIssueDto) {
