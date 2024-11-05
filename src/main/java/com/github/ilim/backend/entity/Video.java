@@ -1,7 +1,6 @@
 package com.github.ilim.backend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ilim.backend.dto.VideoDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

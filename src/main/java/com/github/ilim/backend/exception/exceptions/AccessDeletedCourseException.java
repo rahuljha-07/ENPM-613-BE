@@ -1,8 +1,5 @@
 package com.github.ilim.backend.exception.exceptions;
 
-import com.github.ilim.backend.entity.User;
-import jakarta.annotation.Nullable;
-
 import java.util.UUID;
 
 public class AccessDeletedCourseException extends RuntimeException {

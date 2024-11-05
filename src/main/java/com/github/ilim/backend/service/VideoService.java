@@ -1,13 +1,9 @@
 package com.github.ilim.backend.service;
 
-import com.fasterxml.jackson.databind.Module;
 import com.github.ilim.backend.dto.VideoDto;
-import com.github.ilim.backend.entity.CourseModule;
 import com.github.ilim.backend.entity.CourseModuleItem;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.entity.Video;
-import com.github.ilim.backend.enums.ModuleItemType;
-import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
 import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
 import com.github.ilim.backend.repo.VideoRepo;

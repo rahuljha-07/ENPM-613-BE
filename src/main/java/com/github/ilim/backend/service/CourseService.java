@@ -9,7 +9,6 @@ import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
 import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
-import com.github.ilim.backend.exception.exceptions.CantAttemptOwnQuizException;
 import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
@@ -24,7 +23,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;

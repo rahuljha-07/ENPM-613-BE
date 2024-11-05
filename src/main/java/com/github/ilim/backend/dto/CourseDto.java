@@ -1,7 +1,6 @@
 package com.github.ilim.backend.dto;
 
 
-import com.github.ilim.backend.enums.CourseStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 

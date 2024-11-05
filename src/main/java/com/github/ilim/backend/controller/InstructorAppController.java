@@ -2,10 +2,6 @@ package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.dto.InstructorAppDto;
 import com.github.ilim.backend.entity.InstructorApp;
-import com.github.ilim.backend.enums.UserRole;
-import com.github.ilim.backend.exception.exceptions.AdminCannotBeInstructorException;
-import com.github.ilim.backend.exception.exceptions.InstructorAppAlreadyExistsException;
-import com.github.ilim.backend.exception.exceptions.UserAlreadyInstructorException;
 import com.github.ilim.backend.service.InstructorAppService;
 import com.github.ilim.backend.service.UserService;
 import com.github.ilim.backend.util.response.ApiRes;
