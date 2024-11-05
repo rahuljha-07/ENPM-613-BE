@@ -10,9 +10,9 @@
 - [x] Request to be an instructor
 - [x] Browse Courses
 - [ ] Search Courses
-- [ ] Buy Courses
-- [ ] Access Course Materials
-- [ ] Complete Quizzes
+- [x] Buy Courses
+- [x] Access Course Materials
+- [x] Complete Quizzes
 - [ ] View Certificates
 - [ ] File a Support Issue
 ### Instructor
@@ -24,8 +24,8 @@
 - [x] Delete Modules
 - [x] Add Videos to Modules
 - [x] Remove Videos from Modules
-- [ ] Add Quizzes to Modules
-- [ ] Remove Quizzes from Modules
+- [x] Add Quizzes to Modules
+- [x] Remove Quizzes from Modules
 ### Admin
 - [x] Get a list of all users
 - [x] Approve Instructors
@@ -40,3 +40,5 @@
 - [ ] Edit the TOS for users
 ### System
 - [ ] Handle Payments
+- [ ] Grade Quizzes
+- [ ] Generate Certificates
