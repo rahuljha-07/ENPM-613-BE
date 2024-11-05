@@ -1,0 +1,26 @@
+meta {
+  name: Sign In as Student
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://{{ilim-url}}/auth/sign-in
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "email": "user@mail.com",
+      "password": "!Qq12345"
+  }
+}
+
+vars:post-response {
+  studentToken: res.body.accessToken
+}
+
+assert {
+  res.status: eq 200
+}

@@ -1,0 +1,27 @@
+meta {
+  name: Inst can update module
+  type: http
+  seq: 11
+}
+
+put {
+  url: http://{{ilim-url}}/instructor/update-module/{{moduleId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+    "title": "Intro to Module (test run)",
+    "description": "edited={{moduleId}}"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.body: isDefined
+}

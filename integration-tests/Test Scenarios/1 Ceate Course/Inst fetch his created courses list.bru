@@ -1,0 +1,32 @@
+meta {
+  name: Inst fetch his created courses list
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://{{ilim-url}}/instructor/course/created
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+      "title": "Computer Science Course",
+      "description": "This is a new course for beginners to teach them computer science",
+      "price": 54.15,
+      "thumbnailUrl": "https://domain.org/image.png"
+  }
+}
+
+vars:post-response {
+  courseId: res.body.body[res.body.body.length -1].id
+}
+
+assert {
+  res.status: eq 200
+}

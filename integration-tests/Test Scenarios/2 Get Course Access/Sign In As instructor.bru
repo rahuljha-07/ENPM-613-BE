@@ -1,0 +1,22 @@
+meta {
+  name: Sign In As instructor
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://{{ilim-url}}/auth/sign-in
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "email": "instructorx@mail.com",
+      "password": "!Qq12345"
+  }
+}
+
+vars:post-response {
+  instructorToken: res.body.accessToken
+}

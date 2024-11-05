@@ -1,0 +1,26 @@
+meta {
+  name: Inst can delete module
+  type: http
+  seq: 15
+}
+
+delete {
+  url: http://{{ilim-url}}/instructor/delete-module/{{moduleId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+    "title": "Intro to Module (test run)",
+    "description": "edited={{moduleId}}"
+  }
+}
+
+assert {
+  res.status: eq 200
+}
