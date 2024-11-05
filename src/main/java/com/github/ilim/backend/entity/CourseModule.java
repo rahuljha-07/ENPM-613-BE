@@ -19,6 +19,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import net.minidev.json.annotate.JsonIgnore;
 
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "course_modules")
 @NoArgsConstructor
@@ -73,12 +75,6 @@ public class CourseModule extends AuditEntity {
     }
 
     public void removeModuleItem(CourseModuleItem item) {
-        moduleItems.remove(item);
-        item.setCourseModule(null);
-    }
-
-    public void removeQuizModuleItemById(UUID quizId) {
-        var item = findModuleItemByQuizId(quizId);
         moduleItems.remove(item);
         item.setCourseModule(null);
     }

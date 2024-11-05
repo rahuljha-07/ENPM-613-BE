@@ -38,13 +38,13 @@ public class ModuleService {
         courseService.saveCourse(course);
     }
 
-    public void reorderModuleItems(User instructor, UUID moduleId, List<UUID> itemsOrder) {
-        if (itemsOrder.isEmpty()) {
-            return;
-        }
-        // TODO: Implement this
-        throw new NotImplementedException();
-    }
+//    public void reorderModuleItems(User instructor, UUID moduleId, List<UUID> itemsOrder) {
+//        if (itemsOrder.isEmpty()) {
+//            return;
+//        }
+//        // TODO: Implement this
+//        throw new NotImplementedException();
+//    }
 
     @Transactional
     public void updateCourseModule(User instructor, UUID moduleId, ModuleDto dto) {
