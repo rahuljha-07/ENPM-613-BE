@@ -19,6 +19,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.minidev.json.annotate.JsonIgnore;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,7 +49,7 @@ public class Question extends AuditEntity {
     private QuestionType type;
 
     @Column(nullable = false)
-    private int points;
+    private BigDecimal points;
 
     @Column(nullable = false)
     private int orderIndex;

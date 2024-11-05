@@ -4,6 +4,8 @@ import com.github.ilim.backend.enums.QuestionType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +21,7 @@ public class QuestionDto {
     private QuestionType type;
 
     @NotNull
-    private Integer points;
+    private BigDecimal points;
 
     @NotNull
     private List<QuestionOptionDto> options;

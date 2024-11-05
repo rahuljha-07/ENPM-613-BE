@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ public class Quiz extends AuditEntity {
     private String description;
 
     @Column(nullable = false)
-    private int passingScore;
+    private BigDecimal passingScore;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id")

@@ -34,8 +34,7 @@ public class UserAnswer extends AuditEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")
-    private Question questions;
-
+    private Question question;
 
     @OneToMany(mappedBy = "userAnswer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAnswerOption> selectedOptions;
@@ -43,6 +42,10 @@ public class UserAnswer extends AuditEntity {
     @Column(nullable = false)
     private boolean isCorrect;
 
-    @Column(nullable = false)
-    private BigDecimal answer;
+    public static UserAnswer from(Question question, QuizAttempt attempt) {
+        UserAnswer answer = new UserAnswer();
+        answer.setAttempt(attempt);
+        answer.setQuestion(question);
+        return answer;
+    }
 }

@@ -6,17 +6,18 @@ import com.github.ilim.backend.entity.Question;
 import com.github.ilim.backend.entity.QuestionOption;
 import com.github.ilim.backend.entity.Quiz;
 import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.exception.exceptions.CantDeleteAttemptedQuiz;
 import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.exception.exceptions.QuizNotFoundException;
 import com.github.ilim.backend.repo.QuestionOptionRepo;
 import com.github.ilim.backend.repo.QuestionRepo;
+import com.github.ilim.backend.repo.QuizAttemptRepo;
 import com.github.ilim.backend.repo.QuizRepo;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 @Service
@@ -29,6 +30,15 @@ public class QuizService {
     private final QuizRepo quizRepo;
     private final QuestionRepo questionRepo;
     private final QuestionOptionRepo questionOptionRepo;
+    private final QuizAttemptRepo quizAttemptRepo;
+
+    public Quiz findQuizById(User instructor, UUID quizId) {
+        var quiz = quizRepo.findById(quizId)
+            .orElseThrow(() -> new QuizNotFoundException(quizId));
+        var course = quiz.getCourseModule().getCourse();
+        courseService.assertUserHasAccessToCourseContent(instructor, course);
+        return quiz;
+    }
 
     public Quiz findQuizByIdAsInstructor(User instructor, UUID quizId) {
         var quiz = findQuizById(instructor, quizId);
@@ -38,17 +48,9 @@ public class QuizService {
         return quiz;
     }
 
-    public QuizDto getQuizDtoById(User instructor, UUID quizId) {
+    public QuizDto getQuizDtoByQuizId(User instructor, UUID quizId) {
         var quiz = findQuizById(instructor, quizId);
         return QuizDto.from(quiz, instructor.getRole());
-    }
-
-    private Quiz findQuizById(User instructor, UUID quizId) {
-        var quiz = quizRepo.findById(quizId)
-            .orElseThrow(() -> new QuizNotFoundException(quizId));
-        var course = quiz.getCourseModule().getCourse();
-        courseService.assertUserHasAccessToCourseContent(instructor, course);
-        return quiz;
     }
 
     @Transactional
@@ -81,6 +83,10 @@ public class QuizService {
     public void removeQuizFromModule(User instructor, UUID quizId) {
         var quiz = findQuizByIdAsInstructor(instructor, quizId);
         var module = quiz.getCourseModule();
+        var quizAttempts = quizAttemptRepo.findQuizAttemptsByQuiz(quiz);
+        if (!quizAttempts.isEmpty()) {
+            throw new CantDeleteAttemptedQuiz(instructor.getId(), quiz.getId(), quizAttempts.getFirst().getId());
+        }
 
         // delete ModuleItem record
         var moduleItem = module.findModuleItemByQuizId(quizId);

@@ -7,7 +7,10 @@ import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.CourseStatus;
 import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
+import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
+import com.github.ilim.backend.exception.exceptions.CantAttemptOwnQuizException;
+import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
@@ -104,7 +107,7 @@ public class CourseService {
         }
     }
 
-    private boolean userHasAccessToCourseContent(@Nullable User user, Course course) {
+    private boolean userHasAccessToCourseContent(@Nullable User user, @NonNull Course course) {
         assertCourseNotDeleted(course);
         // Visitors cannot access any course content
         if (user == null) {
@@ -165,6 +168,12 @@ public class CourseService {
 
     public void purchaseCourse(User student, UUID courseId) {
         var course = findPublishedCourse(courseId);
+        if (purchaseService.findByStudentAndCourse(student, course).isPresent()) {
+            throw new AlreadyPurchasedCourseException(student.getId(), courseId);
+        }
+        if (course.getInstructor().getId().equals(student.getId())) {
+            throw new CantPurchaseOwnCourseException(student.getId(), course.getId());
+        }
         assertCourseNotDeleted(course);
         // TODO: This should be implemented properly when the PaymentService is ready
         var purchase = new CoursePurchase();

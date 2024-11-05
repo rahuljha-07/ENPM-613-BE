@@ -31,7 +31,7 @@ public class QuizController {
     @GetMapping("/quiz/{quizId}")
     public ApiRes<Res<QuizDto>> findQuizById(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID quizId) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
-        var quizDto = quizService.getQuizDtoById(user, quizId);
+        var quizDto = quizService.getQuizDtoByQuizId(user, quizId);
         return Reply.ok(quizDto);
     }
 

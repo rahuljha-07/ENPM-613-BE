@@ -18,12 +18,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(
-    name = "quiz_attempts",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"student_id", "quiz_id"})
-    }
-)
+@Table(name = "quiz_attempts")
 @NoArgsConstructor
 public class QuizAttempt extends AuditEntity {
 
@@ -39,10 +34,14 @@ public class QuizAttempt extends AuditEntity {
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
-    @Column(nullable = false)
-    private BigDecimal score;
-
-    @Column(nullable = false)
+    private BigDecimal userScore;
+    private BigDecimal totalScore;
     private boolean isPassed;
 
+    public static QuizAttempt from(User user, Quiz quiz) {
+        var attempt = new QuizAttempt();
+        attempt.setQuiz(quiz);
+        attempt.setStudent(user);
+        return attempt;
+    }
 }

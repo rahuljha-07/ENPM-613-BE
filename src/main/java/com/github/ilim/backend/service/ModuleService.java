@@ -9,6 +9,7 @@ import com.github.ilim.backend.repo.ModuleRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -63,7 +64,7 @@ public class ModuleService {
         return module;
     }
 
-    public CourseModule findModuleById(User instructor, UUID moduleId) {
+    public CourseModule findModuleById(User instructor, @NonNull UUID moduleId) {
         var module = moduleRepo.findById(moduleId)
             .orElseThrow(() -> new CourseModuleNotFoundException(moduleId));
 

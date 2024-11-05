@@ -3,7 +3,6 @@ package com.github.ilim.backend.exception;
 
 import com.github.ilim.backend.exception.exceptions.CantAttemptOwnQuizException;
 import com.github.ilim.backend.exception.exceptions.CantDeleteAttemptedQuiz;
-import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
 import com.github.ilim.backend.exception.exceptions.MissingAnswerException;
 import com.github.ilim.backend.exception.exceptions.ModuleItemNotFoundException;
 import com.github.ilim.backend.exception.exceptions.QuestionOptionNotFoundException;
@@ -21,20 +20,38 @@ import java.util.logging.Logger;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
-public class ModuleItemExceptionHandler {
+public class QuizExceptionHandler {
 
     private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 
-    @ExceptionHandler(VideoNotFoundException.class)
-    public ApiRes<Res<String>> handleVideoNotFoundException(VideoNotFoundException e) {
+    @ExceptionHandler(QuizNotFoundException.class)
+    public ApiRes<Res<String>> handleQuizNotFoundException(QuizNotFoundException e) {
         logger.warning(e.getMessage());
         return Reply.notFound(e.getMessage());
     }
 
-    @ExceptionHandler(ModuleItemNotFoundException.class)
-    public ApiRes<Res<String>> handleModuleItemNotFoundException(ModuleItemNotFoundException e) {
+    @ExceptionHandler(MissingAnswerException.class)
+    public ApiRes<Res<String>> handleMissingAnswerException(MissingAnswerException e) {
+        logger.warning(e.getMessage());
+        return Reply.badRequest(e.getMessage());
+    }
+
+    @ExceptionHandler(QuestionOptionNotFoundException.class)
+    public ApiRes<Res<String>> handleQuestionOptionNotFoundException(QuestionOptionNotFoundException e) {
         logger.warning(e.getMessage());
         return Reply.notFound(e.getMessage());
+    }
+
+    @ExceptionHandler(CantAttemptOwnQuizException.class)
+    public ApiRes<Res<String>> handleCantAttemptOwnQuizException(CantAttemptOwnQuizException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(CantDeleteAttemptedQuiz.class)
+    public ApiRes<Res<String>> handleCantDeleteAttemptedQuiz(CantDeleteAttemptedQuiz e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
     }
 
 }

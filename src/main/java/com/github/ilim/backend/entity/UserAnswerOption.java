@@ -31,4 +31,10 @@ public class UserAnswerOption extends AuditEntity {
     @JoinColumn(name = "selected_option_id", nullable = false)
     private QuestionOption selectedOption;
 
+    public static UserAnswerOption from(UserAnswer answer, QuestionOption option) {
+        var answerOption = new UserAnswerOption();
+        answerOption.setUserAnswer(answer);
+        answerOption.setSelectedOption(option);
+        return answerOption;
+    }
 }

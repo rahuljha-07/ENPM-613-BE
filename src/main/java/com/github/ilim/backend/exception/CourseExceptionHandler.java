@@ -2,7 +2,9 @@ package com.github.ilim.backend.exception;
 
 
 import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
+import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
+import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
@@ -50,6 +52,18 @@ public class CourseExceptionHandler {
 
     @ExceptionHandler(AccessDeletedCourseException.class)
     public ApiRes<Res<String>> handleAccessDeletedCourseException(AccessDeletedCourseException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(AlreadyPurchasedCourseException.class)
+    public ApiRes<Res<String>> handleAlreadyPurchasedCourseException(AlreadyPurchasedCourseException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(CantPurchaseOwnCourseException.class)
+    public ApiRes<Res<String>> handleCantPurchaseOwnCourseException(CantPurchaseOwnCourseException e) {
         logger.warning(e.getMessage());
         return Reply.forbidden(e.getMessage());
     }
