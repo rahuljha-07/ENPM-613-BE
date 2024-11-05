@@ -1,5 +1,7 @@
 package com.github.ilim.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,6 +22,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "quiz_attempts")
 @NoArgsConstructor
+@JsonIgnoreProperties({"student", "quiz"})
 public class QuizAttempt extends AuditEntity {
 
     @Id
@@ -37,6 +40,16 @@ public class QuizAttempt extends AuditEntity {
     private BigDecimal userScore;
     private BigDecimal totalScore;
     private boolean isPassed;
+
+    @JsonProperty
+    public String getStudentId() {
+        return student.getId();
+    }
+
+    @JsonProperty
+    public UUID geQuizId() {
+        return quiz.getId();
+    }
 
     public static QuizAttempt from(User user, Quiz quiz) {
         var attempt = new QuizAttempt();

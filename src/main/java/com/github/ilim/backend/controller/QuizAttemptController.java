@@ -2,6 +2,7 @@ package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.dto.QuizAttemptDto;
 import com.github.ilim.backend.dto.QuizAttemptResultDto;
+import com.github.ilim.backend.entity.QuizAttempt;
 import com.github.ilim.backend.service.QuizAttemptService;
 import com.github.ilim.backend.service.UserService;
 import com.github.ilim.backend.util.response.ApiRes;
@@ -40,37 +41,37 @@ public class QuizAttemptController {
         return Reply.ok(result);
     }
 
-//    @GetMapping("/quiz-attempt/{attemptId}")
-//    @PreAuthorize("isAuthenticated()")
-//    public ApiRes<Res<QuizAttemptDto>> getQuizAttempt(
-//        @AuthenticationPrincipal Jwt jwt,
-//        @PathVariable UUID attemptId
-//    ) {
-//        var user = userService.findById(jwt.getClaimAsString("sub"));
-//        var attemptDto = quizAttemptService.getQuizAttempt(user, attemptId);
-//        return Reply.ok(attemptDto);
-//    }
-//
-//    @GetMapping("/student/quiz-attempts/{quizId}")
-//    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR')")
-//    public ApiRes<Res<List<QuizAttemptDto>>> getStudentQuizAttempts(
-//        @AuthenticationPrincipal Jwt jwt,
-//        @PathVariable UUID quizId
-//    ) {
-//        var user = userService.findById(jwt.getClaimAsString("sub"));
-//        var attempts = quizAttemptService.getStudentQuizAttempts(user, quizId);
-//        return Reply.ok(attempts);
-//    }
-//
-//    // Get quiz attempts for an instructor (all attempts by students)
-//    @GetMapping("/instructor/quiz-attempts/{quizId}")
-//    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
-//    public ApiRes<Res<List<QuizAttemptDto>>> getInstructorQuizAttempts(
-//        @AuthenticationPrincipal Jwt jwt,
-//        @PathVariable UUID quizId
-//    ) {
-//        var instructor = userService.findById(jwt.getClaimAsString("sub"));
-//        var attempts = quizAttemptService.getInstructorQuizAttempts(instructor, quizId);
-//        return Reply.ok(attempts);
-//    }
+    @GetMapping("/student/quiz-attempt/{quizId}")
+    @PreAuthorize("hasAnyRole('STUDENT','INSTRUCTOR')")
+    public ApiRes<Res<List<QuizAttemptResultDto>>> getAllQuizAttempts(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID quizId
+    ) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        var attemptDto = quizAttemptService.getAllStudentQuizAttempts(user, quizId);
+        return Reply.ok(attemptDto);
+    }
+
+    @GetMapping("/student/quiz-attempt/{quizId}/last")
+    @PreAuthorize("hasAnyRole('STUDENT','INSTRUCTOR')")
+    public ApiRes<Res<QuizAttemptResultDto>> getLastQuizAttempt(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID quizId
+    ) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        var attemptDto = quizAttemptService.getLastStudentQuizAttempt(user, quizId);
+        return Reply.ok(attemptDto);
+    }
+
+    // Get quiz attempts for an instructor (all attempts by students)
+    @GetMapping("/instructor/quiz-attempt/{quizId}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    public ApiRes<Res<List<QuizAttempt>>> getAllQuizAttemptsForQuiz(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID quizId
+    ) {
+        var instructor = userService.findById(jwt.getClaimAsString("sub"));
+        var attempts = quizAttemptService.getAllQuizAttemptsForQuiz(instructor, quizId);
+        return Reply.ok(attempts);
+    }
 }

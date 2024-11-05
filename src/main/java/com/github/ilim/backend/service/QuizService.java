@@ -6,7 +6,7 @@ import com.github.ilim.backend.entity.Question;
 import com.github.ilim.backend.entity.QuestionOption;
 import com.github.ilim.backend.entity.Quiz;
 import com.github.ilim.backend.entity.User;
-import com.github.ilim.backend.exception.exceptions.CantDeleteAttemptedQuiz;
+import com.github.ilim.backend.exception.exceptions.CantDeleteAttemptedQuizException;
 import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.exception.exceptions.QuizNotFoundException;
 import com.github.ilim.backend.repo.QuestionOptionRepo;
@@ -85,7 +85,7 @@ public class QuizService {
         var module = quiz.getCourseModule();
         var quizAttempts = quizAttemptRepo.findQuizAttemptsByQuiz(quiz);
         if (!quizAttempts.isEmpty()) {
-            throw new CantDeleteAttemptedQuiz(instructor.getId(), quiz.getId(), quizAttempts.getFirst().getId());
+            throw new CantDeleteAttemptedQuizException(instructor.getId(), quiz.getId(), quizAttempts.getFirst().getId());
         }
 
         // delete ModuleItem record

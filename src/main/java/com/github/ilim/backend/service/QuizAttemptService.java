@@ -3,6 +3,7 @@ package com.github.ilim.backend.service;
 import com.github.ilim.backend.dto.QuizAttemptDto;
 import com.github.ilim.backend.dto.QuizAttemptResultDto;
 import com.github.ilim.backend.dto.UserAnswerDto;
+import com.github.ilim.backend.entity.AuditEntity;
 import com.github.ilim.backend.entity.Question;
 import com.github.ilim.backend.entity.QuestionOption;
 import com.github.ilim.backend.entity.Quiz;
@@ -15,22 +16,22 @@ import com.github.ilim.backend.exception.exceptions.AdminCantAttemptQuizzesExcep
 import com.github.ilim.backend.exception.exceptions.CantAttemptOwnQuizException;
 import com.github.ilim.backend.exception.exceptions.MissingAnswerException;
 import com.github.ilim.backend.exception.exceptions.QuestionOptionNotFoundException;
+import com.github.ilim.backend.exception.exceptions.QuizAttemptsNotFoundException;
 import com.github.ilim.backend.repo.QuestionOptionRepo;
-import com.github.ilim.backend.repo.QuestionRepo;
 import com.github.ilim.backend.repo.QuizAttemptRepo;
 import com.github.ilim.backend.repo.UserAnswerOptionRepo;
 import com.github.ilim.backend.repo.UserAnswerRepo;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.engine.spi.CollectionEntry;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,16 +39,38 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class QuizAttemptService {
 
-    private final QuizService quizService;
-    private final QuizAttemptRepo quizAttemptRepo;
-    private final QuestionRepo questionRepo;
-    private final QuestionOptionRepo questionOptionRepo;
-    private final UserAnswerRepo userAnswerRepo;
     private final UserAnswerOptionRepo userAnswerOptionRepo;
-    private final CourseService courseService;
+    private final QuestionOptionRepo questionOptionRepo;
+    private final QuizAttemptRepo quizAttemptRepo;
+    private final UserAnswerRepo userAnswerRepo;
+    private final QuizService quizService;
+
+    public List<QuizAttemptResultDto> getAllStudentQuizAttempts(@NonNull User student, @NonNull UUID quizId) {
+        var quiz = quizService.findQuizById(student, quizId);
+        var attempts = quizAttemptRepo.findQuizAttemptsByQuizAndStudent(quiz, student);
+        if (attempts.isEmpty()) {
+            throw new QuizAttemptsNotFoundException(quizId);
+        }
+        return attempts.stream()
+            .map(QuizAttemptResultDto::from)
+            .toList();
+    }
+
+    public QuizAttemptResultDto getLastStudentQuizAttempt(@NonNull User student, @NonNull UUID quizId) {
+        var quiz = quizService.findQuizById(student, quizId);
+        var attempts = quizAttemptRepo.findQuizAttemptsByQuizAndStudent(quiz, student);
+        var lastAttempt = attempts.stream()
+            .max(Comparator.comparing(AuditEntity::getCreatedAt))
+            .orElseThrow(() -> new QuizAttemptsNotFoundException(quizId));
+        return QuizAttemptResultDto.from(lastAttempt);
+    }
+    public List<QuizAttempt> getAllQuizAttemptsForQuiz(User instructor, UUID quizId) {
+        var quiz = quizService.findQuizById(instructor, quizId);
+        return quizAttemptRepo.findQuizAttemptsByQuiz(quiz);
+    }
 
     @Transactional
-    public QuizAttemptResultDto processQuizAttempt(User user, @Valid QuizAttemptDto dto) {
+    public QuizAttemptResultDto processQuizAttempt(@NonNull User user, @Valid QuizAttemptDto dto) {
         var quiz = quizService.findQuizById(user, dto.getQuizId());
         if (quiz.getCourseModule().getCourse().getInstructor().getId().equals(user.getId())) {
             throw new CantAttemptOwnQuizException(user.getId(), dto.getQuizId());

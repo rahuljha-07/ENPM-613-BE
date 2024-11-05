@@ -1,13 +1,7 @@
 package com.github.ilim.backend.exception;
 
 
-import com.github.ilim.backend.exception.exceptions.CantAttemptOwnQuizException;
-import com.github.ilim.backend.exception.exceptions.CantDeleteAttemptedQuiz;
-import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
-import com.github.ilim.backend.exception.exceptions.MissingAnswerException;
 import com.github.ilim.backend.exception.exceptions.ModuleItemNotFoundException;
-import com.github.ilim.backend.exception.exceptions.QuestionOptionNotFoundException;
-import com.github.ilim.backend.exception.exceptions.QuizNotFoundException;
 import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
 import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
