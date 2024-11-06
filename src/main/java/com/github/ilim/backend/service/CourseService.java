@@ -1,6 +1,7 @@
 package com.github.ilim.backend.service;
 
 import com.github.ilim.backend.dto.CourseDto;
+import com.github.ilim.backend.dto.PublicCourseDto;
 import com.github.ilim.backend.entity.Course;
 import com.github.ilim.backend.entity.CoursePurchase;
 import com.github.ilim.backend.entity.User;
@@ -13,9 +14,11 @@ import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseExcepti
 import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
+import com.github.ilim.backend.exception.exceptions.OnlyAdminAccessAllCourses;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
 import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
 import com.github.ilim.backend.repo.CourseRepo;
+import com.github.ilim.backend.util.CourseUtil;
 import jakarta.annotation.Nullable;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -67,15 +70,15 @@ public class CourseService {
     }
 
     public Course findPublishedCourse(UUID courseId) {
-        return courseRepo.findByIdAndStatusAndIsDeleted(courseId, CourseStatus.PUBLISHED, false)
+        var course = courseRepo.findByIdAndStatusAndIsDeleted(courseId, CourseStatus.PUBLISHED, false)
             .orElseThrow(() -> new CourseNotFoundException(courseId));
+        return enforceCourseAccess(null, course);
     }
 
     public Course findCourseByIdAndUser(@Nullable User user, UUID courseId) {
         var course = courseRepo.findById(courseId)
             .orElseThrow(() -> new CourseNotFoundException(courseId));
-        assertUserHasAccessToCourse(user, course);
-        return course;
+        return enforceCourseAccess(user, course);
     }
 
     public void assertUserHasAccessToCourse(User user, Course course) {
@@ -129,28 +132,34 @@ public class CourseService {
         return purchaseService.findByStudentAndCourse(user, course).isPresent();
     }
 
-    public List<Course> findAllCourses() {
+    public List<Course> findAllCourses(@NonNull User admin) {
+        if (admin.getRole() != UserRole.ADMIN) {
+            throw new OnlyAdminAccessAllCourses(admin.getId());
+        }
         return courseRepo.findAll();
     }
 
-    public List<Course> findPublishedCourses() {
+    public List<PublicCourseDto> findPublishedCourses() {
         boolean isDeleted = false;
-        return courseRepo.findAllByStatusAndIsDeleted(CourseStatus.PUBLISHED, isDeleted);
+        var courses = courseRepo.findAllByStatusAndIsDeleted(CourseStatus.PUBLISHED, isDeleted);
+        return CourseUtil.toPublicCourseDtos(courses);
     }
 
-    public List<Course> findPurchasedCourses(User user) {
+    public List<Course> findPurchasedCourses(User student) {
         boolean isDeleted = false;
-        var purchasedCoursesIds = purchaseService.findAllByStudent(user).stream()
+        var purchasedCoursesIds = purchaseService.findAllByStudent(student).stream()
             .map(CoursePurchase::getCourse)
             .filter(Objects::nonNull)
             .map(Course::getId)
             .toList();
-        return courseRepo.findAllByIdInAndIsDeleted(purchasedCoursesIds, isDeleted);
+        var courses = courseRepo.findAllByIdInAndIsDeleted(purchasedCoursesIds, isDeleted);
+        return enforceCoursesAccess(student, courses);
     }
 
     public List<Course> findCreatedCourses(User instructor) {
         boolean isDeleted = false;
-        return courseRepo.findAllByInstructorAndIsDeleted(instructor, isDeleted);
+        var courses = courseRepo.findAllByInstructorAndIsDeleted(instructor, isDeleted);
+        return enforceCoursesAccess(instructor, courses);
     }
 
     @Transactional
@@ -207,5 +216,36 @@ public class CourseService {
         course.getCourseModules().clear();
         course.getCourseModules().addAll(modulesInNewOrder);
         saveCourse(course);
+    }
+
+    public List<PublicCourseDto> filterPublishedCourses(@Nullable String containsFilter) {
+        var courses = findPublishedCourses();
+        if (containsFilter == null) {
+            return courses;
+        }
+        return courses.stream()
+            .filter(course -> course.getTitle().toLowerCase().contains(containsFilter.toLowerCase()))
+            .toList();
+    }
+
+    public Course enforceCourseAccess(@Nullable User user, Course course) {
+        if (userHasAccessToCourseContent(user, course)) {
+            if (user == null) {
+                throw new IllegalStateException("userHasAccessToCourseContent failed to work!");
+            }
+            // hide answers for students of the course
+            if (!user.getRole().equals(UserRole.ADMIN) && !user.getId().equals(course.getInstructor().getId())) {
+                return CourseUtil.toStudentCourseDto(course);
+            }
+            return course;
+        }
+        assertUserHasAccessToCourse(user, course);
+        return CourseUtil.toPublicCourseDto(course);
+    }
+
+    public List<Course> enforceCoursesAccess(@Nullable User user, List<Course> courses) {
+        return courses.stream()
+            .map(course -> enforceCourseAccess(user, course))
+            .toList();
     }
 }

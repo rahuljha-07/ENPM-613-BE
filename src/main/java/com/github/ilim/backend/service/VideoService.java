@@ -6,6 +6,7 @@ import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.entity.Video;
 import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
+import com.github.ilim.backend.repo.ModuleItemRepo;
 import com.github.ilim.backend.repo.VideoRepo;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ public class VideoService {
     private final VideoRepo videoRepo;
     private final CourseService courseService;
     private final ModuleService moduleService;
+    private final ModuleItemService moduleItemService;
 
     @Transactional
     public void addVideoToModule(User instructor, UUID moduleId, @Valid VideoDto dto) {
@@ -41,7 +43,7 @@ public class VideoService {
     public void removeVideoFromModule(User instructor, UUID videoId) {
         var video = findVideoByIdAsInstructor(instructor, videoId);
         var module = video.getCourseModule();
-        var moduleItem = module.findModuleItemByVideoId(videoId);
+        var moduleItem = moduleItemService.findModuleItemByVideo(video);
         module.removeModuleItem(moduleItem);
         videoRepo.delete(video);
     }

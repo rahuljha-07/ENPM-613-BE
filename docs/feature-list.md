@@ -5,11 +5,11 @@
 - [x] Forgot Password
 - [x] Change Password
 - [x] Get Account Details
-- [ ] Update Account
+- [x] Update Account
 ### Student
 - [x] Request to be an instructor
 - [x] Browse Courses
-- [ ] Search Courses
+- [x] Search Courses
 - [x] Buy Courses
 - [x] Access Course Materials
 - [x] Complete Quizzes
@@ -33,7 +33,7 @@
 - [ ] Block User
 - [ ] Handle Support Issues
 - [x] Browse Courses
-- [ ] Search Courses
+- [x] Search Courses
 - [x] Edit Courses
 - [x] Remove Courses
 - [ ] View User Profile Page

@@ -1,6 +1,7 @@
 package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.dto.CourseDto;
+import com.github.ilim.backend.dto.PublicCourseDto;
 import com.github.ilim.backend.entity.Course;
 import com.github.ilim.backend.service.CourseService;
 import com.github.ilim.backend.service.UserService;
@@ -8,6 +9,7 @@ import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
 import com.github.ilim.backend.util.response.Res;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -34,14 +37,17 @@ public class CourseController {
 
     @GetMapping("/admin/course/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiRes<Res<List<Course>>> findAllCourses() {
-        var courses = courseService.findAllCourses();
+    public ApiRes<Res<List<Course>>> findAllCourses(@AuthenticationPrincipal Jwt jwt) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        var courses = courseService.findAllCourses(user);
         return Reply.ok(courses);
     }
 
     @GetMapping("/course/published")
-    public ApiRes<Res<List<Course>>> findPublishedCourses() {
-        var courses = courseService.findPublishedCourses();
+    public ApiRes<Res<List<PublicCourseDto>>> filterPublishedCourses(
+        @RequestParam(value = "contains", required = false) String contains
+    ) {
+        var courses = courseService.filterPublishedCourses(contains);
         return Reply.ok(courses);
     }
 

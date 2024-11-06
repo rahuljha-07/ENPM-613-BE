@@ -6,6 +6,7 @@ import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseExcept
 import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
+import com.github.ilim.backend.exception.exceptions.OnlyAdminAccessAllCourses;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
 import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
 import com.github.ilim.backend.util.response.ApiRes;
@@ -64,6 +65,12 @@ public class CourseExceptionHandler {
     public ApiRes<Res<String>> handleCantPurchaseOwnCourseException(CantPurchaseOwnCourseException e) {
         logger.warning(e.getMessage());
         return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(OnlyAdminAccessAllCourses.class)
+    public ApiRes<Res<String>> handleOnlyAdminAccessAllCourses(OnlyAdminAccessAllCourses e) {
+        logger.warning(e.getMessage());
+        return Reply.unauthorized(e.getMessage());
     }
 
 }

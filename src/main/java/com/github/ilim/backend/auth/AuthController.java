@@ -74,5 +74,6 @@ public class AuthController {
         authService.changePassword(accessToken, requestDto.getOldPassword(), requestDto.getNewPassword());
         return Reply.ok("Password changed successfully.");
     }
+
 }
 

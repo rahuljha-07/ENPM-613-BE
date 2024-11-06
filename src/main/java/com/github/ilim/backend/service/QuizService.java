@@ -31,6 +31,7 @@ public class QuizService {
     private final QuestionRepo questionRepo;
     private final QuestionOptionRepo questionOptionRepo;
     private final QuizAttemptRepo quizAttemptRepo;
+    private final ModuleItemService moduleItemService;
 
     public Quiz findQuizById(User instructor, UUID quizId) {
         var quiz = quizRepo.findById(quizId)
@@ -89,7 +90,7 @@ public class QuizService {
         }
 
         // delete ModuleItem record
-        var moduleItem = module.findModuleItemByQuizId(quizId);
+        var moduleItem = moduleItemService.findModuleItemByQuiz(quiz);
         module.removeModuleItem(moduleItem);
 
         // delete Quiz record

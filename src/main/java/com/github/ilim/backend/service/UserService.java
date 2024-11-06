@@ -1,5 +1,6 @@
 package com.github.ilim.backend.service;
 
+import com.github.ilim.backend.dto.UpdateUserDto;
 import com.github.ilim.backend.entity.InstructorApp;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.UserRole;
@@ -42,12 +43,11 @@ public class UserService {
         userRepo.save(user);
     }
 
-//    public User update(String userId,@NonNull User updatedUser) {
-//        var user = findById(userId);
-//        user.setName(updatedUser.getName());
-//        user.setBirthdate(updatedUser.getBirthdate());
-//        user.setProfileImageUrl(updatedUser.getProfileImageUrl());
-//        // Do not update email or ID
-//        return userRepo.save(user);
-//    }
+    public User update(@NonNull User user, @NonNull UpdateUserDto dto) {
+        user.setBio(dto.getBio());
+        user.setTitle(dto.getTitle());
+        user.setProfileImageUrl(dto.getProfileImageUrl());
+        // Core attributes in cognito cannot be updated in the current implementation
+        return userRepo.save(user);
+    }
 }

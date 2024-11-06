@@ -1,8 +1,10 @@
 package com.github.ilim.backend.service;
 
 import com.github.ilim.backend.dto.ModuleDto;
+import com.github.ilim.backend.dto.StudentCourseModuleDto;
 import com.github.ilim.backend.entity.CourseModule;
 import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
 import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.repo.ModuleRepo;
@@ -59,18 +61,25 @@ public class ModuleService {
     }
 
     public CourseModule findModuleByIdAsInstructor(User instructor, UUID moduleId) {
-        var module = findModuleById(instructor, moduleId);
+        var module = findById(instructor, moduleId);
         if (!module.getCourse().getInstructor().equals(instructor)) {
             throw new NotCourseInstructorException(instructor, module);
         }
         return module;
     }
 
-    public CourseModule findModuleById(User instructor, @NonNull UUID moduleId) {
+    public Object findCourseModuleById(User instructor, UUID moduleId) {
+        var module = findById(instructor, moduleId);
+        if (module.getCourse().getInstructor().equals(instructor) || instructor.getRole() == UserRole.ADMIN) {
+            return module;
+        }
+        return StudentCourseModuleDto.from(module);
+    }
+
+    private CourseModule findById(User student, @NonNull UUID moduleId) {
         var module = moduleRepo.findById(moduleId)
             .orElseThrow(() -> new CourseModuleNotFoundException(moduleId));
-
-        courseService.assertUserHasAccessToCourseContent(instructor, module.getCourse());
+        courseService.assertUserHasAccessToCourseContent(student, module.getCourse());
         return module;
     }
 }
