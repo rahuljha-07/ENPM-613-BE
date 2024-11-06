@@ -129,7 +129,7 @@ public class CourseService {
             return false;
         }
         // Finally, a student who purchase the course can access its content
-        return purchaseService.findByStudentAndCourse(user, course).isPresent();
+        return !purchaseService.findByStudentAndCourse(user, course).isEmpty();
     }
 
     public List<Course> findAllCourses(@NonNull User admin) {
@@ -179,7 +179,7 @@ public class CourseService {
     @Transactional
     public void purchaseCourse(User student, UUID courseId) {
         var course = findPublishedCourse(courseId);
-        if (purchaseService.findByStudentAndCourse(student, course).isPresent()) {
+        if (!purchaseService.findByStudentAndCourse(student, course).isEmpty()) {
             throw new AlreadyPurchasedCourseException(student.getId(), courseId);
         }
         if (course.getInstructor().getId().equals(student.getId())) {

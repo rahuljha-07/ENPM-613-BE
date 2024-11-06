@@ -24,11 +24,6 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/all")
-    public ApiRes<Res<List<User>>> getAllUsers() {
-        return Reply.ok(userService.getAll());
-    }
-
     @GetMapping
     public ApiRes<Res<User>> getUserProfile(@AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getSubject();
@@ -38,7 +33,7 @@ public class UserController {
     @PutMapping
     public ApiRes<Res<String>> updateUserProfile(@AuthenticationPrincipal Jwt jwt, @RequestBody UpdateUserDto dto) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
-        userService.update(user, dto);
+        userService.updateFromDto(user, dto);
         return Reply.ok("User data has been updated successfully");
     }
 

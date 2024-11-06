@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface CoursePurchaseRepo extends JpaRepository<CoursePurchase, UUID> {
 
-    Optional<CoursePurchase> findByStudentAndCourse(User student, Course course);
+    List<CoursePurchase> findByStudentAndCourse(User student, Course course);
 
     List<CoursePurchase> findAllByStudent(User student);
 

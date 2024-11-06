@@ -33,11 +33,11 @@ public class QuizService {
     private final QuizAttemptRepo quizAttemptRepo;
     private final ModuleItemService moduleItemService;
 
-    public Quiz findQuizById(User instructor, UUID quizId) {
+    public Quiz findQuizById(User user, UUID quizId) {
         var quiz = quizRepo.findById(quizId)
             .orElseThrow(() -> new QuizNotFoundException(quizId));
         var course = quiz.getCourseModule().getCourse();
-        courseService.assertUserHasAccessToCourseContent(instructor, course);
+        courseService.assertUserHasAccessToCourseContent(user, course);
         return quiz;
     }
 

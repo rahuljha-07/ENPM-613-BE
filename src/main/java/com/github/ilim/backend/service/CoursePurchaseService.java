@@ -22,7 +22,7 @@ public class CoursePurchaseService {
         return purchaseRepo.findAllByStudent(student);
     }
 
-    public Optional<CoursePurchase> findByStudentAndCourse(@NonNull User student, @NonNull Course course) {
+    public List<CoursePurchase> findByStudentAndCourse(@NonNull User student, @NonNull Course course) {
         return purchaseRepo.findByStudentAndCourse(student, course);
     }
 

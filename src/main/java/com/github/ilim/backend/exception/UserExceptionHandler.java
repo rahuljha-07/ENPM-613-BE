@@ -1,8 +1,12 @@
 package com.github.ilim.backend.exception;
 
 
+import com.github.ilim.backend.exception.exceptions.BlockedUserCantSignInException;
+import com.github.ilim.backend.exception.exceptions.CantUpdateBlockedUserException;
 import com.github.ilim.backend.exception.exceptions.MissingBirthdateException;
 import com.github.ilim.backend.exception.exceptions.MissingEmailOrPasswordException;
+import com.github.ilim.backend.exception.exceptions.UserIsAlreadyBlockedException;
+import com.github.ilim.backend.exception.exceptions.UserIsNotAdminException;
 import com.github.ilim.backend.exception.exceptions.UserNotFoundException;
 import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
@@ -93,5 +97,29 @@ public class UserExceptionHandler {
     public ApiRes<Res<String>> handleLimitExceededException(LimitExceededException e) {
         logger.warning(e.getMessage());
         return Reply.create(HttpStatus.TOO_MANY_REQUESTS, e.getMessage());
+    }
+
+    @ExceptionHandler(CantUpdateBlockedUserException.class)
+    public ApiRes<Res<String>> handleCantUpdateBlockedUserException(CantUpdateBlockedUserException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(UserIsNotAdminException.class)
+    public ApiRes<Res<String>> handleUserIsNotAdminException(UserIsNotAdminException e) {
+        logger.warning(e.getMessage());
+        return Reply.unauthorized(e.getMessage());
+    }
+
+    @ExceptionHandler(UserIsAlreadyBlockedException.class)
+    public ApiRes<Res<String>> handleUserIsAlreadyBlockedException(UserIsAlreadyBlockedException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(BlockedUserCantSignInException.class)
+    public ApiRes<Res<String>> handleBlockedUserCantSignInException(BlockedUserCantSignInException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
     }
 }

@@ -1,10 +1,15 @@
 package com.github.ilim.backend.service;
 
 import com.github.ilim.backend.entity.InstructorApp;
+import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.ApplicationStatus;
+import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
+import com.github.ilim.backend.exception.exceptions.UserIsAlreadyBlockedException;
+import com.github.ilim.backend.exception.exceptions.UserIsNotAdminException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -45,4 +50,11 @@ public class AdminService {
         instructorAppService.update(application);
     }
 
+    public void blockUser(@NonNull User admin, @NonNull String userId) {
+        var user = userService.findById(userId);
+        if (admin.getRole() != UserRole.ADMIN) {
+            throw new UserIsNotAdminException(admin.getId());
+        }
+        userService.blockUser(user);
+    }
 }

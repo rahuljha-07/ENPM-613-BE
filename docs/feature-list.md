@@ -13,7 +13,8 @@
 - [x] Buy Courses
 - [x] Access Course Materials
 - [x] Complete Quizzes
-- [ ] View Certificates
+- [x] See Course Progress
+- [x] View Certificates
 - [ ] File a Support Issue
 ### Instructor
 - [x] Create Courses 
@@ -30,15 +31,15 @@
 - [x] Get a list of all users
 - [x] Approve Instructors
 - [x] Approve Courses
-- [ ] Block User
-- [ ] Handle Support Issues
+- [x] Block User
 - [x] Browse Courses
 - [x] Search Courses
 - [x] Edit Courses
 - [x] Remove Courses
-- [ ] View User Profile Page
+- [x] View User Profile Page
 - [ ] Edit the TOS for users
 ### System
 - [ ] Handle Payments
-- [ ] Grade Quizzes
-- [ ] Generate Certificates
+- [x] Grade Quizzes
+- [x] Generate Certificates
+- [x] Enforce Access Control in all cases

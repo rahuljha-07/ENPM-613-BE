@@ -4,6 +4,9 @@ import com.github.ilim.backend.dto.UpdateUserDto;
 import com.github.ilim.backend.entity.InstructorApp;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.UserRole;
+import com.github.ilim.backend.exception.exceptions.CantUpdateBlockedUserException;
+import com.github.ilim.backend.exception.exceptions.UserIsAlreadyBlockedException;
+import com.github.ilim.backend.exception.exceptions.UserIsNotAdminException;
 import com.github.ilim.backend.exception.exceptions.UserNotFoundException;
 import com.github.ilim.backend.repo.UserRepo;
 import jakarta.transaction.Transactional;
@@ -28,6 +31,13 @@ public class UserService {
             .orElseThrow(() -> new UserNotFoundException(userId));
     }
 
+    public User findByIdAsAdmin(@NonNull User admin, String userId) {
+        if (admin.getRole() != UserRole.ADMIN) {
+            throw new UserIsNotAdminException(admin.getId());
+        }
+        return findById(userId);
+    }
+
     @Transactional
     public User create(@NonNull User user) {
         return userRepo.save(user);
@@ -43,11 +53,31 @@ public class UserService {
         userRepo.save(user);
     }
 
-    public User update(@NonNull User user, @NonNull UpdateUserDto dto) {
+    public void updateFromDto(@NonNull User user, @NonNull UpdateUserDto dto) {
+        assertUserIsActive(user);
         user.setBio(dto.getBio());
         user.setTitle(dto.getTitle());
         user.setProfileImageUrl(dto.getProfileImageUrl());
         // Core attributes in cognito cannot be updated in the current implementation
-        return userRepo.save(user);
+        userRepo.save(user);
+    }
+
+    private void assertUserIsActive(@NonNull User user) {
+        if (user.isBlocked()) {
+            throw new CantUpdateBlockedUserException(user.getId());
+        }
+    }
+
+    public boolean isUserBlockedByEmail(String email) {
+        var user = userRepo.findByEmail(email);
+        return user.isPresent() && user.get().isBlocked();
+    }
+
+    public void blockUser(User user) {
+        if (user.isBlocked()) {
+            throw new UserIsAlreadyBlockedException(user.getId());
+        }
+        user.setBlocked(true);
+        userRepo.save(user);
     }
 }

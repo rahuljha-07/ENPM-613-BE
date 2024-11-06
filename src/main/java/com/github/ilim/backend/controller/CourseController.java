@@ -33,15 +33,6 @@ public class CourseController {
     private final UserService userService;
 
     // TODO: Use pagination for any `findAll` endpoints
-
-    @GetMapping("/admin/course/all")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiRes<Res<List<Course>>> findAllCourses(@AuthenticationPrincipal Jwt jwt) {
-        var user = userService.findById(jwt.getClaimAsString("sub"));
-        var courses = courseService.findAllCourses(user);
-        return Reply.ok(courses);
-    }
-
     @GetMapping("/course/published")
     public ApiRes<Res<List<PublicCourseDto>>> filterPublishedCourses(
         @RequestParam(value = "contains", required = false) String contains
@@ -93,21 +84,6 @@ public class CourseController {
         var user = userService.findById(jwt.getClaimAsString("sub"));
         courseService.updateCourse(user, courseId, dto);
         return Reply.ok("Course updated successfully");
-    }
-
-    @DeleteMapping("/admin/delete-course/{courseId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiRes<Res<String>> deleteCourseAsAdmin(@PathVariable UUID courseId) {
-        courseService.deleteCourseAsAdmin(courseId);
-        return Reply.ok("Course deleted successfully");
-    }
-
-    @PostMapping("/admin/approve-course/{courseId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiRes<Res<String>> approveCourse(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
-        var user = userService.findById(jwt.getClaimAsString("sub"));
-        courseService.approveCourse(user, courseId);
-        return Reply.ok("Course Approved successfully");
     }
 
     @PostMapping("/student/purchase-course/{courseId}")

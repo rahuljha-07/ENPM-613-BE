@@ -7,13 +7,16 @@ import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseExcepti
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
 import com.github.ilim.backend.exception.exceptions.OnlyAdminAccessAllCourses;
+import com.github.ilim.backend.exception.exceptions.StudentDidNotCompleteCourseException;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
+import com.github.ilim.backend.exception.exceptions.UserCantHaveQuizProgress;
 import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
 import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
 import com.github.ilim.backend.util.response.Res;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -71,6 +74,18 @@ public class CourseExceptionHandler {
     public ApiRes<Res<String>> handleOnlyAdminAccessAllCourses(OnlyAdminAccessAllCourses e) {
         logger.warning(e.getMessage());
         return Reply.unauthorized(e.getMessage());
+    }
+
+    @ExceptionHandler(UserCantHaveQuizProgress.class)
+    public ApiRes<Res<String>> handleUserCantHaveQuizProgress(UserCantHaveQuizProgress e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(StudentDidNotCompleteCourseException.class)
+    public ApiRes<Res<String>> handleStudentDidNotCompleteCourseException(StudentDidNotCompleteCourseException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
     }
 
 }
