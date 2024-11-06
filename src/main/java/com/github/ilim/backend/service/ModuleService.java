@@ -10,11 +10,9 @@ import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException
 import com.github.ilim.backend.repo.ModuleRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service

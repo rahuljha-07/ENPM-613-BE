@@ -1,6 +1,5 @@
 package com.github.ilim.backend.dto;
 
-import jakarta.persistence.Column;
 import lombok.Data;
 
 @Data

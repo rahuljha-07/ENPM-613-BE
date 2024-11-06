@@ -2,7 +2,6 @@ package com.github.ilim.backend.dto;
 
 import com.github.ilim.backend.entity.CourseModule;
 
-import java.util.List;
 import java.util.UUID;
 
 public record PublicCourseModuleDto(

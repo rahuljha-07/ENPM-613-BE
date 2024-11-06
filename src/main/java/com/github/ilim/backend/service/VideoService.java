@@ -6,7 +6,6 @@ import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.entity.Video;
 import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
-import com.github.ilim.backend.repo.ModuleItemRepo;
 import com.github.ilim.backend.repo.VideoRepo;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;

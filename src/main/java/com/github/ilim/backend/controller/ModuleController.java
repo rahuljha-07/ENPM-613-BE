@@ -1,14 +1,11 @@
 package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.dto.ModuleDto;
-import com.github.ilim.backend.dto.StudentCourseModuleDto;
-import com.github.ilim.backend.entity.CourseModule;
 import com.github.ilim.backend.service.ModuleService;
 import com.github.ilim.backend.service.UserService;
 import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
 import com.github.ilim.backend.util.response.Res;
-import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +19,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController

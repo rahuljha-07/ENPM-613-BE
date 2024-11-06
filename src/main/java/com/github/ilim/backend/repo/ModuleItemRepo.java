@@ -1,6 +1,5 @@
 package com.github.ilim.backend.repo;
 
-import com.github.ilim.backend.entity.CourseModule;
 import com.github.ilim.backend.entity.CourseModuleItem;
 import com.github.ilim.backend.entity.Quiz;
 import com.github.ilim.backend.entity.Video;
