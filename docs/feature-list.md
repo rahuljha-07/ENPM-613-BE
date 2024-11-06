@@ -19,7 +19,7 @@
 ### Instructor
 - [x] Create Courses 
 - [x] Edit Courses
-- [ ] Submit Course for Approval
+- [x] Submit Course for Approval
 - [x] Create Modules
 - [x] Edit Modules
 - [x] Delete Modules

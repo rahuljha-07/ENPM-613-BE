@@ -24,7 +24,7 @@ public class PublicCourseDto extends Course {
     }
 
     public static PublicCourseDto from(Course course) {
-        if (course == null || course.isDeleted() || course.getStatus().equals(CourseStatus.DRAFT)) {
+        if (course == null || course.isDeleted() || !course.getStatus().equals(CourseStatus.PUBLISHED)) {
             throw new CantCreatePublicCourseException(course);
         }
         var dto = new PublicCourseDto();

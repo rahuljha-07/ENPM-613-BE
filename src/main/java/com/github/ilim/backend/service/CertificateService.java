@@ -1,15 +1,10 @@
 package com.github.ilim.backend.service;
-import com.github.ilim.backend.entity.Course;
+
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.exception.exceptions.CantGenerateCertificateException;
 import com.github.ilim.backend.exception.exceptions.StudentDidNotCompleteCourseException;
-import com.github.ilim.backend.exception.exceptions.UserCantHaveQuizProgress;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;

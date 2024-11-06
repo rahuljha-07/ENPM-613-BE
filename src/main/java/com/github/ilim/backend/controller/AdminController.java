@@ -1,6 +1,5 @@
 package com.github.ilim.backend.controller;
 
-import com.github.ilim.backend.dto.InstructorAppDto;
 import com.github.ilim.backend.dto.RespondToInstructorAppDto;
 import com.github.ilim.backend.entity.Course;
 import com.github.ilim.backend.entity.User;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -89,6 +87,14 @@ public class AdminController {
     public ApiRes<Res<List<Course>>> findAllCourses(@AuthenticationPrincipal Jwt jwt) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
         var courses = courseService.findAllCourses(user);
+        return Reply.ok(courses);
+    }
+
+    @GetMapping("/admin/course/wait-for-approval")
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiRes<Res<List<Course>>> findCoursesWaitingForApproval(@AuthenticationPrincipal Jwt jwt) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        var courses = courseService.findCoursesWaitingForApproval(user);
         return Reply.ok(courses);
     }
 

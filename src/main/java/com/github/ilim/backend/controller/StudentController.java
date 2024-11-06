@@ -1,7 +1,6 @@
 package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.dto.CourseQuizProgress;
-import com.github.ilim.backend.service.CourseService;
 import com.github.ilim.backend.service.StudentService;
 import com.github.ilim.backend.service.UserService;
 import com.github.ilim.backend.util.response.ApiRes;

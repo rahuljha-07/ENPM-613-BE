@@ -11,8 +11,8 @@ public class CantCreatePublicCourseException extends RuntimeException {
                     ? null
                     : course.isDeleted()
                     ? "deleted"
-                    : course.getStatus().equals(CourseStatus.DRAFT)
-                    ? "draft"
+                    : !course.getStatus().equals(CourseStatus.PUBLISHED)
+                    ? "non-published"
                     : "unknown reason",
                 course != null
                     ? course.getId()

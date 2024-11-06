@@ -4,7 +4,9 @@ package com.github.ilim.backend.exception;
 import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
 import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
 import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
+import com.github.ilim.backend.exception.exceptions.CourseAlreadyPublished;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
+import com.github.ilim.backend.exception.exceptions.CourseStatusNotDraftException;
 import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
 import com.github.ilim.backend.exception.exceptions.OnlyAdminAccessAllCourses;
 import com.github.ilim.backend.exception.exceptions.StudentDidNotCompleteCourseException;
@@ -16,7 +18,6 @@ import com.github.ilim.backend.util.response.Reply;
 import com.github.ilim.backend.util.response.Res;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -84,6 +85,18 @@ public class CourseExceptionHandler {
 
     @ExceptionHandler(StudentDidNotCompleteCourseException.class)
     public ApiRes<Res<String>> handleStudentDidNotCompleteCourseException(StudentDidNotCompleteCourseException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(CourseAlreadyPublished.class)
+    public ApiRes<Res<String>> handleCourseAlreadyPublished(CourseAlreadyPublished e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(CourseStatusNotDraftException.class)
+    public ApiRes<Res<String>> handleCourseStatusNotDraftException(CourseStatusNotDraftException e) {
         logger.warning(e.getMessage());
         return Reply.forbidden(e.getMessage());
     }

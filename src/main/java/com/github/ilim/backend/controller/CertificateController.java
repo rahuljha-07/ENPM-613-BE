@@ -2,9 +2,6 @@ package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.service.CertificateService;
 import com.github.ilim.backend.service.UserService;
-import com.github.ilim.backend.util.response.ApiRes;
-import com.github.ilim.backend.util.response.Reply;
-import com.github.ilim.backend.util.response.Res;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -13,9 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 

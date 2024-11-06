@@ -11,9 +11,12 @@ import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException
 import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
 import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
+import com.github.ilim.backend.exception.exceptions.CourseAlreadyPublished;
 import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
+import com.github.ilim.backend.exception.exceptions.CourseStatusNotDraftException;
 import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
+import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.exception.exceptions.OnlyAdminAccessAllCourses;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
 import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
@@ -52,6 +55,9 @@ public class CourseService {
     public void approveCourse(User admin, UUID courseId) {
         var course = findCourseByIdAndUser(admin, courseId);
         assertCourseNotDeleted(course);
+        if (course.getStatus() == CourseStatus.PUBLISHED) {
+            throw new CourseAlreadyPublished(course);
+        }
         course.setStatus(CourseStatus.PUBLISHED);
         courseRepo.save(course);
     }
@@ -124,8 +130,8 @@ public class CourseService {
         if (user.getId().equals(course.getInstructor().getId())){
             return true;
         }
-        // All other users cannot access DRAFT course content
-        if (course.getStatus().equals(CourseStatus.DRAFT)) {
+        // All other users cannot access non-published course content
+        if (!course.getStatus().equals(CourseStatus.PUBLISHED)) {
             return false;
         }
         // Finally, a student who purchase the course can access its content
@@ -137,6 +143,12 @@ public class CourseService {
             throw new OnlyAdminAccessAllCourses(admin.getId());
         }
         return courseRepo.findAll();
+    }
+
+    public List<Course> findCoursesWaitingForApproval(User user) {
+        return findAllCourses(user).stream()
+            .filter(course -> course.getStatus() == CourseStatus.WAIT_APPROVAL)
+            .toList();
     }
 
     public List<PublicCourseDto> findPublishedCourses() {
@@ -247,5 +259,17 @@ public class CourseService {
         return courses.stream()
             .map(course -> enforceCourseAccess(user, course))
             .toList();
+    }
+
+    public void submitCourseForApproval(User instructor, UUID courseId) {
+        var course = findCourseByIdAndUser(instructor, courseId);
+        if (!course.getInstructor().getId().equals(instructor.getId())) {
+            throw new NotCourseInstructorException(instructor, course);
+        }
+        if (course.getStatus() != CourseStatus.DRAFT) {
+            throw new CourseStatusNotDraftException(course);
+        }
+        course.setStatus(CourseStatus.WAIT_APPROVAL);
+        courseRepo.save(course);
     }
 }

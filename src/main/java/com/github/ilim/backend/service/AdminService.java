@@ -5,7 +5,6 @@ import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.ApplicationStatus;
 import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
-import com.github.ilim.backend.exception.exceptions.UserIsAlreadyBlockedException;
 import com.github.ilim.backend.exception.exceptions.UserIsNotAdminException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

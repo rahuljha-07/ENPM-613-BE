@@ -1,21 +1,16 @@
 package com.github.ilim.backend.service;
 
-import com.github.ilim.backend.dto.CourseModuleItemDto;
 import com.github.ilim.backend.dto.CourseQuizProgress;
-import com.github.ilim.backend.dto.QuizDto;
 import com.github.ilim.backend.dto.StudentCourseDto;
 import com.github.ilim.backend.dto.StudentCourseModuleDto;
 import com.github.ilim.backend.dto.StudentQuizDto;
 import com.github.ilim.backend.entity.Course;
-import com.github.ilim.backend.entity.CourseModule;
-import com.github.ilim.backend.entity.CourseModuleItem;
 import com.github.ilim.backend.entity.QuizAttempt;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.ModuleItemType;
 import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.UserCantHaveQuizProgress;
-import com.github.ilim.backend.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;

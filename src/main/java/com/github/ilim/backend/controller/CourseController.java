@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -84,6 +83,14 @@ public class CourseController {
         var user = userService.findById(jwt.getClaimAsString("sub"));
         courseService.updateCourse(user, courseId, dto);
         return Reply.ok("Course updated successfully");
+    }
+
+    @PostMapping("/instructor/course/{courseId}/submit-for-approval")
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    ApiRes<Res<String>> submitCourseForApproval(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        courseService.submitCourseForApproval(user, courseId);
+        return Reply.ok("Course submitted successfully to the admin to review it.");
     }
 
     @PostMapping("/student/purchase-course/{courseId}")
