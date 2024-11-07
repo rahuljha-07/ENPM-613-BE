@@ -218,13 +218,13 @@ Resources:
             #nohup java -jar target/*.jar --server.port=8082 > /home/ec2-user/ilimdeliveryserv.log 2>&1 &
             EOF
           - AwsRdsEndpoint: !Ref AwsRdsEndpoint
-          - IlimDbName: !Ref IlimDbName
-          - AwsRdsUsername: !Ref AwsRdsUsername
-          - AwsRdsPassword: !Ref AwsRdsPassword
-          - CognitoUserPoolId: !Ref CognitoUserPoolId
-          - CognitoClientId: !Ref CognitoClientId
-          - CognitoRegion: !Ref CognitoRegion
-          - CognitoJwkUrl: !Ref CognitoJwkUrl
+            IlimDbName: !Ref IlimDbName
+            AwsRdsUsername: !Ref AwsRdsUsername
+            AwsRdsPassword: !Ref AwsRdsPassword
+            CognitoUserPoolId: !Ref CognitoUserPoolId
+            CognitoClientId: !Ref CognitoClientId
+            CognitoRegion: !Ref CognitoRegion
+            CognitoJwkUrl: !Ref CognitoJwkUrl
 
 Outputs:
   BackendInstancePrivateIP:
