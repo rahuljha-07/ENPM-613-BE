@@ -1,0 +1,15 @@
+spring.datasource.url=jdbc:postgresql://${AwsRdsEndpoint}:5432/${IlimDbName}
+spring.datasource.username=${AwsRdsUsername}
+spring.datasource.password=${AwsRdsPassword}
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# JPA and Hibernate
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+
+# Cognito
+aws.cognito.userPoolId=${CognitoUserPoolId}
+aws.cognito.clientId=${CognitoClientId}
+aws.cognito.region=${CognitoRegion}
+aws.cognito.jwkUrl=${CognitoJwkUrl}

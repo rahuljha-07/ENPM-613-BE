@@ -47,7 +47,7 @@ Resources:
       SubnetIds:
         - !Ref PrivateSubnet1ID
         - !Ref PrivateSubnet2ID
-      DBSubnetGroupName: ilim-db-subnet-group
+      DBSubnetGroupName: ilim-db-subnet-group-1
 
   RDSInstance:
     Type: AWS::RDS::DBInstance

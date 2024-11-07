@@ -27,29 +27,29 @@ Parameters:
     Description: "Known hosts entry for GitHub (to prevent SSH prompts)"
     Type: String
     Default: "github.com,140.82.114.4 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg="
-  ILIM_RDS_DB_NAME:
+  IlimDbName:
     Type: String
     Description: "ilim DB NAME"
-  AWS_RDS_ENDPOINT:
+  AwsRdsEndpoint:
     Type: String
     Description: "RDS endpoint for the database"
-  AWS_RDS_USERNAME:
+  AwsRdsUsername:
     Type: String
     Description: "Username for RDS database"
-  AWS_RDS_PASSWORD:
+  AwsRdsPassword:
     Type: String
     Description: "Password for RDS database"
     NoEcho: true
-  COGNITO_USER_POOL_ID:
+  CognitoUserPoolId:
     Type: String
     Description: "Cognito User Pool ID"
-  COGNITO_CLIENT_ID:
+  CognitoClientId:
     Type: String
     Description: "Cognito Client ID"
-  COGNITO_REGION:
+  CognitoRegion:
     Type: String
     Description: "Cognito Region"
-  COGNITO_JWK_URL:
+  CognitoJwkUrl:
     Type: String
     Description: "Cognito JWK URL"
 
@@ -129,80 +129,102 @@ Resources:
         - Key: Name
           Value: ilim-backend-instance
       UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          # Redirect all output to a log file
-          exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
-          
-          echo "----- Updating and installing necessary packages"
-          yum update -y
-          
-          yum install -y git java-21-amazon-corretto-devel maven docker
-          service docker start
-          usermod -a -G git docker ec2-user
+        Fn::Base64:
+          !Sub
+          - |
+            #!/bin/bash
+            # Redirect all output to a log file
+            exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 
-          echo "----- Setting up SSH key for GitHub access"
-          mkdir -p /home/ec2-user/.ssh
-          
-          echo "${GitHubSSHKeyP1}${GitHubSSHKeyP2}" | base64 -d > /home/ec2-user/.ssh/id_rsa
-          chmod 600 /home/ec2-user/.ssh/id_rsa
-          
-          echo "${GitHubKnownHostsEntry}" > /home/ec2-user/.ssh/known_hosts
-          ssh-keyscan github.com >> /home/ec2-user/.ssh/known_hosts
-          chown -R ec2-user:ec2-user /home/ec2-user/.ssh
+            echo "----- Updating and installing necessary packages"
+            yum update -y
 
-          echo "----- Switching to ec2-user"
-          sudo -i -u ec2-user bash << EOF
-          
-          cd /home/ec2-user
-          
-          echo "----- Cloning ilim-backend"
-          git clone git@github.com:rahuljha-07/ENPM-613-BE.git
-          
-          #echo "----- Cloning Payment Service"
-          #git clone git@github.com:your-username/paymentservice.git
-          
-          #echo "----- Cloning ilim Delivery Service"
-          #git clone git@github.com:your-username/ilimdeliveryserv.git
+            yum install -y git java-21-amazon-corretto-devel maven docker
+            service docker start
+            usermod -a -G git docker ec2-user
 
-          echo "----- Building ilim-backend"
-          cd ENPM-613-BE
-          ./mvnw clean package -DskipTests
-          
-          #echo "----- Building Payment Service"
-          #cd ../paymentservice
-          #./mvnw clean package -DskipTests
-          
-          #echo "----- Building ilim Delivery Service"
-          #cd ../ilimdeliveryserv
-          #./mvnw clean package -DskipTests
+            echo "----- Setting up SSH key for GitHub access"
+            mkdir -p /home/ec2-user/.ssh
 
-          echo "----- Installing Kafka"
-          wget https://archive.apache.org/dist/kafka/2.8.0/kafka_2.13-2.8.0.tgz
-          tar -xzf kafka_2.13-2.8.0.tgz
-          mv kafka_2.13-2.8.0 kafka
-          cd kafka
+            echo "${GitHubSSHKeyP1}${GitHubSSHKeyP2}" | base64 -d > /home/ec2-user/.ssh/id_rsa
+            chmod 600 /home/ec2-user/.ssh/id_rsa
 
-          echo "----- Starting Zookeeper and Kafka (in the background)"
-          nohup bin/zookeeper-server-start.sh config/zookeeper.properties > /home/ec2-user/zookeeper.log 2>&1 &
-          sleep 5
-          nohup bin/kafka-server-start.sh config/server.properties > /home/ec2-user/kafka.log 2>&1 &
+            echo "${GitHubKnownHostsEntry}" > /home/ec2-user/.ssh/known_hosts
+            ssh-keyscan github.com >> /home/ec2-user/.ssh/known_hosts
+            chown -R ec2-user:ec2-user /home/ec2-user/.ssh
 
-          echo "----- Waiting for Kafka to start"
-          sleep 10
-
-          echo "----- Starting ilim-backend app"
-          cd /home/ec2-user/ENPM-613-BE
-          nohup java -jar target/*.jar --server.port=8099 > /home/ec2-user/ilim-backend.log 2>&1 &
-
-          #echo "----- Starting Payment Service"
-          #cd /home/ec2-user/paymentservice
-          #nohup java -jar target/*.jar --server.port=8081 > /home/ec2-user/paymentservice.log 2>&1 &
-          
-          #echo "----- Starting ilim Delivery Service"
-          #cd /home/ec2-user/ilimdeliveryserv
-          #nohup java -jar target/*.jar --server.port=8082 > /home/ec2-user/ilimdeliveryserv.log 2>&1 &
-          EOF
+            echo "----- Switching to ec2-user"
+            sudo -i -u ec2-user bash << EOF
+            
+            cd /home/ec2-user
+            
+            echo "----- Cloning ilim-backend"
+            git clone git@github.com:rahuljha-07/ENPM-613-BE.git
+            
+            #echo "----- Cloning Payment Service"
+            #git clone git@github.com:your-username/paymentservice.git
+            
+            #echo "----- Cloning ilim Delivery Service"
+            #git clone git@github.com:your-username/ilimdeliveryserv.git
+  
+            echo "----- Building ilim-backend"
+            cd ENPM-613-BE
+            ./mvnw clean package -DskipTests
+            
+            #echo "----- Building Payment Service"
+            #cd ../paymentservice
+            #./mvnw clean package -DskipTests
+            
+            #echo "----- Building ilim Delivery Service"
+            #cd ../ilimdeliveryserv
+            #./mvnw clean package -DskipTests
+  
+            echo "----- Installing Kafka"
+            wget https://archive.apache.org/dist/kafka/2.8.0/kafka_2.13-2.8.0.tgz
+            tar -xzf kafka_2.13-2.8.0.tgz
+            mv kafka_2.13-2.8.0 kafka
+            cd kafka
+  
+            echo "----- Starting Zookeeper and Kafka (in the background)"
+            nohup bin/zookeeper-server-start.sh config/zookeeper.properties > /home/ec2-user/zookeeper.log 2>&1 &
+            sleep 5
+            nohup bin/kafka-server-start.sh config/server.properties > /home/ec2-user/kafka.log 2>&1 &
+  
+            echo "----- Waiting for Kafka to start"
+            sleep 10
+  
+            echo "----- Configure ilim-backend app"
+            cd /home/ec2-user/ENPM-613-BE
+            export AwsRdsEndpoint="${AwsRdsEndpoint}"
+            export IlimDbName="${IlimDbName}"
+            export AwsRdsUsername="${AwsRdsUsername}"
+            export AwsRdsPassword="${AwsRdsPassword}"
+            export CognitoUserPoolId="${CognitoUserPoolId}"
+            export CognitoClientId="${CognitoClientId}"
+            export CognitoRegion="${CognitoRegion}"
+            export CognitoJwkUrl="${CognitoJwkUrl}"
+            
+            envsubst < application-dev.properties.template > application-dev.properties
+            
+            echo "----- Starting ilim-backend app"
+            nohup java -jar target/*.jar --server.port=8099 > /home/ec2-user/ilim-backend.log 2>&1 &
+  
+            #echo "----- Starting Payment Service"
+            #cd /home/ec2-user/paymentservice
+            #nohup java -jar target/*.jar --server.port=8081 > /home/ec2-user/paymentservice.log 2>&1 &
+            
+            #echo "----- Starting ilim Delivery Service"
+            #cd /home/ec2-user/ilimdeliveryserv
+            #nohup java -jar target/*.jar --server.port=8082 > /home/ec2-user/ilimdeliveryserv.log 2>&1 &
+            EOF
+          - AwsRdsEndpoint: !Ref AwsRdsEndpoint
+          - IlimDbName: !Ref IlimDbName
+          - AwsRdsUsername: !Ref AwsRdsUsername
+          - AwsRdsPassword: !Ref AwsRdsPassword
+          - CognitoUserPoolId: !Ref CognitoUserPoolId
+          - CognitoClientId: !Ref CognitoClientId
+          - CognitoRegion: !Ref CognitoRegion
+          - CognitoJwkUrl: !Ref CognitoJwkUrl
 
 Outputs:
   BackendInstancePrivateIP:
