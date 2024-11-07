@@ -45,13 +45,25 @@ Resources:
           Value: ilim-public-subnet
 
   # Private Subnet
-  PrivateSubnet:
+  PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
       CidrBlock: "10.0.2.0/24"
       MapPublicIpOnLaunch: false
       AvailabilityZone: us-east-1a
+      Tags:
+        - Key: Name
+          Value: ilim-private-subnet
+
+  # Private Subnet
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: "10.0.3.0/24"
+      MapPublicIpOnLaunch: false
+      AvailabilityZone: us-east-1b
       Tags:
         - Key: Name
           Value: ilim-private-subnet
@@ -95,10 +107,15 @@ Resources:
       SubnetId: !Ref PublicSubnet
       RouteTableId: !Ref PublicRouteTable
 
-  PrivateSubnetRouteTableAssociation:
+  PrivateSubnetRouteTableAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref PrivateSubnet
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable
+  PrivateSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
       RouteTableId: !Ref PrivateRouteTable
 
   # Security Groups
@@ -157,9 +174,14 @@ Outputs:
     Description: "Public Subnet ID"
     Value: !Ref PublicSubnet
 
-  PrivateSubnetID:
+  PrivateSubnet1ID:
     Description: "Private Subnet ID"
-    Value: !Ref PrivateSubnet
+    Value: !Ref PrivateSubnet1
+
+
+  PrivateSubnet2ID:
+    Description: "Private Subnet ID"
+    Value: !Ref PrivateSubnet2
 
   NATInstanceID:
     Description: "NAT Instance ID"
