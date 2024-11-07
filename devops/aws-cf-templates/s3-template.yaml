@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "S3 Bucket for Media Assets"
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: "Name of the S3 bucket for media assets"
+
+Resources:
+  AssetsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Name
+          Value: !Ref BucketName
+
+Outputs:
+  S3BucketName:
+    Description: "Name of the S3 bucket"
+    Value: !Ref AssetsBucket
+
+  S3BucketArn:
+    Description: "ARN of the S3 bucket"
+    Value: !GetAtt AssetsBucket.Arn

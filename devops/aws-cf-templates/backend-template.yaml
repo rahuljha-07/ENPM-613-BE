@@ -1,0 +1,210 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "EC2 Instance for Backend Services with S3 Access and Private Repo Cloning"
+
+Parameters:
+  VPCID:
+    Type: String
+    Description: "VPC ID"
+  PrivateSubnetID:
+    Type: String
+    Description: "Private Subnet ID"
+  KeyName:
+    Description: "Name of an existing EC2 KeyPair to enable SSH access"
+    Type: AWS::EC2::KeyPair::KeyName
+  InstanceType:
+    Description: "EC2 instance type"
+    Type: String
+    Default: t2.micro
+  GitHubSSHKeyP1:
+    Description: "Private SSH key Part 1 for accessing GitHub repositories (Base64 encoded)"
+    Type: String
+    NoEcho: true
+  GitHubSSHKeyP2:
+    Description: "Private SSH key Part 2 for accessing GitHub repositories (Base64 encoded)"
+    Type: String
+    NoEcho: true
+  GitHubKnownHostsEntry:
+    Description: "Known hosts entry for GitHub (to prevent SSH prompts)"
+    Type: String
+    Default: "github.com,140.82.114.4 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg="
+  ILIM_RDS_DB_NAME:
+    Type: String
+    Description: "ilim DB NAME"
+  AWS_RDS_ENDPOINT:
+    Type: String
+    Description: "RDS endpoint for the database"
+  AWS_RDS_USERNAME:
+    Type: String
+    Description: "Username for RDS database"
+  AWS_RDS_PASSWORD:
+    Type: String
+    Description: "Password for RDS database"
+    NoEcho: true
+  COGNITO_USER_POOL_ID:
+    Type: String
+    Description: "Cognito User Pool ID"
+  COGNITO_CLIENT_ID:
+    Type: String
+    Description: "Cognito Client ID"
+  COGNITO_REGION:
+    Type: String
+    Description: "Cognito Region"
+  COGNITO_JWK_URL:
+    Type: String
+    Description: "Cognito JWK URL"
+
+Resources:
+  BackendInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      Policies:
+        - PolicyName: "EC2InstanceS3Access"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "s3:*"
+                Resource: "*"
+
+  BackendInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref BackendInstanceRole
+      Path: "/"
+
+  BackendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for backend EC2 instance"
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: "185.156.46.156/24"  # Put here your IP for SSH access
+        - IpProtocol: tcp
+          FromPort: 8099    # ilim-backend port
+          ToPort: 8099
+          CidrIp: "10.0.0.0/16"
+        - IpProtocol: tcp
+          FromPort: 8081
+          ToPort: 8081
+          CidrIp: "10.0.0.0/16"
+        - IpProtocol: tcp
+          FromPort: 8082
+          ToPort: 8082
+          CidrIp: "10.0.0.0/16"
+        - IpProtocol: tcp
+          FromPort: 9092  # Kafka port
+          ToPort: 9092
+          CidrIp: "10.0.0.0/16"
+      Tags:
+        - Key: Name
+          Value: ilim-backend-sg
+
+  BackendInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref PrivateSubnetID
+      #ImageId: ami-0ddc798b3f1a5117e
+      ImageId: ami-063d43db0594b521b  # Amazon Linux 2023 AMI (64-bit (x86), uefi-preferred)
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !Ref BackendSecurityGroup
+      IamInstanceProfile: !Ref BackendInstanceProfile
+      Tags:
+        - Key: Name
+          Value: ilim-backend-instance
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          # Redirect all output to a log file
+          exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+          
+          echo "----- Updating and installing necessary packages"
+          yum update -y
+          
+          yum install -y git java-21-amazon-corretto-devel maven docker
+          service docker start
+          usermod -a -G git docker ec2-user
+
+          echo "----- Setting up SSH key for GitHub access"
+          mkdir -p /home/ec2-user/.ssh
+          
+          echo "${GitHubSSHKeyP1}${GitHubSSHKeyP2}" | base64 -d > /home/ec2-user/.ssh/id_rsa
+          chmod 600 /home/ec2-user/.ssh/id_rsa
+          
+          echo "${GitHubKnownHostsEntry}" > /home/ec2-user/.ssh/known_hosts
+          ssh-keyscan github.com >> /home/ec2-user/.ssh/known_hosts
+          chown -R ec2-user:ec2-user /home/ec2-user/.ssh
+
+          echo "----- Switching to ec2-user"
+          sudo -i -u ec2-user bash << EOF
+          
+          cd /home/ec2-user
+          
+          echo "----- Cloning ilim-backend"
+          git clone git@github.com:rahuljha-07/ENPM-613-BE.git
+          
+          #echo "----- Cloning Payment Service"
+          #git clone git@github.com:your-username/paymentservice.git
+          
+          #echo "----- Cloning ilim Delivery Service"
+          #git clone git@github.com:your-username/ilimdeliveryserv.git
+
+          echo "----- Building ilim-backend"
+          cd ENPM-613-BE
+          ./mvnw clean package -DskipTests
+          
+          #echo "----- Building Payment Service"
+          #cd ../paymentservice
+          #./mvnw clean package -DskipTests
+          
+          #echo "----- Building ilim Delivery Service"
+          #cd ../ilimdeliveryserv
+          #./mvnw clean package -DskipTests
+
+          echo "----- Installing Kafka"
+          wget https://archive.apache.org/dist/kafka/2.8.0/kafka_2.13-2.8.0.tgz
+          tar -xzf kafka_2.13-2.8.0.tgz
+          mv kafka_2.13-2.8.0 kafka
+          cd kafka
+
+          echo "----- Starting Zookeeper and Kafka (in the background)"
+          nohup bin/zookeeper-server-start.sh config/zookeeper.properties > /home/ec2-user/zookeeper.log 2>&1 &
+          sleep 5
+          nohup bin/kafka-server-start.sh config/server.properties > /home/ec2-user/kafka.log 2>&1 &
+
+          echo "----- Waiting for Kafka to start"
+          sleep 10
+
+          echo "----- Starting ilim-backend app"
+          cd /home/ec2-user/ENPM-613-BE
+          nohup java -jar target/*.jar --server.port=8099 > /home/ec2-user/ilim-backend.log 2>&1 &
+
+          #echo "----- Starting Payment Service"
+          #cd /home/ec2-user/paymentservice
+          #nohup java -jar target/*.jar --server.port=8081 > /home/ec2-user/paymentservice.log 2>&1 &
+          
+          #echo "----- Starting ilim Delivery Service"
+          #cd /home/ec2-user/ilimdeliveryserv
+          #nohup java -jar target/*.jar --server.port=8082 > /home/ec2-user/ilimdeliveryserv.log 2>&1 &
+          EOF
+
+Outputs:
+  BackendInstancePrivateIP:
+    Description: "Private IP of Backend Instance"
+    Value: !GetAtt BackendInstance.PrivateIp

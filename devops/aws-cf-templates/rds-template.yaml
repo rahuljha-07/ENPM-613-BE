@@ -35,7 +35,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 5432
           ToPort: 5432
-          CidrIp: "10.0.0.0/24"
+          CidrIp: "10.0.0.0/20"  # Allow access from entire VPC
       Tags:
         - Key: Name
           Value: ilim-rds-sg

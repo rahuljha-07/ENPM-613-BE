@@ -137,9 +137,14 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: "185.156.46.156/24"  # Put here your IP for SSH access
+        - IpProtocol: -1
+          FromPort: -1
+          ToPort: -1
+          CidrIp: "10.0.0.0/20"  # Allow all traffic from private subnets
       Tags:
         - Key: Name
           Value: ilim-nat-sg
+
 
   # NAT Instance
   NATInstance:
