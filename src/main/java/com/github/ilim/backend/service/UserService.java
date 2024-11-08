@@ -23,7 +23,7 @@ public class UserService {
 
     public User findById(String userId) {
         return userRepo.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException(userId));
+                .orElseThrow(() -> new UserNotFoundException(userId));
     }
 
     public User create(@NonNull User user) {
@@ -39,12 +39,7 @@ public class UserService {
         userRepo.save(user);
     }
 
-//    public User update(String userId,@NonNull User updatedUser) {
-//        var user = findById(userId);
-//        user.setName(updatedUser.getName());
-//        user.setBirthdate(updatedUser.getBirthdate());
-//        user.setProfileImageUrl(updatedUser.getProfileImageUrl());
-//        // Do not update email or ID
-//        return userRepo.save(user);
-//    }
+    public List<User> findByRole(UserRole role) {
+        return userRepo.findByRole(role);
+    }
 }
