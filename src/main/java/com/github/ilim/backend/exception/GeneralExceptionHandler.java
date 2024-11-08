@@ -2,6 +2,7 @@ package com.github.ilim.backend.exception;
 
 
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
+import com.github.ilim.backend.exception.exceptions.EmailSendingException;
 import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
 import com.github.ilim.backend.util.response.Res;
@@ -29,6 +30,12 @@ public class GeneralExceptionHandler {
     public ApiRes<Res<String>> handleBadRequestException(BadRequestException e) {
         logger.warning(e.getMessage());
         return Reply.badRequest(e.getMessage());
+    }
+
+    @ExceptionHandler(EmailSendingException.class)
+    public ApiRes<Res<String>> handleEmailSendingException(EmailSendingException e) {
+        logger.severe("Email sending failed: " + e.getMessage());
+        return Reply.badRequest("Failed to send support issue email. Please try again later.");
     }
 
 }

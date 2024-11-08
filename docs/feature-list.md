@@ -14,7 +14,7 @@
 - [ ] Access Course Materials
 - [ ] Complete Quizzes
 - [ ] View Certificates
-- [ ] File a Support Issue
+- [x] File a Support Issue
 ### Instructor
 - [x] Create Courses 
 - [x] Edit Courses
