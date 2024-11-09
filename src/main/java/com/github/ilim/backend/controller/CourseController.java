@@ -32,14 +32,14 @@ public class CourseController {
 
     // TODO: Use pagination for any `findAll` endpoints
 
-    @GetMapping("/admin/course")
+    @GetMapping("/admin/course/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiRes<Res<List<Course>>> findAllCourses() {
         var courses = courseService.findAllCourses();
         return Reply.ok(courses);
     }
 
-    @GetMapping("/course")
+    @GetMapping("/course/published")
     public ApiRes<Res<List<Course>>> findPublishedCourses() {
         var courses = courseService.findPublishedCourses();
         return Reply.ok(courses);
@@ -54,7 +54,7 @@ public class CourseController {
         return Reply.ok(course);
     }
 
-    @GetMapping("/student/course")
+    @GetMapping("/student/course/purchased")
     @PreAuthorize("hasAnyRole('Student', 'INSTRUCTOR')")
     public ApiRes<Res<List<Course>>> findPurchasedCourses(@AuthenticationPrincipal Jwt jwt) {
         var user = userService.findById(jwt.getClaim("sub").toString());
@@ -62,7 +62,7 @@ public class CourseController {
         return Reply.ok(courses);
     }
 
-    @GetMapping("/instructor/course")
+    @GetMapping("/instructor/course/created")
     @PreAuthorize("hasRole('INSTRUCTOR')")
     public ApiRes<Res<List<Course>>> findCreatedCourses(@AuthenticationPrincipal Jwt jwt) {
         var user = userService.findById(jwt.getClaim("sub").toString());
@@ -70,7 +70,7 @@ public class CourseController {
         return Reply.ok(courses);
     }
 
-    @PostMapping("/instructor/course")
+    @PostMapping("/instructor/create-course")
     @PreAuthorize("hasRole('INSTRUCTOR')")
     ApiRes<Res<String>> createCourse(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CourseDto dto) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
@@ -78,7 +78,7 @@ public class CourseController {
         return Reply.created("Course created successfully");
     }
 
-    @PutMapping("/course/{courseId}")
+    @PutMapping("/instructor/update-course/{courseId}")
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
     public ApiRes<Res<String>> updateCourse(
         @AuthenticationPrincipal Jwt jwt,
@@ -90,19 +90,39 @@ public class CourseController {
         return Reply.ok("Course updated successfully");
     }
 
-    @DeleteMapping("/admin/course/{courseId}")
+    @DeleteMapping("/admin/delete-course/{courseId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiRes<Res<String>> deleteCourseAsAdmin(@PathVariable UUID courseId) {
         courseService.deleteCourseAsAdmin(courseId);
         return Reply.ok("Course deleted successfully");
     }
 
-    @PostMapping("/student/course/{courseId}/purchase")
+    @PostMapping("/admin/approve-course/{courseId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiRes<Res<String>> approveCourse(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        courseService.approveCourse(user, courseId);
+        return Reply.ok("Course Approved successfully");
+    }
+
+    @PostMapping("/student/purchase-course/{courseId}")
     @PreAuthorize("hasAnyRole('Student', 'INSTRUCTOR')")
     public ApiRes<Res<String>> purchaseCourse(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
         courseService.purchaseCourse(user, courseId);
         return Reply.ok("[Development Mode] Purchased successfully");
+    }
+
+    @PutMapping("/instructor/course/{courseId}/reorder-modules")
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    public ApiRes<Res<String>> reorderCourseModules(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID courseId,
+        @RequestBody List<UUID> modulesOrder
+    ) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        courseService.reorderCourseModules(user, courseId, modulesOrder);
+        return Reply.ok("Course modules reordered successfully.");
     }
 
 }

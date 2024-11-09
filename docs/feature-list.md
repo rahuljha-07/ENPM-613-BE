@@ -18,17 +18,18 @@
 ### Instructor
 - [x] Create Courses 
 - [x] Edit Courses
-- [ ] Create Modules
-- [ ] Edit Modules
-- [ ] Delete Modules
-- [ ] Add Videos to Modules
-- [ ] Remove Videos from Modules
+- [ ] Submit Course for Approval
+- [x] Create Modules
+- [x] Edit Modules
+- [x] Delete Modules
+- [x] Add Videos to Modules
+- [x] Remove Videos from Modules
 - [ ] Add Quizzes to Modules
 - [ ] Remove Quizzes from Modules
 ### Admin
 - [x] Get a list of all users
 - [x] Approve Instructors
-- [ ] Approve Courses
+- [x] Approve Courses
 - [ ] Block User
 - [ ] Handle Support Issues
 - [x] Browse Courses
