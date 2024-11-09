@@ -15,43 +15,37 @@ Parameters:
     Description: "EC2 instance type"
     Type: String
     Default: t2.micro
-  GitHubSSHKeyP1:
-    Description: "Private SSH key Part 1 for accessing GitHub repositories (Base64 encoded)"
-    Type: String
-    NoEcho: true
-  GitHubSSHKeyP2:
-    Description: "Private SSH key Part 2 for accessing GitHub repositories (Base64 encoded)"
-    Type: String
-    NoEcho: true
-  GitHubKnownHostsEntry:
-    Description: "Known hosts entry for GitHub (to prevent SSH prompts)"
-    Type: String
-    Default: "github.com,140.82.114.4 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg="
   IlimDbName:
     Type: String
     Description: "ilim DB NAME"
+    Default: ilimdb
   AwsRdsEndpoint:
     Type: String
     Description: "RDS endpoint for the database"
   AwsRdsUsername:
     Type: String
     Description: "Username for RDS database"
+    Default: postgres
   AwsRdsPassword:
     Type: String
     Description: "Password for RDS database"
     NoEcho: true
+    Default: postgres
   CognitoUserPoolId:
     Type: String
     Description: "Cognito User Pool ID"
+    Default: us-east-1_KqABgqAau
   CognitoClientId:
     Type: String
     Description: "Cognito Client ID"
   CognitoRegion:
     Type: String
     Description: "Cognito Region"
+    Default: us-east-1
   CognitoJwkUrl:
     Type: String
     Description: "Cognito JWK URL"
+    Default: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_KqABgqAau/.well-known/jwks.json
 
 Resources:
   BackendInstanceRole:
@@ -68,14 +62,23 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
       Policies:
-        - PolicyName: "EC2InstanceS3Access"
+        - PolicyName: "EC2InstanceSSMAccess"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
-                  - "s3:*"
-                Resource: "*"
+                  - "ssm:GetParameter"
+                  - "ssm:GetParameter"
+                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/GitHubSSHKey"
+        - PolicyName: "EC2InstanceCognitoAccess"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "cognito-idp:AdminInitiateAuth"
+                Resource: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPoolId}"
 
   BackendInstanceProfile:
     Type: AWS::IAM::InstanceProfile
@@ -119,7 +122,6 @@ Resources:
     Properties:
       InstanceType: !Ref InstanceType
       SubnetId: !Ref PrivateSubnetID
-      #ImageId: ami-0ddc798b3f1a5117e
       ImageId: ami-063d43db0594b521b  # Amazon Linux 2023 AMI (64-bit (x86), uefi-preferred)
       KeyName: !Ref KeyName
       SecurityGroupIds:
@@ -139,17 +141,14 @@ Resources:
             echo "----- Updating and installing necessary packages"
             yum update -y
 
+            # debugging only: yum install postgresql15.x86_64 postgresql15-server
             yum install -y git java-21-amazon-corretto-devel maven docker
             service docker start
-            usermod -a -G git docker ec2-user
+            usermod -a -G docker ec2-user
 
             echo "----- Setting up SSH key for GitHub access"
             mkdir -p /home/ec2-user/.ssh
 
-            echo "${GitHubSSHKeyP1}${GitHubSSHKeyP2}" | base64 -d > /home/ec2-user/.ssh/id_rsa
-            chmod 600 /home/ec2-user/.ssh/id_rsa
-
-            echo "${GitHubKnownHostsEntry}" > /home/ec2-user/.ssh/known_hosts
             ssh-keyscan github.com >> /home/ec2-user/.ssh/known_hosts
             chown -R ec2-user:ec2-user /home/ec2-user/.ssh
 
@@ -158,41 +157,20 @@ Resources:
             
             cd /home/ec2-user
             
+            # Retrieve the SSH key from Parameter Store
+            aws ssm get-parameter --name "GitHubSSHKey" --with-decryption --region us-east-1 --output text --query Parameter.Value > /home/ec2-user/.ssh/id_rsa
+            chmod 600 /home/ec2-user/.ssh/id_rsa
+            
             echo "----- Cloning ilim-backend"
-            git clone git@github.com:rahuljha-07/ENPM-613-BE.git
+            #git clone git@github.com:rahuljha-07/ENPM-613-BE.git
+            git clone -b complete-features --single-branch git@github.com:rahuljha-07/ENPM-613-BE.git
             
             #echo "----- Cloning Payment Service"
             #git clone git@github.com:your-username/paymentservice.git
             
             #echo "----- Cloning ilim Delivery Service"
             #git clone git@github.com:your-username/ilimdeliveryserv.git
-  
-            echo "----- Building ilim-backend"
-            cd ENPM-613-BE
-            ./mvnw clean package -DskipTests
             
-            #echo "----- Building Payment Service"
-            #cd ../paymentservice
-            #./mvnw clean package -DskipTests
-            
-            #echo "----- Building ilim Delivery Service"
-            #cd ../ilimdeliveryserv
-            #./mvnw clean package -DskipTests
-  
-            echo "----- Installing Kafka"
-            wget https://archive.apache.org/dist/kafka/2.8.0/kafka_2.13-2.8.0.tgz
-            tar -xzf kafka_2.13-2.8.0.tgz
-            mv kafka_2.13-2.8.0 kafka
-            cd kafka
-  
-            echo "----- Starting Zookeeper and Kafka (in the background)"
-            nohup bin/zookeeper-server-start.sh config/zookeeper.properties > /home/ec2-user/zookeeper.log 2>&1 &
-            sleep 5
-            nohup bin/kafka-server-start.sh config/server.properties > /home/ec2-user/kafka.log 2>&1 &
-  
-            echo "----- Waiting for Kafka to start"
-            sleep 10
-  
             echo "----- Configure ilim-backend app"
             cd /home/ec2-user/ENPM-613-BE
             export AwsRdsEndpoint="${AwsRdsEndpoint}"
@@ -203,11 +181,38 @@ Resources:
             export CognitoClientId="${CognitoClientId}"
             export CognitoRegion="${CognitoRegion}"
             export CognitoJwkUrl="${CognitoJwkUrl}"
+          
+            envsubst < src/main/resources/application-dev.properties.template > src/main/resources/application-dev.properties
             
-            envsubst < application-dev.properties.template > application-dev.properties
+            echo "----- Building ilim-backend"
+            ./mvnw clean package -DskipTests -P dev
+            
+            #echo "----- Building Payment Service"
+            #cd ../paymentservice
+            #./mvnw clean package -DskipTests
+            
+            #echo "----- Building ilim Delivery Service"
+            #cd ../ilimdeliveryserv
+            #./mvnw clean package -DskipTests
+  
+            echo "----- Installing Kafka"
+            cd ..
+            wget https://archive.apache.org/dist/kafka/2.8.0/kafka_2.13-2.8.0.tgz
+            tar -xzf kafka_2.13-2.8.0.tgz
+            mv kafka_2.13-2.8.0 kafka
+            cd kafka
+  
+            echo "----- Starting Zookeeper and Kafka (in the background)"
+            nohup bin/zookeeper-server-start.sh config/zookeeper.properties > /home/ec2-user/zookeeper.log 2>&1 &
+            sleep 5
+            nohup bin/kafka-server-start.sh config/server.properties > /home/ec2-user/kafka.log 2>&1 &
+            cd ..
+  
+            echo "----- Waiting for Kafka to start"
+            sleep 10
             
             echo "----- Starting ilim-backend app"
-            nohup java -jar target/*.jar --server.port=8099 > /home/ec2-user/ilim-backend.log 2>&1 &
+            nohup java -jar ENPM-613-BE/target/*.jar --server.port=8099 > /home/ec2-user/ilim-backend.log 2>&1 &
   
             #echo "----- Starting Payment Service"
             #cd /home/ec2-user/paymentservice
