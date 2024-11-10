@@ -1,0 +1,28 @@
+meta {
+  name: Buyer Student can get video
+  type: http
+  seq: 16
+}
+
+get {
+  url: http://{{ilim-url}}/video/{{videoId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{studentToken}}
+}
+
+body:json {
+  {
+      "title": "Computer Science Course",
+      "description": "This is a new course for beginners to teach them computer science",
+      "price": 54.15,
+      "thumbnailUrl": "https://domain.org/image.png"
+  }
+}
+
+assert {
+  res.status: eq 200
+}

@@ -1,0 +1,41 @@
+meta {
+  name: Student gets all attempt
+  type: http
+  seq: 23
+}
+
+get {
+  url: http://{{ilim-url}}/student/quiz-attempt/{{quizId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{studentToken}}
+}
+
+body:json {
+  {
+    "quizId": "{{quizId}}",
+    "answers": [
+      {
+        "questionId": "{{questions1Id}}",
+        "selectedOptionIds": [
+          "{{questions1Option2}}"
+        ]
+      },
+      {
+        "questionId": "{{questions2Id}}",
+        "selectedOptionIds": [
+          "{{questions2Option1}}",
+          "{{questions2Option3}}"
+        ]
+      }
+    ]
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.body.length: eq 8
+}

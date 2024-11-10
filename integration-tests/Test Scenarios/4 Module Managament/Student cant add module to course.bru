@@ -1,0 +1,26 @@
+meta {
+  name: Student cant add module to course
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://{{ilim-url}}/instructor/course/{{courseId}}/add-module
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{studentToken}}
+}
+
+body:json {
+  {
+    "title": "Intro Module (test run)",
+    "description": "some text"
+  }
+}
+
+assert {
+  res.status: eq 403
+}

@@ -12,13 +12,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "user_answers")
 @NoArgsConstructor
@@ -34,8 +35,7 @@ public class UserAnswer extends AuditEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")
-    private Question questions;
-
+    private Question question;
 
     @OneToMany(mappedBy = "userAnswer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAnswerOption> selectedOptions;
@@ -43,6 +43,10 @@ public class UserAnswer extends AuditEntity {
     @Column(nullable = false)
     private boolean isCorrect;
 
-    @Column(nullable = false)
-    private BigDecimal answer;
+    public static UserAnswer from(Question question, QuizAttempt attempt) {
+        UserAnswer answer = new UserAnswer();
+        answer.setAttempt(attempt);
+        answer.setQuestion(question);
+        return answer;
+    }
 }

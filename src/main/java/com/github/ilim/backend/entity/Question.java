@@ -1,6 +1,8 @@
 package com.github.ilim.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.ilim.backend.dto.QuestionDto;
 import com.github.ilim.backend.enums.QuestionType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -17,7 +19,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.minidev.json.annotate.JsonIgnore;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +27,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "questions")
 @NoArgsConstructor
+@JsonIgnoreProperties({"quiz"})
 public class Question extends AuditEntity {
 
     @Id
@@ -46,10 +49,18 @@ public class Question extends AuditEntity {
     private QuestionType type;
 
     @Column(nullable = false)
-    private int points;
+    private BigDecimal points;
 
     @Column(nullable = false)
     private int orderIndex;
+
+    public static Question from(QuestionDto dto) {
+        Question question = new Question();
+        question.setText(dto.getText());
+        question.setType(dto.getType());
+        question.setPoints(dto.getPoints());
+        return question;
+    }
 
     @JsonProperty("quizId")
     public UUID getQuizId() {

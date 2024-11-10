@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ilim.backend.dto.ModuleDto;
 import com.github.ilim.backend.enums.ModuleItemType;
-import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
+import com.github.ilim.backend.exception.exceptions.QuizNotFoundException;
 import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,16 +19,16 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "course_modules")
 @NoArgsConstructor
@@ -112,5 +112,13 @@ public class CourseModule extends AuditEntity {
             .filter(it -> it.getVideo() != null && videoId.equals(it.getVideo().getId()))
             .findFirst()
             .orElseThrow(() -> new VideoNotFoundException(videoId));
+    }
+
+    public CourseModuleItem findModuleItemByQuizId(UUID quizId) {
+        return moduleItems.stream()
+            .filter(it -> it.getItemType().equals(ModuleItemType.QUIZ))
+            .filter(it -> it.getQuiz() != null && quizId.equals(it.getQuiz().getId()))
+            .findFirst()
+            .orElseThrow(() -> new QuizNotFoundException(quizId));
     }
 }

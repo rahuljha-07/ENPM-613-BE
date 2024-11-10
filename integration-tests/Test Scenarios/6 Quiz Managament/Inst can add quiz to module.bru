@@ -1,0 +1,64 @@
+meta {
+  name: Inst can add quiz to module
+  type: http
+  seq: 11
+}
+
+post {
+  url: http://{{ilim-url}}/instructor/module/{{moduleId}}/add-quiz
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+    "title": "Cat Quiz (test run) ",
+    "description": "some text about it",
+    "passingScore": 10,
+    "questions": [
+      {
+        "text": "Is cat an animal?",
+        "type": "TRUE_FALSE",
+        "points": 5,
+        "options": [
+          {
+            "text": "Yes",
+            "isCorrect": true
+          },
+          {
+            "text": "No",
+            "isCorrect": false
+          }
+        ]
+      },
+      {
+        "text": "Can a cat do the following",
+        "type": "MULTIPLE_CHOICE",
+        "points": 5,
+        "options": [
+          {
+            "text": "Eat?",
+            "isCorrect": true
+          },
+          {
+            "text": "Breath?",
+            "isCorrect": true
+          },
+          {
+            "text": "Fly?",
+            "isCorrect": false
+          }
+        ]
+      }
+    ]
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.body: isDefined
+}

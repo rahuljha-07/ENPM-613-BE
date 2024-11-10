@@ -1,8 +1,8 @@
 package com.github.ilim.backend.exception;
 
 
-import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
+import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
 import com.github.ilim.backend.util.response.Res;

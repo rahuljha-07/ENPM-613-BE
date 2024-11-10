@@ -1,16 +1,13 @@
 package com.github.ilim.backend.service;
 
-import com.fasterxml.jackson.databind.Module;
 import com.github.ilim.backend.dto.VideoDto;
-import com.github.ilim.backend.entity.CourseModule;
 import com.github.ilim.backend.entity.CourseModuleItem;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.entity.Video;
-import com.github.ilim.backend.enums.ModuleItemType;
-import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
 import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
 import com.github.ilim.backend.repo.VideoRepo;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +22,7 @@ public class VideoService {
     private final CourseService courseService;
     private final ModuleService moduleService;
 
+    @Transactional
     public void addVideoToModule(User instructor, UUID moduleId, @Valid VideoDto dto) {
         var module = moduleService.findModuleByIdAsInstructor(instructor, moduleId);
 
@@ -39,14 +37,16 @@ public class VideoService {
         moduleService.saveModule(module);
     }
 
-    public void removeVideoFromModule(User instructor, UUID itemId) {
-        var video = findVideoByIdAsInstructor(instructor, itemId);
+    @Transactional
+    public void removeVideoFromModule(User instructor, UUID videoId) {
+        var video = findVideoByIdAsInstructor(instructor, videoId);
         var module = video.getCourseModule();
-        var moduleItem = module.findModuleItemByVideoId(itemId);
+        var moduleItem = module.findModuleItemByVideoId(videoId);
         module.removeModuleItem(moduleItem);
         videoRepo.delete(video);
     }
 
+    @Transactional
     public void updateVideo(User instructor, UUID videoId, @Valid VideoDto dto) {
         var video = findVideoByIdAsInstructor(instructor, videoId);
         video.updateFrom(dto);

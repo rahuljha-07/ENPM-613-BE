@@ -3,20 +3,23 @@ package com.github.ilim.backend.service;
 import com.github.ilim.backend.entity.InstructorApp;
 import com.github.ilim.backend.enums.ApplicationStatus;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AdminService {
 
-    private final InstructorAppService InstructorAppService;
+    private final InstructorAppService instructorAppService;
     private final UserService userService;
 
-    public void approveInstructorApp(String applicationId) {
-        var application = InstructorAppService.findById(applicationId);
+    @Transactional
+    public void approveInstructorApp(UUID applicationId) {
+        var application = instructorAppService.findById(applicationId);
         if (application.getStatus() == ApplicationStatus.APPROVED) {
             throw new BadRequestException("Application already approved");
         }
@@ -25,8 +28,9 @@ public class AdminService {
         // TODO: notify user
     }
 
-    public void rejectInstructorApp(String applicationId, String reason) {
-        var application = InstructorAppService.findById(applicationId);
+    @Transactional
+    public void rejectInstructorApp(UUID applicationId, String reason) {
+        var application = instructorAppService.findById(applicationId);
         if (application.getStatus() == ApplicationStatus.REJECTED) {
             throw new BadRequestException("Application already rejected");
         }
@@ -38,7 +42,7 @@ public class AdminService {
         application.setStatus(status);
         application.setAdminMessage(reason);
         application.setReviewedAt(LocalDateTime.now());
-        InstructorAppService.update(application);
+        instructorAppService.update(application);
     }
 
 }

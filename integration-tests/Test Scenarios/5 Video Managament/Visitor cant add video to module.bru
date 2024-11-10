@@ -1,0 +1,28 @@
+meta {
+  name: Visitor cant add video to module
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://{{ilim-url}}/instructor/module/{{moduleId}}/add-video
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: 
+}
+
+body:json {
+  {
+    "title": "Good Video (test run)",
+    "description": "some text heeereee",
+    "videoUrl": "https://domain.org/video.mpeg",
+    "durationInSeconds": 80
+  }
+}
+
+assert {
+  res.status: eq 401
+}

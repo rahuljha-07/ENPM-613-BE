@@ -79,15 +79,15 @@ public class ModuleController {
         return Reply.ok("Module deleted successfully.");
     }
 
-    @PutMapping("/instructor/module/{moduleId}/reorder-items")
-    @PreAuthorize("hasRole('INSTRUCTOR')")
-    public ApiRes<Res<String>> reorderModuleItems(
-        @AuthenticationPrincipal Jwt jwt,
-        @PathVariable UUID moduleId,
-        @RequestBody List<UUID> itemsOrder
-    ) {
-        var user = userService.findById(jwt.getClaimAsString("sub"));
-        moduleService.reorderModuleItems(user, moduleId, itemsOrder);
-        return Reply.ok("Course modules reordered successfully.");
-    }
+//    @PutMapping("/instructor/module/{moduleId}/reorder-items")
+//    @PreAuthorize("hasRole('INSTRUCTOR')")
+//    public ApiRes<Res<String>> reorderModuleItems(
+//        @AuthenticationPrincipal Jwt jwt,
+//        @PathVariable UUID moduleId,
+//        @RequestBody List<UUID> itemsOrder
+//    ) {
+//        var user = userService.findById(jwt.getClaimAsString("sub"));
+//        moduleService.reorderModuleItems(user, moduleId, itemsOrder);
+//        return Reply.ok("Course modules reordered successfully.");
+//    }
 }

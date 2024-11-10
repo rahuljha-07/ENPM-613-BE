@@ -1,5 +1,7 @@
 package com.github.ilim.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.github.ilim.backend.dto.QuestionOptionDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,15 +12,17 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "question_options")
 @NoArgsConstructor
+@JsonIgnoreProperties({"question"})
 public class QuestionOption extends AuditEntity {
 
     @Id
@@ -37,5 +41,12 @@ public class QuestionOption extends AuditEntity {
 
     @Column(nullable = false)
     private int orderIndex;
+
+    public static QuestionOption from(QuestionOptionDto dto) {
+        QuestionOption option = new QuestionOption();
+        option.setText(dto.getText());
+        option.setCorrect(dto.getIsCorrect());
+        return option;
+    }
 
 }

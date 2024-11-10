@@ -1,7 +1,6 @@
 package com.github.ilim.backend.exception;
 
 
-import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
 import com.github.ilim.backend.exception.exceptions.ModuleItemNotFoundException;
 import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
 import com.github.ilim.backend.util.response.ApiRes;

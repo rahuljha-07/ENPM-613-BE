@@ -3,12 +3,13 @@ package com.github.ilim.backend.service;
 import com.github.ilim.backend.dto.ModuleDto;
 import com.github.ilim.backend.entity.CourseModule;
 import com.github.ilim.backend.entity.User;
-import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
+import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.repo.ModuleRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,20 +38,22 @@ public class ModuleService {
         courseService.saveCourse(course);
     }
 
-    public void reorderModuleItems(User instructor, UUID courseId, List<UUID> itemsOrder) {
-        if (itemsOrder.isEmpty()) {
-            return;
-        }
-        var course = courseService.findCourseByIdAndUser(instructor, courseId);
-        throw new NotImplementedException();
-    }
+//    public void reorderModuleItems(User instructor, UUID moduleId, List<UUID> itemsOrder) {
+//        if (itemsOrder.isEmpty()) {
+//            return;
+//        }
+//        // TODO: Implement this
+//        throw new NotImplementedException();
+//    }
 
+    @Transactional
     public void updateCourseModule(User instructor, UUID moduleId, ModuleDto dto) {
         var module = findModuleByIdAsInstructor(instructor, moduleId);
         module.updateFrom(dto);
         courseService.saveCourse(module.getCourse());
     }
 
+    @Transactional
     public void saveModule(CourseModule module) {
         moduleRepo.save(module);
     }
@@ -63,7 +66,7 @@ public class ModuleService {
         return module;
     }
 
-    public CourseModule findModuleById(User instructor, UUID moduleId) {
+    public CourseModule findModuleById(User instructor, @NonNull UUID moduleId) {
         var module = moduleRepo.findById(moduleId)
             .orElseThrow(() -> new CourseModuleNotFoundException(moduleId));
 

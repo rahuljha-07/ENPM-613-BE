@@ -1,0 +1,26 @@
+meta {
+  name: Student cant delete video
+  type: http
+  seq: 21
+}
+
+delete {
+  url: http://{{ilim-url}}/instructor/delete-video/{{videoId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{studentToken}}
+}
+
+body:json {
+  {
+    "title": "Intro to Module (test run)",
+    "description": "edited={{moduleId}}"
+  }
+}
+
+assert {
+  res.status: eq 403
+}

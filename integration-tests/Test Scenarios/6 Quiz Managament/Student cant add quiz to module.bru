@@ -1,0 +1,27 @@
+meta {
+  name: Student cant add quiz to module
+  type: http
+  seq: 10
+}
+
+post {
+  url: http://{{ilim-url}}/instructor/module/{{moduleId}}/add-quiz
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{studentToken}}
+}
+
+body:json {
+  {
+    "title": "Quiz title (test run) ",
+    "description": "some text about it",
+    "passingScore": 10
+  }
+}
+
+assert {
+  res.status: eq 403
+}

@@ -1,8 +1,6 @@
 package com.github.ilim.backend.exception.exceptions;
 
-import com.github.ilim.backend.entity.Course;
 import com.github.ilim.backend.entity.User;
-import com.github.ilim.backend.enums.UserRole;
 import jakarta.annotation.Nullable;
 
 import java.util.UUID;

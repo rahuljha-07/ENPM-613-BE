@@ -1,6 +1,7 @@
 package com.github.ilim.backend.entity;
 
-import jakarta.persistence.Column;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -9,22 +10,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(
-    name = "quiz_attempts",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"student_id", "quiz_id"})
-    }
-)
+@Table(name = "quiz_attempts")
 @NoArgsConstructor
+@JsonIgnoreProperties({"student", "quiz"})
 public class QuizAttempt extends AuditEntity {
 
     @Id
@@ -39,10 +37,24 @@ public class QuizAttempt extends AuditEntity {
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
-    @Column(nullable = false)
-    private BigDecimal score;
-
-    @Column(nullable = false)
+    private BigDecimal userScore;
+    private BigDecimal totalScore;
     private boolean isPassed;
 
+    @JsonProperty
+    public String getStudentId() {
+        return student.getId();
+    }
+
+    @JsonProperty
+    public UUID geQuizId() {
+        return quiz.getId();
+    }
+
+    public static QuizAttempt from(User user, Quiz quiz) {
+        var attempt = new QuizAttempt();
+        attempt.setQuiz(quiz);
+        attempt.setStudent(user);
+        return attempt;
+    }
 }

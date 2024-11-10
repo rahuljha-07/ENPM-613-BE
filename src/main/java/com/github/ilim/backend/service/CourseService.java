@@ -7,7 +7,10 @@ import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.CourseStatus;
 import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
+import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
+import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
+import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
@@ -21,7 +24,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -59,8 +61,9 @@ public class CourseService {
         courseRepo.save(course);
     }
 
-    public Course saveCourse(Course course) {
-        return courseRepo.save(course);
+    @Transactional
+    public void saveCourse(Course course) {
+        courseRepo.save(course);
     }
 
     public Course findPublishedCourse(UUID courseId) {
@@ -104,7 +107,7 @@ public class CourseService {
         }
     }
 
-    private boolean userHasAccessToCourseContent(@Nullable User user, Course course) {
+    private boolean userHasAccessToCourseContent(@Nullable User user, @NonNull Course course) {
         assertCourseNotDeleted(course);
         // Visitors cannot access any course content
         if (user == null) {
@@ -150,6 +153,7 @@ public class CourseService {
         return courseRepo.findAllByInstructorAndIsDeleted(instructor, isDeleted);
     }
 
+    @Transactional
     public void deleteCourseAsAdmin(UUID courseId) {
         var course = courseRepo.findById(courseId)
             .orElseThrow(() -> new CourseNotFoundException(courseId));
@@ -163,8 +167,15 @@ public class CourseService {
         }
     }
 
+    @Transactional
     public void purchaseCourse(User student, UUID courseId) {
         var course = findPublishedCourse(courseId);
+        if (purchaseService.findByStudentAndCourse(student, course).isPresent()) {
+            throw new AlreadyPurchasedCourseException(student.getId(), courseId);
+        }
+        if (course.getInstructor().getId().equals(student.getId())) {
+            throw new CantPurchaseOwnCourseException(student.getId(), course.getId());
+        }
         assertCourseNotDeleted(course);
         // TODO: This should be implemented properly when the PaymentService is ready
         var purchase = new CoursePurchase();
@@ -176,13 +187,22 @@ public class CourseService {
         purchaseService.save(purchase);
     }
 
+    @Transactional
     public void reorderCourseModules(User instructor, UUID courseId, List<UUID> modulesOrder) {
         var course = findCourseByIdAndUser(instructor, courseId);
         if (modulesOrder.size() != course.getCourseModules().size()) {
-            throw new BadRequestException("reorderModuleItems request must have exactly the same number of modules as the parent course!");
+            throw new BadRequestException(
+                "reorderCourseModules request must have exactly the same number of modules as the parent course!"
+            );
         }
         var modulesInNewOrder = modulesOrder.stream()
-            .map(course::findModule)
+            .map(id -> {
+                var module = course.findModule(id);
+                if (module == null) {
+                    throw new CourseModuleNotFoundException(id);
+                }
+                return module;
+            })
             .toList();
         course.getCourseModules().clear();
         course.getCourseModules().addAll(modulesInNewOrder);
