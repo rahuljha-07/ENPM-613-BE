@@ -28,7 +28,7 @@ public class UserService {
 
     public User findById(String userId) {
         return userRepo.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException(userId));
+                .orElseThrow(() -> new UserNotFoundException(userId));
     }
 
     public User findByIdAsAdmin(@NonNull User admin, String userId) {
@@ -52,6 +52,7 @@ public class UserService {
         user.setRole(UserRole.INSTRUCTOR);
         userRepo.save(user);
     }
+
 
     public void updateFromDto(@NonNull User user, @NonNull UpdateUserDto dto) {
         assertUserIsActive(user);
@@ -79,5 +80,9 @@ public class UserService {
         }
         user.setBlocked(true);
         userRepo.save(user);
+
+    public List<User> findByRole(UserRole role) {
+        return userRepo.findByRole(role);
+
     }
 }
