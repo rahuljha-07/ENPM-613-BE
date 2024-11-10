@@ -34,7 +34,6 @@ Parameters:
   CognitoUserPoolId:
     Type: String
     Description: "Cognito User Pool ID"
-    Default: us-east-1_KqABgqAau
   CognitoClientId:
     Type: String
     Description: "Cognito Client ID"
@@ -45,7 +44,6 @@ Parameters:
   CognitoJwkUrl:
     Type: String
     Description: "Cognito JWK URL"
-    Default: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_KqABgqAau/.well-known/jwks.json
 
 Resources:
   BackendInstanceRole:
@@ -162,8 +160,7 @@ Resources:
             chmod 600 /home/ec2-user/.ssh/id_rsa
             
             echo "----- Cloning ilim-backend"
-            #git clone git@github.com:rahuljha-07/ENPM-613-BE.git
-            git clone -b complete-features --single-branch git@github.com:rahuljha-07/ENPM-613-BE.git
+            git clone git@github.com:rahuljha-07/ENPM-613-BE.git
             
             #echo "----- Cloning Payment Service"
             #git clone git@github.com:your-username/paymentservice.git
