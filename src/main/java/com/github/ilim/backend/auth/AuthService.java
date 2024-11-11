@@ -2,6 +2,7 @@ package com.github.ilim.backend.auth;
 
 import com.github.ilim.backend.dto.SignUpDto;
 import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.exception.exceptions.BlockedUserCantSignInException;
 import com.github.ilim.backend.exception.exceptions.MissingEmailOrPasswordException;
 import com.github.ilim.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,6 +49,9 @@ public class AuthService {
     public AdminInitiateAuthResponse signIn(String email, String password) {
         if (email == null || email.isBlank() || password == null || password.isBlank()) {
             throw new MissingEmailOrPasswordException();
+        }
+        if (userService.isUserBlockedByEmail(email)) {
+            throw new BlockedUserCantSignInException(email);
         }
         var authRequest = AdminInitiateAuthRequest.builder()
             .authFlow(AuthFlowType.ADMIN_USER_PASSWORD_AUTH)

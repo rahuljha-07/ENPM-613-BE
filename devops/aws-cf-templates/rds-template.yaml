@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "RDS PostgreSQL Instance in private subnet"
+
+Parameters:
+  VPCID:
+    Type: String
+    Description: "VPC ID"
+  PrivateSubnet1ID:
+    Type: String
+    Description: "Private Subnet 1 ID"
+  PrivateSubnet2ID:
+    Type: String
+    Description: "Private Subnet 2 ID"
+  DBUsername:
+    Type: String
+    Default: "postgres"
+  DBPassword:
+    Type: String
+    NoEcho: true
+    Default: "postgres"
+  DBAllocatedStorage:
+    Type: Number
+    Default: 20
+  DBInstanceClass:
+    Type: String
+    Default: db.t3.micro
+
+Resources:
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for RDS"
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: "10.0.0.0/20"  # Allow access from entire VPC
+      Tags:
+        - Key: Name
+          Value: ilim-rds-sg
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: "Subnet group for RDS"
+      SubnetIds:
+        - !Ref PrivateSubnet1ID
+        - !Ref PrivateSubnet2ID
+      DBSubnetGroupName: ilim-db-subnet-group-1
+
+  RDSInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: "ilimdb"
+      Engine: "postgres"
+      EngineVersion: "16.4"
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      AllocatedStorage: !Ref DBAllocatedStorage
+      DBInstanceClass: !Ref DBInstanceClass
+      VPCSecurityGroups:
+        - !Ref RDSSecurityGroup
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      PubliclyAccessible: false
+      MultiAZ: false
+      StorageType: gp2
+      Tags:
+        - Key: Name
+          Value: ilim-rds-instance
+
+Outputs:
+  RDSInstanceEndpoint:
+    Description: "RDS Endpoint"
+    Value: !GetAtt RDSInstance.Endpoint.Address

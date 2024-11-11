@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Certificate of Completion</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+        body {
+            width: 800px;
+            height: 600px;
+            margin: 0 auto;
+            padding: 50px;
+            border: 10px solid #787878;
+            position: relative;
+            font-family: 'Arial', sans-serif;
+            background-color: #fdfdfd;
+        }
+        .logo {
+            text-align: center;
+            font-size: 60px;
+            font-weight: bold;
+            margin-top: 50px;
+        }
+        .title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 50px;
+        }
+        .content {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 30px;
+            line-height: 1.6;
+        }
+        .participant {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .footer {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div class="logo">ilim</div>
+    <div class="title">Certificate of Completion</div>
+    <div class="content">
+        This is to certify that
+        <div class="participant" th:text="${certificate.studentName}">[Participant Name]</div>
+        has successfully completed the course
+        "<span th:text="${certificate.courseTitle}">[Course Title]</span>"
+        from the ilim ELMS system.
+    </div>
+    <div class="footer">
+        Certificate ID: <span th:text="${certificate.certificateId}">[Certificate ID]</span>
+    </div>
+</div>
+</body>
+</html>

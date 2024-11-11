@@ -1,6 +1,7 @@
 package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.dto.CourseDto;
+import com.github.ilim.backend.dto.PublicCourseDto;
 import com.github.ilim.backend.entity.Course;
 import com.github.ilim.backend.service.CourseService;
 import com.github.ilim.backend.service.UserService;
@@ -12,12 +13,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -31,17 +32,11 @@ public class CourseController {
     private final UserService userService;
 
     // TODO: Use pagination for any `findAll` endpoints
-
-    @GetMapping("/admin/course/all")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiRes<Res<List<Course>>> findAllCourses() {
-        var courses = courseService.findAllCourses();
-        return Reply.ok(courses);
-    }
-
     @GetMapping("/course/published")
-    public ApiRes<Res<List<Course>>> findPublishedCourses() {
-        var courses = courseService.findPublishedCourses();
+    public ApiRes<Res<List<PublicCourseDto>>> filterPublishedCourses(
+        @RequestParam(value = "contains", required = false) String contains
+    ) {
+        var courses = courseService.filterPublishedCourses(contains);
         return Reply.ok(courses);
     }
 
@@ -90,19 +85,12 @@ public class CourseController {
         return Reply.ok("Course updated successfully");
     }
 
-    @DeleteMapping("/admin/delete-course/{courseId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiRes<Res<String>> deleteCourseAsAdmin(@PathVariable UUID courseId) {
-        courseService.deleteCourseAsAdmin(courseId);
-        return Reply.ok("Course deleted successfully");
-    }
-
-    @PostMapping("/admin/approve-course/{courseId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiRes<Res<String>> approveCourse(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+    @PostMapping("/instructor/course/{courseId}/submit-for-approval")
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    ApiRes<Res<String>> submitCourseForApproval(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
-        courseService.approveCourse(user, courseId);
-        return Reply.ok("Course Approved successfully");
+        courseService.submitCourseForApproval(user, courseId);
+        return Reply.ok("Course submitted successfully to the admin to review it.");
     }
 
     @PostMapping("/student/purchase-course/{courseId}")

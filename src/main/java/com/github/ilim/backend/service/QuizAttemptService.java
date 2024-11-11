@@ -65,8 +65,8 @@ public class QuizAttemptService {
         return QuizAttemptResultDto.from(lastAttempt);
     }
 
-    public List<QuizAttempt> getAllQuizAttemptsForQuiz(User instructor, UUID quizId) {
-        var quiz = quizService.findQuizById(instructor, quizId);
+    public List<QuizAttempt> getAllQuizAttemptsForQuiz(User user, UUID quizId) {
+        var quiz = quizService.findQuizById(user, quizId);
         return quizAttemptRepo.findQuizAttemptsByQuiz(quiz);
     }
 

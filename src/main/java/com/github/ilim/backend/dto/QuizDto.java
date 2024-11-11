@@ -60,7 +60,7 @@ public class QuizDto {
             optionDto.setText(option.getText());
             // Do not expose isCorrect to students
             if (role.equals(UserRole.ADMIN) || role.equals(UserRole.INSTRUCTOR)) {
-                optionDto.setIsCorrect(option.isCorrect());
+                optionDto.setIsCorrect(option.getIsCorrect());
             }
             optionDtos.add(optionDto);
         }

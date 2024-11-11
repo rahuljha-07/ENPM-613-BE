@@ -10,7 +10,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +21,7 @@ public class CoursePurchaseService {
         return purchaseRepo.findAllByStudent(student);
     }
 
-    public Optional<CoursePurchase> findByStudentAndCourse(@NonNull User student, @NonNull Course course) {
+    public List<CoursePurchase> findByStudentAndCourse(@NonNull User student, @NonNull Course course) {
         return purchaseRepo.findByStudentAndCourse(student, course);
     }
 

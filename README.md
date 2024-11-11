@@ -7,7 +7,7 @@ So far, the server provides authentication and user management services using AW
 ## Prerequisites
 Before you begin, ensure you have the following installed on your local development machine:
 
-- **Java Development Kit (JDK) 17** or higher
+- **Java Development Kit (JDK) 21** or higher
 - **Maven** for building the project
 - **Git** for version control
 - **Docker && Docker Compose** for running PostgreSQL locally
@@ -36,6 +36,11 @@ Before you begin, ensure you have the following installed on your local developm
    2. Follow the instructions there and complete `application-local.properties`.
 
 3. Start the server from IntelliJ or using build it using maven and run the JAR file.
+
+Note: To build it in dev environment
+```bash
+./mvnw clean package -DskipTests -P dev
+```
 
 ---
 ## Project Overview

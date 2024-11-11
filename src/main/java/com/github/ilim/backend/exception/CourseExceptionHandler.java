@@ -4,9 +4,14 @@ package com.github.ilim.backend.exception;
 import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
 import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
 import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
+import com.github.ilim.backend.exception.exceptions.CourseAlreadyPublished;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
+import com.github.ilim.backend.exception.exceptions.CourseStatusNotDraftException;
 import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
+import com.github.ilim.backend.exception.exceptions.OnlyAdminAccessAllCourses;
+import com.github.ilim.backend.exception.exceptions.StudentDidNotCompleteCourseException;
 import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
+import com.github.ilim.backend.exception.exceptions.UserCantHaveQuizProgress;
 import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
 import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
@@ -62,6 +67,36 @@ public class CourseExceptionHandler {
 
     @ExceptionHandler(CantPurchaseOwnCourseException.class)
     public ApiRes<Res<String>> handleCantPurchaseOwnCourseException(CantPurchaseOwnCourseException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(OnlyAdminAccessAllCourses.class)
+    public ApiRes<Res<String>> handleOnlyAdminAccessAllCourses(OnlyAdminAccessAllCourses e) {
+        logger.warning(e.getMessage());
+        return Reply.unauthorized(e.getMessage());
+    }
+
+    @ExceptionHandler(UserCantHaveQuizProgress.class)
+    public ApiRes<Res<String>> handleUserCantHaveQuizProgress(UserCantHaveQuizProgress e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(StudentDidNotCompleteCourseException.class)
+    public ApiRes<Res<String>> handleStudentDidNotCompleteCourseException(StudentDidNotCompleteCourseException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(CourseAlreadyPublished.class)
+    public ApiRes<Res<String>> handleCourseAlreadyPublished(CourseAlreadyPublished e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(CourseStatusNotDraftException.class)
+    public ApiRes<Res<String>> handleCourseStatusNotDraftException(CourseStatusNotDraftException e) {
         logger.warning(e.getMessage());
         return Reply.forbidden(e.getMessage());
     }

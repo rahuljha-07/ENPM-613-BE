@@ -1,0 +1,234 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "EC2 Instance for Backend Services with S3 Access and Private Repo Cloning"
+
+Parameters:
+  VPCID:
+    Type: String
+    Description: "VPC ID"
+  PrivateSubnetID:
+    Type: String
+    Description: "Private Subnet ID"
+  KeyName:
+    Description: "Name of an existing EC2 KeyPair to enable SSH access"
+    Type: AWS::EC2::KeyPair::KeyName
+  InstanceType:
+    Description: "EC2 instance type"
+    Type: String
+    Default: t2.micro
+  IlimDbName:
+    Type: String
+    Description: "ilim DB NAME"
+    Default: ilimdb
+  AwsRdsEndpoint:
+    Type: String
+    Description: "RDS endpoint for the database"
+  AwsRdsUsername:
+    Type: String
+    Description: "Username for RDS database"
+    Default: postgres
+  AwsRdsPassword:
+    Type: String
+    Description: "Password for RDS database"
+    NoEcho: true
+    Default: postgres
+  CognitoUserPoolId:
+    Type: String
+    Description: "Cognito User Pool ID"
+  CognitoClientId:
+    Type: String
+    Description: "Cognito Client ID"
+  CognitoRegion:
+    Type: String
+    Description: "Cognito Region"
+    Default: us-east-1
+  CognitoJwkUrl:
+    Type: String
+    Description: "Cognito JWK URL"
+
+Resources:
+  BackendInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      Policies:
+        - PolicyName: "EC2InstanceSSMAccess"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ssm:GetParameter"
+                  - "ssm:GetParameter"
+                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/GitHubSSHKey"
+        - PolicyName: "EC2InstanceCognitoAccess"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "cognito-idp:AdminInitiateAuth"
+                Resource: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPoolId}"
+
+  BackendInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref BackendInstanceRole
+      Path: "/"
+
+  BackendSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for backend EC2 instance"
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: "185.156.46.156/24"  # Put here your IP for SSH access
+        - IpProtocol: tcp
+          FromPort: 8099    # ilim-backend port
+          ToPort: 8099
+          CidrIp: "10.0.0.0/16"
+        - IpProtocol: tcp
+          FromPort: 8081
+          ToPort: 8081
+          CidrIp: "10.0.0.0/16"
+        - IpProtocol: tcp
+          FromPort: 8082
+          ToPort: 8082
+          CidrIp: "10.0.0.0/16"
+        - IpProtocol: tcp
+          FromPort: 9092  # Kafka port
+          ToPort: 9092
+          CidrIp: "10.0.0.0/16"
+      Tags:
+        - Key: Name
+          Value: ilim-backend-sg
+
+  BackendInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref PrivateSubnetID
+      ImageId: ami-063d43db0594b521b  # Amazon Linux 2023 AMI (64-bit (x86), uefi-preferred)
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !Ref BackendSecurityGroup
+      IamInstanceProfile: !Ref BackendInstanceProfile
+      Tags:
+        - Key: Name
+          Value: ilim-backend-instance
+      UserData:
+        Fn::Base64:
+          !Sub
+          - |
+            #!/bin/bash
+            # Redirect all output to a log file
+            exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+
+            echo "----- Updating and installing necessary packages"
+            yum update -y
+
+            # debugging only: yum install postgresql15.x86_64 postgresql15-server
+            yum install -y git java-21-amazon-corretto-devel maven docker
+            service docker start
+            usermod -a -G docker ec2-user
+
+            echo "----- Setting up SSH key for GitHub access"
+            mkdir -p /home/ec2-user/.ssh
+
+            ssh-keyscan github.com >> /home/ec2-user/.ssh/known_hosts
+            chown -R ec2-user:ec2-user /home/ec2-user/.ssh
+
+            echo "----- Switching to ec2-user"
+            sudo -i -u ec2-user bash << EOF
+            
+            cd /home/ec2-user
+            
+            # Retrieve the SSH key from Parameter Store
+            aws ssm get-parameter --name "GitHubSSHKey" --with-decryption --region us-east-1 --output text --query Parameter.Value > /home/ec2-user/.ssh/id_rsa
+            chmod 600 /home/ec2-user/.ssh/id_rsa
+            
+            echo "----- Cloning ilim-backend"
+            git clone git@github.com:rahuljha-07/ENPM-613-BE.git
+            
+            #echo "----- Cloning Payment Service"
+            #git clone git@github.com:your-username/paymentservice.git
+            
+            #echo "----- Cloning ilim Delivery Service"
+            #git clone git@github.com:your-username/ilimdeliveryserv.git
+            
+            echo "----- Configure ilim-backend app"
+            cd /home/ec2-user/ENPM-613-BE
+            export AwsRdsEndpoint="${AwsRdsEndpoint}"
+            export IlimDbName="${IlimDbName}"
+            export AwsRdsUsername="${AwsRdsUsername}"
+            export AwsRdsPassword="${AwsRdsPassword}"
+            export CognitoUserPoolId="${CognitoUserPoolId}"
+            export CognitoClientId="${CognitoClientId}"
+            export CognitoRegion="${CognitoRegion}"
+            export CognitoJwkUrl="${CognitoJwkUrl}"
+          
+            envsubst < src/main/resources/application-dev.properties.template > src/main/resources/application-dev.properties
+            
+            echo "----- Building ilim-backend"
+            ./mvnw clean package -DskipTests -P dev
+            
+            #echo "----- Building Payment Service"
+            #cd ../paymentservice
+            #./mvnw clean package -DskipTests
+            
+            #echo "----- Building ilim Delivery Service"
+            #cd ../ilimdeliveryserv
+            #./mvnw clean package -DskipTests
+  
+            echo "----- Installing Kafka"
+            cd ..
+            wget https://archive.apache.org/dist/kafka/2.8.0/kafka_2.13-2.8.0.tgz
+            tar -xzf kafka_2.13-2.8.0.tgz
+            mv kafka_2.13-2.8.0 kafka
+            cd kafka
+  
+            echo "----- Starting Zookeeper and Kafka (in the background)"
+            nohup bin/zookeeper-server-start.sh config/zookeeper.properties > /home/ec2-user/zookeeper.log 2>&1 &
+            sleep 5
+            nohup bin/kafka-server-start.sh config/server.properties > /home/ec2-user/kafka.log 2>&1 &
+            cd ..
+  
+            echo "----- Waiting for Kafka to start"
+            sleep 10
+            
+            echo "----- Starting ilim-backend app"
+            nohup java -jar ENPM-613-BE/target/*.jar --server.port=8099 > /home/ec2-user/ilim-backend.log 2>&1 &
+  
+            #echo "----- Starting Payment Service"
+            #cd /home/ec2-user/paymentservice
+            #nohup java -jar target/*.jar --server.port=8081 > /home/ec2-user/paymentservice.log 2>&1 &
+            
+            #echo "----- Starting ilim Delivery Service"
+            #cd /home/ec2-user/ilimdeliveryserv
+            #nohup java -jar target/*.jar --server.port=8082 > /home/ec2-user/ilimdeliveryserv.log 2>&1 &
+            EOF
+          - AwsRdsEndpoint: !Ref AwsRdsEndpoint
+            IlimDbName: !Ref IlimDbName
+            AwsRdsUsername: !Ref AwsRdsUsername
+            AwsRdsPassword: !Ref AwsRdsPassword
+            CognitoUserPoolId: !Ref CognitoUserPoolId
+            CognitoClientId: !Ref CognitoClientId
+            CognitoRegion: !Ref CognitoRegion
+            CognitoJwkUrl: !Ref CognitoJwkUrl
+
+Outputs:
+  BackendInstancePrivateIP:
+    Description: "Private IP of Backend Instance"
+    Value: !GetAtt BackendInstance.PrivateIp

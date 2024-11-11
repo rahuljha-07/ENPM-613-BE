@@ -36,8 +36,7 @@ public class QuestionOption extends AuditEntity {
     @Column(nullable = false)
     private String text;
 
-    @Column(nullable = false)
-    private boolean isCorrect;
+    private Boolean isCorrect;
 
     @Column(nullable = false)
     private int orderIndex;
@@ -45,7 +44,7 @@ public class QuestionOption extends AuditEntity {
     public static QuestionOption from(QuestionOptionDto dto) {
         QuestionOption option = new QuestionOption();
         option.setText(dto.getText());
-        option.setCorrect(dto.getIsCorrect());
+        option.setIsCorrect(dto.getIsCorrect());
         return option;
     }
 

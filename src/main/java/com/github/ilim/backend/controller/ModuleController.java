@@ -1,13 +1,11 @@
 package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.dto.ModuleDto;
-import com.github.ilim.backend.entity.CourseModule;
 import com.github.ilim.backend.service.ModuleService;
 import com.github.ilim.backend.service.UserService;
 import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
 import com.github.ilim.backend.util.response.Res;
-import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,15 +29,13 @@ public class ModuleController {
     private final UserService userService;
 
     @GetMapping("/module/{moduleId}")
-    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'ADMIN')")
-    public ApiRes<Res<CourseModule>> getCourseModule(
-        @Nullable @AuthenticationPrincipal Jwt jwt,
+    @PreAuthorize("isAuthenticated()")
+    public ApiRes<Res<Object>> findModuleByIdAsStudent(
+        @AuthenticationPrincipal Jwt jwt,
         @PathVariable UUID moduleId
     ) {
-        var user = jwt == null
-            ? null
-            : userService.findById(jwt.getClaim("sub").toString());
-        var module = moduleService.findModuleById(user, moduleId);
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        var module = moduleService.findCourseModuleById(user, moduleId);
         return Reply.ok(module);
     }
 
