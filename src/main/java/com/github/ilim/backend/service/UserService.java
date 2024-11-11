@@ -80,6 +80,7 @@ public class UserService {
         }
         user.setBlocked(true);
         userRepo.save(user);
+    }
 
     public List<User> findByRole(UserRole role) {
         return userRepo.findByRole(role);
