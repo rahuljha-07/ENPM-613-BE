@@ -1,17 +1,11 @@
 package com.github.ilim.backend.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import com.github.ilim.backend.enums.PurchaseStatus;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -41,13 +35,29 @@ public class CoursePurchase {
     private Course course;
 
     @Column(nullable = false)
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime purchaseDate;
 
     @Column(nullable = false)
     private BigDecimal purchasePrice;
 
-    @Column(nullable = false)
     private String paymentId;
+
+    private String failedMessage;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PurchaseStatus status = PurchaseStatus.PENDING;
+
+    public static CoursePurchase createPendingPurchase(User student, Course course) {
+        var purchase = new CoursePurchase();
+        purchase.setStudent(student);
+        purchase.setCourse(course);
+        purchase.setPurchasePrice(course.getPrice());
+        purchase.setPurchaseDate(LocalDateTime.now());
+        purchase.setStatus(PurchaseStatus.PENDING);
+        return purchase;
+    }
 
     @JsonProperty("studentId")
     public String getStudentId() {

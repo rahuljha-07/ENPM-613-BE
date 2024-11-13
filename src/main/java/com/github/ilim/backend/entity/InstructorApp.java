@@ -1,5 +1,6 @@
 package com.github.ilim.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.github.ilim.backend.dto.InstructorAppDto;
 import com.github.ilim.backend.enums.ApplicationStatus;
 import jakarta.persistence.Column;
@@ -54,7 +55,10 @@ public class InstructorApp {
 
     private String adminMessage; // in case of rejection
 
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime submittedAt;
+
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime reviewedAt;
 
     public static InstructorApp from(InstructorAppDto dto) {

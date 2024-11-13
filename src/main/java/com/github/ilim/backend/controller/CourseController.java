@@ -1,8 +1,11 @@
 package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.dto.CourseDto;
+import com.github.ilim.backend.dto.PaymentEventDto;
 import com.github.ilim.backend.dto.PublicCourseDto;
 import com.github.ilim.backend.entity.Course;
+import com.github.ilim.backend.enums.PurchaseStatus;
+import com.github.ilim.backend.service.CoursePurchaseService;
 import com.github.ilim.backend.service.CourseService;
 import com.github.ilim.backend.service.UserService;
 import com.github.ilim.backend.util.response.ApiRes;
@@ -13,13 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +25,7 @@ import java.util.UUID;
 @RestController
 public class CourseController {
 
+    private final CoursePurchaseService coursePurchaseService;
     private final CourseService courseService;
     private final UserService userService;
 
@@ -94,11 +92,11 @@ public class CourseController {
     }
 
     @PostMapping("/student/purchase-course/{courseId}")
-    @PreAuthorize("hasAnyRole('Student', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR')")
     public ApiRes<Res<String>> purchaseCourse(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
-        courseService.purchaseCourse(user, courseId);
-        return Reply.ok("[Development Mode] Purchased successfully");
+        String checkoutUrl = coursePurchaseService.purchaseCourse(user, courseId);
+        return Reply.ok(checkoutUrl);
     }
 
     @PutMapping("/instructor/course/{courseId}/reorder-modules")
@@ -113,4 +111,26 @@ public class CourseController {
         return Reply.ok("Course modules reordered successfully.");
     }
 
+    @PostMapping("/student/course/{courseId}/check-purchase")
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR')")
+    public ApiRes<Res<PurchaseStatus>> checkCoursePurchase(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        PurchaseStatus purchaseStatus = coursePurchaseService.checkCoursePurchase(user, courseId);
+        return Reply.ok(purchaseStatus);
+    }
+
+    @PostMapping("/student/course/{courseId}/cancel-purchase")
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR')")
+    public ApiRes<Res<String>> cancelCoursePurchase(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        coursePurchaseService.cancelCoursePurchase(user, courseId);
+        return Reply.ok("All pending requests has been canceled");
+    }
+
+    @PostMapping("/admin/confirm-course-purchase")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ApiRes<Res<String>> simulateCoursePurchaseConfirmation(@Valid @RequestBody PaymentEventDto dto) {
+        coursePurchaseService.simulateCoursePurchaseConfirmation(dto);
+        return Reply.ok();
+    }
 }

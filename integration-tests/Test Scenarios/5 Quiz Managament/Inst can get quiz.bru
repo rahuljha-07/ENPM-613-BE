@@ -1,0 +1,28 @@
+meta {
+  name: Inst can get quiz
+  type: http
+  seq: 21
+}
+
+get {
+  url: http://{{ilim-url}}/quiz/{{quizId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+      "title": "Computer Science Course",
+      "description": "This is a new course for beginners to teach them computer science",
+      "price": 54.15,
+      "thumbnailUrl": "https://domain.org/image.png"
+  }
+}
+
+assert {
+  res.status: eq 200
+}

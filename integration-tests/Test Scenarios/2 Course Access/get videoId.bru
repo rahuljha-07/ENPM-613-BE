@@ -1,0 +1,32 @@
+meta {
+  name: get videoId
+  type: http
+  seq: 8
+}
+
+get {
+  url: http://{{ilim-url}}/module/{{moduleId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+      "title": "Computer Science Course",
+      "description": "This is a new course for beginners to teach them computer science",
+      "price": 54.15,
+      "thumbnailUrl": "https://domain.org/image.png"
+  }
+}
+
+vars:post-response {
+  videoId: res.body.body.moduleItems.at(-1).video.id
+}
+
+assert {
+  res.status: eq 200
+}

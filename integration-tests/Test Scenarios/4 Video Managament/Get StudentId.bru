@@ -1,0 +1,33 @@
+meta {
+  name: Get StudentId
+  type: http
+  seq: 16
+}
+
+get {
+  url: http://{{ilim-url}}/user
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{studentToken}}
+}
+
+body:json {
+  {
+      "title": "Computer Science Course",
+      "description": "This is a new course for beginners to teach them computer science",
+      "price": 54.15,
+      "thumbnailUrl": "https://domain.org/image.png"
+  }
+}
+
+vars:post-response {
+  studentId: res.body.body.id
+}
+
+assert {
+  res.status: eq 200
+  res.body.body.id: isDefined
+}

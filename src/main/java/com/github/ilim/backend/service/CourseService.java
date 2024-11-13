@@ -3,23 +3,11 @@ package com.github.ilim.backend.service;
 import com.github.ilim.backend.dto.CourseDto;
 import com.github.ilim.backend.dto.PublicCourseDto;
 import com.github.ilim.backend.entity.Course;
-import com.github.ilim.backend.entity.CoursePurchase;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.CourseStatus;
 import com.github.ilim.backend.enums.UserRole;
-import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
-import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
-import com.github.ilim.backend.exception.exceptions.BadRequestException;
-import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
-import com.github.ilim.backend.exception.exceptions.CourseAlreadyPublished;
-import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
-import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
-import com.github.ilim.backend.exception.exceptions.CourseStatusNotDraftException;
-import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
-import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
-import com.github.ilim.backend.exception.exceptions.OnlyAdminAccessAllCourses;
-import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
-import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
+import com.github.ilim.backend.exception.exceptions.*;
+import com.github.ilim.backend.repo.CoursePurchaseRepo;
 import com.github.ilim.backend.repo.CourseRepo;
 import com.github.ilim.backend.util.CourseUtil;
 import jakarta.annotation.Nullable;
@@ -29,9 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -39,7 +25,7 @@ import java.util.UUID;
 public class CourseService {
 
     private final CourseRepo courseRepo;
-    private final CoursePurchaseService purchaseService;
+    private final CoursePurchaseRepo purchaseRepo;
 
     @Transactional
     public Course create(User instructor, CourseDto dto) {
@@ -135,7 +121,7 @@ public class CourseService {
             return false;
         }
         // Finally, a student who purchase the course can access its content
-        return !purchaseService.findByStudentAndCourse(user, course).isEmpty();
+        return CoursePurchaseService.didStudentPurchaseCourse(purchaseRepo, user, course);
     }
 
     public List<Course> findAllCourses(@NonNull User admin) {
@@ -158,14 +144,15 @@ public class CourseService {
     }
 
     public List<Course> findPurchasedCourses(User student) {
-        boolean isDeleted = false;
-        var purchasedCoursesIds = purchaseService.findAllByStudent(student).stream()
-            .map(CoursePurchase::getCourse)
-            .filter(Objects::nonNull)
-            .map(Course::getId)
-            .toList();
-        var courses = courseRepo.findAllByIdInAndIsDeleted(purchasedCoursesIds, isDeleted);
-        return enforceCoursesAccess(student, courses);
+//        boolean isDeleted = false;
+//        var purchasedCoursesIds = purchaseService.findAllByStudent(student).stream()
+//            .map(CoursePurchase::getCourse)
+//            .filter(Objects::nonNull)
+//            .map(Course::getId)
+//            .toList();
+//        var courses = courseRepo.findAllByIdInAndIsDeleted(purchasedCoursesIds, isDeleted);
+//        return enforceCoursesAccess(student, courses);
+        return null; // TODO: Fix this
     }
 
     public List<Course> findCreatedCourses(User instructor) {
@@ -188,25 +175,6 @@ public class CourseService {
         }
     }
 
-    @Transactional
-    public void purchaseCourse(User student, UUID courseId) {
-        var course = findPublishedCourse(courseId);
-        if (!purchaseService.findByStudentAndCourse(student, course).isEmpty()) {
-            throw new AlreadyPurchasedCourseException(student.getId(), courseId);
-        }
-        if (course.getInstructor().getId().equals(student.getId())) {
-            throw new CantPurchaseOwnCourseException(student.getId(), course.getId());
-        }
-        assertCourseNotDeleted(course);
-        // TODO: This should be implemented properly when the PaymentService is ready
-        var purchase = new CoursePurchase();
-        purchase.setCourse(course);
-        purchase.setPurchaseDate(LocalDateTime.now());
-        purchase.setPurchasePrice(course.getPrice());
-        purchase.setStudent(student);
-        purchase.setPaymentId(UUID.randomUUID().toString()); // TODO: should be taken from PaymentService
-        purchaseService.save(purchase);
-    }
 
     @Transactional
     public void reorderCourseModules(User instructor, UUID courseId, List<UUID> modulesOrder) {

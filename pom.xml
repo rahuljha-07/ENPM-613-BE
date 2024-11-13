@@ -166,6 +166,11 @@
             <artifactId>openhtmltopdf-slf4j</artifactId>
             <version>1.0.10</version>
         </dependency>
+        <!-- Apache Kafka -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

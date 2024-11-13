@@ -3,6 +3,7 @@ package com.github.ilim.backend.exception;
 
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
 import com.github.ilim.backend.exception.exceptions.EmailSendingException;
+import com.github.ilim.backend.exception.exceptions.NoPurchasesException;
 import com.github.ilim.backend.util.response.ApiRes;
 import com.github.ilim.backend.util.response.Reply;
 import com.github.ilim.backend.util.response.Res;
