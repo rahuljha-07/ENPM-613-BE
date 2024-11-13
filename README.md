@@ -42,7 +42,33 @@ Note: To build it in dev environment
 ./mvnw clean package -DskipTests -P dev
 ```
 
+#### PaymentQueue Kafka Topic 
+
+##### To watch Kafka topic when running locally
+```bash
+docker exec -it local-kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic paymentQueue --from-beginning
+```
 ---
+
+##### Verify the Topic Exists
+```bash
+docker exec -it local-kafka kafka-topics --bootstrap-server localhost:9092 --list
+```
+
+##### Produce a Test Message
+To verify that the consumer is working correctly, you can produce a test message to the paymentQueue topic.
+```bash
+docker exec -it local-kafka kafka-console-producer --broker-list localhost:9092 --topic paymentQueue
+```
+
+### Integration with Payment Service
+#### Stripe Local Webhook server 
+To run a local webhook server so you can create a Stripe Secret, you can use servo and ssh
+And use the port of the payment service running locally.
+```bash
+ssh -R 80:localhost:8081 serveo.net
+```
+
 ## Project Overview
 
 The **ilim** application is a backend service that handles user authentication and profile management. It leverages:

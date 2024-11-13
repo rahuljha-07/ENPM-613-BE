@@ -1,0 +1,25 @@
+meta {
+  name: Visitor cant get quiz
+  type: http
+  seq: 11
+}
+
+get {
+  url: http://{{ilim-url}}/course/{{courseId}}
+  body: none
+  auth: none
+}
+
+body:json {
+  {
+      "title": "Computer Science Course",
+      "description": "This is a new course for beginners to teach them computer science",
+      "price": 54.15,
+      "thumbnailUrl": "https://domain.org/image.png"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.body.modules[0].items: isUndefined
+}

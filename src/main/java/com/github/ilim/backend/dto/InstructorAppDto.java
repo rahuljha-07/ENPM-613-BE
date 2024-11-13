@@ -1,5 +1,6 @@
 package com.github.ilim.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.github.ilim.backend.enums.ApplicationStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -28,6 +29,9 @@ public class InstructorAppDto {
     private String profileImageUrl;
     private String resumeUrl;
 
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime submittedAt = LocalDateTime.now();
+
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime reviewedAt;
 }

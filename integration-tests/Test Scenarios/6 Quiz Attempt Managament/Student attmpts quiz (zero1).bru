@@ -1,0 +1,45 @@
+meta {
+  name: Student attmpts quiz (zero1)
+  type: http
+  seq: 19
+}
+
+post {
+  url: http://{{ilim-url}}/student/attempt-quiz
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{studentToken}}
+}
+
+body:json {
+  {
+    "quizId": "{{quizId}}",
+    "answers": [
+      {
+        "questionId": "{{questions1Id}}",
+        "selectedOptionIds": [
+          "{{questions1Option1}}",
+          "{{questions1Option2}}"
+        ]
+      },
+      {
+        "questionId": "{{questions2Id}}",
+        "selectedOptionIds": [
+          "{{questions2Option1}}",
+          "{{questions2Option2}}",
+          "{{questions2Option3}}"
+        ]
+      }
+    ]
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.body.userScore: eq 0
+  res.body.body.totalScore: eq 10
+  res.body.body.passed: eq false
+}

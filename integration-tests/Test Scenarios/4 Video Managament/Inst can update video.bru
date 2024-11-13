@@ -1,0 +1,30 @@
+meta {
+  name: Inst can update video
+  type: http
+  seq: 20
+}
+
+put {
+  url: http://{{ilim-url}}/instructor/update-video/{{videoId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+    "title": "Intro to Studying (test run)",
+    "description": "edited={{videoId}}",
+      "videoUrl": "https://domain.org/video.mpeg",
+      "transcriptUrl": null,
+      "durationInSeconds": 80
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.body: isDefined
+}

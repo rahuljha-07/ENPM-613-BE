@@ -1,0 +1,79 @@
+meta {
+  name: Inst can update quiz
+  type: http
+  seq: 22
+}
+
+put {
+  url: http://{{ilim-url}}/instructor/update-quiz/{{quizId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+    "title": "Cat Quiz (test run) ",
+    "description": "edited={{quizId}}",
+    "passingScore": 10,
+    "questions": [
+      {
+        "text": "Do you like cats?",
+        "type": "TRUE_FALSE",
+        "points": 2,
+        "options": [
+          {
+            "text": "Yes",
+            "isCorrect": true
+          }
+        ]
+      },
+      {
+        "text": "Is cat an animal?",
+        "type": "TRUE_FALSE",
+        "points": 5,
+        "options": [
+          {
+            "text": "Yes",
+            "isCorrect": true
+          },
+          {
+            "text": "No",
+            "isCorrect": false
+          }
+        ]
+      },
+      {
+        "text": "Can a cat do the following",
+        "type": "MULTIPLE_CHOICE",
+        "points": 5,
+        "options": [
+          {
+            "text": "Eat?",
+            "isCorrect": true
+          },
+          {
+            "text": "Breath?",
+            "isCorrect": true
+          },
+          {
+            "text": "Fly?",
+            "isCorrect": false
+          },
+          {
+            "text": "Sing?",
+            "isCorrect": false
+          }
+        ]
+      }
+    ]
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.body: isDefined
+}

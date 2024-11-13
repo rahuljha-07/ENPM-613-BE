@@ -7,6 +7,7 @@ import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.CourseStatus;
 import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.*;
+import com.github.ilim.backend.repo.CoursePurchaseRepo;
 import com.github.ilim.backend.repo.CourseRepo;
 import com.github.ilim.backend.util.CourseUtil;
 import jakarta.annotation.Nullable;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class CourseService {
 
     private final CourseRepo courseRepo;
+    private final CoursePurchaseRepo purchaseRepo;
 
     @Transactional
     public Course create(User instructor, CourseDto dto) {
@@ -119,10 +121,8 @@ public class CourseService {
             return false;
         }
         // Finally, a student who purchase the course can access its content
-        // return !purchaseService.findByStudentAndCourse(user, course).isEmpty();
-        return false; // TODO: Fix this
+        return CoursePurchaseService.didStudentPurchaseCourse(purchaseRepo, user, course);
     }
-
 
     public List<Course> findAllCourses(@NonNull User admin) {
         if (admin.getRole() != UserRole.ADMIN) {

@@ -23,7 +23,7 @@ public enum PaymentIntentStatus {
         };
     }
 
-    public String to(PaymentIntentStatus status) {
+    public static String toString(PaymentIntentStatus status) {
         return switch (status) {
             case SUCCEEDED -> "succeeded";
             case REQUIRES_ACTION -> "requires_action";
@@ -34,5 +34,9 @@ public enum PaymentIntentStatus {
             case REQUIRES_CAPTURE -> "requires_capture";
             default -> null;
         };
+    }
+
+    public String toString() {
+        return toString(this);
     }
 }

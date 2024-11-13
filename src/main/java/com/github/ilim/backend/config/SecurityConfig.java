@@ -23,10 +23,12 @@ public class SecurityConfig {
     private String jwkUrl;
 
     private final CustomUserDetailsService userDetailsService;
+    private final CorsConfigurationSourceImpl corsConfigurationSource;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(AbstractHttpConfigurer::disable)                                           // Disable CSRF
             .authorizeHttpRequests(auth -> auth                                              // authorization rules
                 .requestMatchers("/auth/**").permitAll()                                   // Permit all requests to auth endpoints

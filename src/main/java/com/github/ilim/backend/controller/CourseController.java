@@ -1,6 +1,7 @@
 package com.github.ilim.backend.controller;
 
 import com.github.ilim.backend.dto.CourseDto;
+import com.github.ilim.backend.dto.PaymentEventDto;
 import com.github.ilim.backend.dto.PublicCourseDto;
 import com.github.ilim.backend.entity.Course;
 import com.github.ilim.backend.enums.PurchaseStatus;
@@ -110,11 +111,26 @@ public class CourseController {
         return Reply.ok("Course modules reordered successfully.");
     }
 
-    @PostMapping("/student/check-course-purchase/{courseId}")
+    @PostMapping("/student/course/{courseId}/check-purchase")
     @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR')")
     public ApiRes<Res<PurchaseStatus>> checkCoursePurchase(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
         PurchaseStatus purchaseStatus = coursePurchaseService.checkCoursePurchase(user, courseId);
         return Reply.ok(purchaseStatus);
+    }
+
+    @PostMapping("/student/course/{courseId}/cancel-purchase")
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR')")
+    public ApiRes<Res<String>> cancelCoursePurchase(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        coursePurchaseService.cancelCoursePurchase(user, courseId);
+        return Reply.ok("All pending requests has been canceled");
+    }
+
+    @PostMapping("/admin/confirm-course-purchase")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ApiRes<Res<String>> simulateCoursePurchaseConfirmation(@Valid @RequestBody PaymentEventDto dto) {
+        coursePurchaseService.simulateCoursePurchaseConfirmation(dto);
+        return Reply.ok();
     }
 }

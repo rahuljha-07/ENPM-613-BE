@@ -39,10 +39,4 @@ public class GeneralExceptionHandler {
         return Reply.badRequest("Failed to send support issue email. Please try again later.");
     }
 
-    @ExceptionHandler(NoPurchasesException.class)
-    public ApiRes<Res<String>> handleNoPurchasesException(NoPurchasesException e) {
-        logger.warning(e.getMessage());
-        return Reply.notFound(e.getMessage());
-    }
-
 }
