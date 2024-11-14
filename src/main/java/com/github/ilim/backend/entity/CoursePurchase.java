@@ -7,13 +7,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ilim.backend.enums.PurchaseStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "course_purchases")
 @NoArgsConstructor

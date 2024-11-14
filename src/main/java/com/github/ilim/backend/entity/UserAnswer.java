@@ -13,13 +13,15 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.UUID;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @Entity
 @Table(name = "user_answers")
 @NoArgsConstructor

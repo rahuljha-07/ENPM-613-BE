@@ -14,12 +14,14 @@ import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @Entity
 @Table(name = "videos")
 @NoArgsConstructor

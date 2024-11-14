@@ -7,11 +7,14 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @MappedSuperclass
 @EntityListeners(AuditListener.class)
 public class AuditEntity {
