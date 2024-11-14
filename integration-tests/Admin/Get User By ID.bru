@@ -1,0 +1,19 @@
+meta {
+  name: Get User By ID
+  type: http
+  seq: 11
+}
+
+get {
+  url: http://{{ilim-url}}/admin/user/74986408-5001-7098-fe24-fe39747010fa
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  status: eq 200
+}

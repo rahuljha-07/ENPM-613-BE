@@ -1,0 +1,18 @@
+meta {
+  name: Verify Email
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://{{ilim-url}}/auth/verify-account
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "email": "{{eduEmail}}",
+      "confirmationCode": "185518"
+  }
+}

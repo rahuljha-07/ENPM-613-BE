@@ -1,0 +1,22 @@
+meta {
+  name: Admin Sign In
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://{{ilim-url}}/auth/sign-in
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "email": "admin@mail.com",
+      "password": "!Admin123"
+  }
+}
+
+vars:post-response {
+  token: res.body.accessToken
+}

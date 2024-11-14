@@ -1,0 +1,21 @@
+meta {
+  name: Approve Inst App
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://{{ilim-url}}/admin/approve-instructor-application
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "instructorApplicationId": "{{pendingInstAppId}}"
+  }
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Block User
+  type: http
+  seq: 11
+}
+
+post {
+  url: http://{{ilim-url}}/admin/block-user/74e884b8-7071-7004-9870-7c87c06bd48d
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}

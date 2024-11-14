@@ -1,0 +1,15 @@
+meta {
+  name: Approve Course
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://{{ilim-url}}/admin/approve-course/5f72b85c-02be-477d-8c70-2e4447ede06d
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

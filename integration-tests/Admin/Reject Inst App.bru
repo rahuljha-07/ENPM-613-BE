@@ -1,0 +1,22 @@
+meta {
+  name: Reject Inst App
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://{{ilim-url}}/admin/reject-instructor-application
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "instructorApplicationId": "02a45368-3c13-4c38-ab88-77facbaa5e55",
+    "message": "You are too rich for us"
+  }
+}
