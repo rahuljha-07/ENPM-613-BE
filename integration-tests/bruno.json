@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "ilim",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
