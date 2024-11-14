@@ -25,7 +25,7 @@ public class InstructorAppService {
     private final InstructorAppRepo appRepo;
 
     public boolean existPendingApplicationForUser(String userId) {
-        return appRepo.findByUserId(userId, AuditEntity.SORT_BY_CREATED_AT_DESC).stream()
+        return appRepo.findByUserId(userId, InstructorApp.SORT_BY_SUBMITTED_AT_DESC).stream()
             .anyMatch(application -> application.getStatus() == ApplicationStatus.PENDING);
     }
 
@@ -46,7 +46,7 @@ public class InstructorAppService {
     }
 
     public List<InstructorApp> findByUserId(String id) {
-        return appRepo.findByUserId(id, AuditEntity.SORT_BY_CREATED_AT_DESC);
+        return appRepo.findByUserId(id, InstructorApp.SORT_BY_SUBMITTED_AT_DESC);
     }
 
     public InstructorApp findById(UUID id) {
@@ -55,11 +55,11 @@ public class InstructorAppService {
     }
 
     public List<InstructorApp> findAll() {
-        return appRepo.findAll(AuditEntity.SORT_BY_CREATED_AT_DESC);
+        return appRepo.findAll(InstructorApp.SORT_BY_SUBMITTED_AT_DESC);
     }
 
     public List<InstructorApp> findPendingApplications() {
-        return appRepo.findByStatus(ApplicationStatus.PENDING, AuditEntity.SORT_BY_CREATED_AT_DESC);
+        return appRepo.findByStatus(ApplicationStatus.PENDING, InstructorApp.SORT_BY_SUBMITTED_AT_DESC);
     }
 
     @Transactional

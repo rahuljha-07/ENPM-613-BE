@@ -11,8 +11,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,6 +25,9 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 public class InstructorApp {
+
+    @Transient
+    public static final Sort SORT_BY_SUBMITTED_AT_DESC = Sort.by(Sort.Direction.DESC, "submittedAt");
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
