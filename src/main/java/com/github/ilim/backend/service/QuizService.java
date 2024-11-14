@@ -1,6 +1,7 @@
 package com.github.ilim.backend.service;
 
 import com.github.ilim.backend.dto.QuizDto;
+import com.github.ilim.backend.entity.AuditEntity;
 import com.github.ilim.backend.entity.CourseModuleItem;
 import com.github.ilim.backend.entity.Question;
 import com.github.ilim.backend.entity.QuestionOption;
@@ -84,7 +85,7 @@ public class QuizService {
     public void removeQuizFromModule(User instructor, UUID quizId) {
         var quiz = findQuizByIdAsInstructor(instructor, quizId);
         var module = quiz.getCourseModule();
-        var quizAttempts = quizAttemptRepo.findQuizAttemptsByQuiz(quiz);
+        var quizAttempts = quizAttemptRepo.findQuizAttemptsByQuiz(quiz, AuditEntity.SORT_BY_CREATED_AT_DESC);
         if (!quizAttempts.isEmpty()) {
             throw new CantDeleteAttemptedQuizException(instructor.getId(), quiz.getId(), quizAttempts.getFirst().getId());
         }

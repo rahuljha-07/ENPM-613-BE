@@ -1,7 +1,7 @@
 meta {
   name: get quizId
   type: http
-  seq: 10
+  seq: 9
 }
 
 get {
@@ -24,7 +24,7 @@ body:json {
 }
 
 vars:post-response {
-  quizId: res.body.body.moduleItems.at(-1).quiz.id
+  quizId: res.body.body.moduleItems.at(0).quiz.id
 }
 
 assert {

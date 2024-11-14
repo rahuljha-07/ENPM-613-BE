@@ -1,6 +1,7 @@
 package com.github.ilim.backend.service;
 
 import com.github.ilim.backend.dto.InstructorAppDto;
+import com.github.ilim.backend.entity.AuditEntity;
 import com.github.ilim.backend.entity.InstructorApp;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.ApplicationStatus;
@@ -24,7 +25,7 @@ public class InstructorAppService {
     private final InstructorAppRepo appRepo;
 
     public boolean existPendingApplicationForUser(String userId) {
-        return appRepo.findByUserId(userId).stream()
+        return appRepo.findByUserId(userId, AuditEntity.SORT_BY_CREATED_AT_DESC).stream()
             .anyMatch(application -> application.getStatus() == ApplicationStatus.PENDING);
     }
 
@@ -45,7 +46,7 @@ public class InstructorAppService {
     }
 
     public List<InstructorApp> findByUserId(String id) {
-        return appRepo.findByUserId(id);
+        return appRepo.findByUserId(id, AuditEntity.SORT_BY_CREATED_AT_DESC);
     }
 
     public InstructorApp findById(UUID id) {
@@ -54,11 +55,11 @@ public class InstructorAppService {
     }
 
     public List<InstructorApp> findAll() {
-        return appRepo.findAll();
+        return appRepo.findAll(AuditEntity.SORT_BY_CREATED_AT_DESC);
     }
 
     public List<InstructorApp> findPendingApplications() {
-        return appRepo.findByStatus(ApplicationStatus.PENDING);
+        return appRepo.findByStatus(ApplicationStatus.PENDING, AuditEntity.SORT_BY_CREATED_AT_DESC);
     }
 
     @Transactional

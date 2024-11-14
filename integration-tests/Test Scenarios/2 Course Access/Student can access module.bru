@@ -1,7 +1,7 @@
 meta {
   name: Student can access module
   type: http
-  seq: 24
+  seq: 23
 }
 
 get {
@@ -25,5 +25,5 @@ body:json {
 
 assert {
   res.status: eq 200
-  res.body.body: isDefined 
+  res.body.body: isDefined
 }

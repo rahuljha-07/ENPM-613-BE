@@ -3,9 +3,12 @@ package com.github.ilim.backend.service;
 import com.github.ilim.backend.dto.CourseDto;
 import com.github.ilim.backend.dto.CourseRejectionDto;
 import com.github.ilim.backend.dto.PublicCourseDto;
+import com.github.ilim.backend.entity.AuditEntity;
 import com.github.ilim.backend.entity.Course;
+import com.github.ilim.backend.entity.CoursePurchase;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.CourseStatus;
+import com.github.ilim.backend.enums.PurchaseStatus;
 import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.*;
 import com.github.ilim.backend.repo.CoursePurchaseRepo;
@@ -19,6 +22,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -141,7 +145,7 @@ public class CourseService {
         if (admin.getRole() != UserRole.ADMIN) {
             throw new OnlyAdminAccessAllCourses(admin.getId());
         }
-        return courseRepo.findAll();
+        return courseRepo.findAll(AuditEntity.SORT_BY_CREATED_AT_DESC);
     }
 
     public List<Course> findCoursesWaitingForApproval(User user) {
@@ -152,25 +156,29 @@ public class CourseService {
 
     public List<PublicCourseDto> findPublishedCourses() {
         boolean isDeleted = false;
-        var courses = courseRepo.findAllByStatusAndIsDeleted(CourseStatus.PUBLISHED, isDeleted);
+        var courses = courseRepo.findAllByStatusAndIsDeleted(
+            CourseStatus.PUBLISHED, isDeleted, AuditEntity.SORT_BY_CREATED_AT_DESC
+        );
         return CourseUtil.toPublicCourseDtos(courses);
     }
 
     public List<Course> findPurchasedCourses(User student) {
-//        boolean isDeleted = false;
-//        var purchasedCoursesIds = purchaseService.findAllByStudent(student).stream()
-//            .map(CoursePurchase::getCourse)
-//            .filter(Objects::nonNull)
-//            .map(Course::getId)
-//            .toList();
-//        var courses = courseRepo.findAllByIdInAndIsDeleted(purchasedCoursesIds, isDeleted);
-//        return enforceCoursesAccess(student, courses);
-        return null; // TODO: Fix this
+        boolean isDeleted = false;
+        var purchasedCoursesIds = purchaseRepo.findAllByStudent(student, AuditEntity.SORT_BY_CREATED_AT_DESC).stream()
+            .filter(purchase -> purchase.getStatus() == PurchaseStatus.SUCCEEDED)
+            .map(CoursePurchase::getCourse)
+            .filter(Objects::nonNull)
+            .map(Course::getId)
+            .toList();
+        var courses = courseRepo.findAllByIdInAndIsDeleted(purchasedCoursesIds, isDeleted);
+        return enforceCoursesAccess(student, courses);
     }
 
     public List<Course> findCreatedCourses(User instructor) {
         boolean isDeleted = false;
-        var courses = courseRepo.findAllByInstructorAndIsDeleted(instructor, isDeleted);
+        var courses = courseRepo.findAllByInstructorAndIsDeleted(
+            instructor, isDeleted, AuditEntity.SORT_BY_CREATED_AT_DESC
+        );
         return enforceCoursesAccess(instructor, courses);
     }
 

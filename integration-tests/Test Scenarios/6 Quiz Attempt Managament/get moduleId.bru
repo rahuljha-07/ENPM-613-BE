@@ -1,7 +1,7 @@
 meta {
   name: get moduleId
   type: http
-  seq: 8
+  seq: 7
 }
 
 get {
@@ -24,7 +24,7 @@ body:json {
 }
 
 vars:post-response {
-  moduleId: res.body.body.courseModules.at(-1).id
+  moduleId: res.body.body.courseModules.at(0).id
 }
 
 assert {

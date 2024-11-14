@@ -24,7 +24,7 @@ body:json {
 }
 
 vars:post-response {
-  courseId: res.body.body.at(-1).id
+  courseId: res.body.body.at(0).id
 }
 
 assert {

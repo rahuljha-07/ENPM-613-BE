@@ -2,6 +2,7 @@ package com.github.ilim.backend.service;
 
 import com.github.ilim.backend.dto.PaymentEventDto;
 import com.github.ilim.backend.dto.PaymentRequestDto;
+import com.github.ilim.backend.entity.AuditEntity;
 import com.github.ilim.backend.entity.Course;
 import com.github.ilim.backend.entity.CoursePurchase;
 import com.github.ilim.backend.entity.User;
@@ -33,11 +34,11 @@ public class CoursePurchaseService {
     private static final String DEFAULT_CURRENCY = "USD";
 
     public List<CoursePurchase> findAllByStudent(@NonNull User student) {
-        return purchaseRepo.findAllByStudent(student);
+        return purchaseRepo.findAllByStudent(student, AuditEntity.SORT_BY_CREATED_AT_DESC);
     }
 
     public List<CoursePurchase> findByStudentAndCourse(@NonNull User student, @NonNull Course course) {
-        return purchaseRepo.findByStudentAndCourse(student, course);
+        return purchaseRepo.findByStudentAndCourse(student, course, AuditEntity.SORT_BY_CREATED_AT_DESC);
     }
 
     public CoursePurchase findPendingByStudentAndCourse(@NonNull User student, @NonNull Course course) {
@@ -109,7 +110,7 @@ public class CoursePurchaseService {
         if (didStudentPurchaseCourse(purchaseRepo, student, course)) {
             return PurchaseStatus.SUCCEEDED;
         }
-        var purchases = purchaseRepo.findByStudentAndCourse(student, course);
+        var purchases = purchaseRepo.findByStudentAndCourse(student, course, AuditEntity.SORT_BY_CREATED_AT_DESC);
         if (purchases.stream().anyMatch(purchase -> purchase.getStatus() == PurchaseStatus.PENDING)) {
             return PurchaseStatus.PENDING;
         }

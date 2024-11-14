@@ -24,7 +24,7 @@ body:json {
 }
 
 vars:post-response {
-  videoId: res.body.body.moduleItems.at(-1).video.id
+  videoId: res.body.body.moduleItems.at(0).video.id
 }
 
 assert {

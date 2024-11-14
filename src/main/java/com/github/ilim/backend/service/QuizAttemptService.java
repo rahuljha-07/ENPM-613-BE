@@ -47,7 +47,9 @@ public class QuizAttemptService {
 
     public List<QuizAttemptResultDto> getAllStudentQuizAttempts(@NonNull User student, @NonNull UUID quizId) {
         var quiz = quizService.findQuizById(student, quizId);
-        var attempts = quizAttemptRepo.findQuizAttemptsByQuizAndStudent(quiz, student);
+        var attempts = quizAttemptRepo.findQuizAttemptsByQuizAndStudent(
+            quiz, student, AuditEntity.SORT_BY_CREATED_AT_DESC
+        );
         if (attempts.isEmpty()) {
             throw new QuizAttemptsNotFoundException(quizId);
         }
@@ -58,7 +60,9 @@ public class QuizAttemptService {
 
     public QuizAttemptResultDto getLastStudentQuizAttempt(@NonNull User student, @NonNull UUID quizId) {
         var quiz = quizService.findQuizById(student, quizId);
-        var attempts = quizAttemptRepo.findQuizAttemptsByQuizAndStudent(quiz, student);
+        var attempts = quizAttemptRepo.findQuizAttemptsByQuizAndStudent(
+            quiz, student, AuditEntity.SORT_BY_CREATED_AT_DESC
+        );
         var lastAttempt = attempts.stream()
             .max(Comparator.comparing(AuditEntity::getCreatedAt))
             .orElseThrow(() -> new QuizAttemptsNotFoundException(quizId));
@@ -67,7 +71,7 @@ public class QuizAttemptService {
 
     public List<QuizAttempt> getAllQuizAttemptsForQuiz(User user, UUID quizId) {
         var quiz = quizService.findQuizById(user, quizId);
-        return quizAttemptRepo.findQuizAttemptsByQuiz(quiz);
+        return quizAttemptRepo.findQuizAttemptsByQuiz(quiz, AuditEntity.SORT_BY_CREATED_AT_DESC);
     }
 
     @Transactional
@@ -107,7 +111,9 @@ public class QuizAttemptService {
             userAnswerRepo.save(userAnswer);
 
             // evaluate answers
-            var correctOptions = questionOptionRepo.findByQuestionAndIsCorrect(question, true);
+            var correctOptions = questionOptionRepo.findByQuestionAndIsCorrect(
+                question, true, AuditEntity.SORT_BY_CREATED_AT_DESC
+            );
             if (isAnswerCorrect(correctOptions, answerDto.getSelectedOptionIds())) {
                 userScore = userScore.add(question.getPoints());
             }

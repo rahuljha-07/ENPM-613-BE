@@ -1,6 +1,7 @@
 package com.github.ilim.backend.service;
 
 import com.github.ilim.backend.dto.UpdateUserDto;
+import com.github.ilim.backend.entity.AuditEntity;
 import com.github.ilim.backend.entity.InstructorApp;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.UserRole;
@@ -23,7 +24,7 @@ public class UserService {
     private final UserRepo userRepo;
 
     public List<User> getAll() {
-        return userRepo.findAll();
+        return userRepo.findAll(AuditEntity.SORT_BY_CREATED_AT_DESC);
     }
 
     public User findById(String userId) {
@@ -83,7 +84,7 @@ public class UserService {
     }
 
     public List<User> findByRole(UserRole role) {
-        return userRepo.findByRole(role);
+        return userRepo.findByRole(role, AuditEntity.SORT_BY_CREATED_AT_DESC);
 
     }
 }
