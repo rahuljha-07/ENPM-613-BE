@@ -1,5 +1,6 @@
 package com.github.ilim.backend.controller;
 
+import com.github.ilim.backend.dto.CourseRejectionDto;
 import com.github.ilim.backend.dto.RespondToInstructorAppDto;
 import com.github.ilim.backend.entity.Course;
 import com.github.ilim.backend.entity.User;
@@ -80,6 +81,18 @@ public class AdminController {
         var user = userService.findById(jwt.getClaimAsString("sub"));
         courseService.approveCourse(user, courseId);
         return Reply.ok("Course Approved successfully");
+    }
+
+    @PostMapping("/admin/reject-course/{courseId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiRes<Res<String>> rejectCourse(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID courseId,
+        @Valid @RequestBody CourseRejectionDto dto
+        ) {
+        var user = userService.findById(jwt.getClaimAsString("sub"));
+        courseService.rejectCourse(user, courseId, dto);
+        return Reply.ok("Course Rejected successfully");
     }
 
     @GetMapping("/admin/course/all")

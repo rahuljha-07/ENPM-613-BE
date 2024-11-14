@@ -19,5 +19,4 @@ public class CourseDto {
     private BigDecimal price;
 
     private String thumbnailUrl;
-    private String transcriptUrl;
 }

@@ -49,8 +49,6 @@ public class Course extends AuditEntity {
     @OrderColumn(name = "orderIndex")
     private List<CourseModule> courseModules = new ArrayList<>();
 
-    private String transcriptUrl;
-
     @Column(nullable = false)
     private BigDecimal price;
 
@@ -79,7 +77,6 @@ public class Course extends AuditEntity {
         course.setTitle(dto.getTitle());
         course.setThumbnailUrl(dto.getThumbnailUrl());
         course.setDescription(dto.getDescription());
-        course.setTranscriptUrl(dto.getTranscriptUrl());
         course.setPrice(dto.getPrice());
         return course;
     }
@@ -88,7 +85,6 @@ public class Course extends AuditEntity {
         setTitle(dto.getTitle());
         setThumbnailUrl(dto.getThumbnailUrl());
         setDescription(dto.getDescription());
-        setTranscriptUrl(dto.getTranscriptUrl());
         setPrice(dto.getPrice());
     }
 

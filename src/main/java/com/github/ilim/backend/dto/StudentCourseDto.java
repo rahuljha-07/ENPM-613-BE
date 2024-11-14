@@ -32,7 +32,6 @@ public class StudentCourseDto extends Course {
         dto.setTitle(course.getTitle());
         dto.setThumbnailUrl(course.getThumbnailUrl());
         dto.setDescription(course.getDescription());
-        dto.setTranscriptUrl(course.getTranscriptUrl());
         dto.setInstructor(course.getInstructor());
         dto.setPrice(course.getPrice());
         dto.setStatus(course.getStatus());

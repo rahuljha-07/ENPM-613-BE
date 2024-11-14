@@ -1,6 +1,7 @@
 package com.github.ilim.backend.exception;
 
 
+import com.github.ilim.backend.exception.exceptions.AdminCantBeBlockedException;
 import com.github.ilim.backend.exception.exceptions.BlockedUserCantSignInException;
 import com.github.ilim.backend.exception.exceptions.CantUpdateBlockedUserException;
 import com.github.ilim.backend.exception.exceptions.MissingBirthdateException;
@@ -119,6 +120,12 @@ public class UserExceptionHandler {
 
     @ExceptionHandler(BlockedUserCantSignInException.class)
     public ApiRes<Res<String>> handleBlockedUserCantSignInException(BlockedUserCantSignInException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(AdminCantBeBlockedException.class)
+    public ApiRes<Res<String>> handleAdminCantBeBlockedException(AdminCantBeBlockedException e) {
         logger.warning(e.getMessage());
         return Reply.forbidden(e.getMessage());
     }

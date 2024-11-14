@@ -5,6 +5,7 @@ import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException
 import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
 import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
 import com.github.ilim.backend.exception.exceptions.CourseAlreadyPublished;
+import com.github.ilim.backend.exception.exceptions.CourseIsNotWaitingApprovalException;
 import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
 import com.github.ilim.backend.exception.exceptions.CourseStatusNotDraftException;
 import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
@@ -97,6 +98,12 @@ public class CourseExceptionHandler {
 
     @ExceptionHandler(CourseStatusNotDraftException.class)
     public ApiRes<Res<String>> handleCourseStatusNotDraftException(CourseStatusNotDraftException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(CourseIsNotWaitingApprovalException.class)
+    public ApiRes<Res<String>> handleCourseIsNotWaitingApprovalException(CourseIsNotWaitingApprovalException e) {
         logger.warning(e.getMessage());
         return Reply.forbidden(e.getMessage());
     }

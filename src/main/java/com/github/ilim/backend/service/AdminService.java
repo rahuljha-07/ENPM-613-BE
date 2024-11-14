@@ -4,6 +4,7 @@ import com.github.ilim.backend.entity.InstructorApp;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.ApplicationStatus;
 import com.github.ilim.backend.enums.UserRole;
+import com.github.ilim.backend.exception.exceptions.AdminCantBeBlockedException;
 import com.github.ilim.backend.exception.exceptions.BadRequestException;
 import com.github.ilim.backend.exception.exceptions.UserIsNotAdminException;
 import jakarta.transaction.Transactional;
@@ -50,9 +51,12 @@ public class AdminService {
     }
 
     public void blockUser(@NonNull User admin, @NonNull String userId) {
-        var user = userService.findById(userId);
         if (admin.getRole() != UserRole.ADMIN) {
             throw new UserIsNotAdminException(admin.getId());
+        }
+        var user = userService.findById(userId);
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new AdminCantBeBlockedException(user.getId());
         }
         userService.blockUser(user);
     }

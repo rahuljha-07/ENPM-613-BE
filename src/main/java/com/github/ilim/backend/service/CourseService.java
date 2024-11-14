@@ -1,6 +1,7 @@
 package com.github.ilim.backend.service;
 
 import com.github.ilim.backend.dto.CourseDto;
+import com.github.ilim.backend.dto.CourseRejectionDto;
 import com.github.ilim.backend.dto.PublicCourseDto;
 import com.github.ilim.backend.entity.Course;
 import com.github.ilim.backend.entity.User;
@@ -45,6 +46,18 @@ public class CourseService {
             throw new CourseAlreadyPublished(course);
         }
         course.setStatus(CourseStatus.PUBLISHED);
+        courseRepo.save(course);
+    }
+
+    @Transactional
+    public void rejectCourse(User admin, UUID courseId, @Valid CourseRejectionDto dto) {
+        var course = findCourseByIdAndUser(admin, courseId);
+        assertCourseNotDeleted(course);
+        if (course.getStatus() != CourseStatus.WAIT_APPROVAL) {
+            throw new CourseIsNotWaitingApprovalException(course.getId(), course.getStatus());
+        }
+        course.setStatus(CourseStatus.DRAFT);
+        // TODO: Use the DTO to notify the user by email about the reason of rejection
         courseRepo.save(course);
     }
 
