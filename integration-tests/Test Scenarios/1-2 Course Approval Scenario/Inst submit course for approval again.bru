@@ -1,0 +1,28 @@
+meta {
+  name: Inst submit course for approval again
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://{{ilim-url}}/instructor/course/{{courseId}}/submit-for-approval
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+      "title": "CS Course (Test Run)",
+      "description": "This is a new course.",
+      "price": 95.50,
+      "thumbnailUrl": "https://domain.org/image-big.png"
+  }
+}
+
+assert {
+  res.status: eq 200
+}

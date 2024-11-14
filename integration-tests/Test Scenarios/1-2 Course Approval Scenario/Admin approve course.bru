@@ -1,0 +1,25 @@
+meta {
+  name: Admin approve course
+  type: http
+  seq: 10
+}
+
+post {
+  url: http://{{ilim-url}}/admin/approve-course/{{courseId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "reason": "I didn't like it"
+  }
+}
+
+assert {
+  res.status: eq 200
+}

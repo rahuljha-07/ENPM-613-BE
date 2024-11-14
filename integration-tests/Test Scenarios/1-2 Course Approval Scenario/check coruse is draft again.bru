@@ -1,0 +1,29 @@
+meta {
+  name: check coruse is draft again
+  type: http
+  seq: 8
+}
+
+get {
+  url: http://{{ilim-url}}/course/{{courseId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+      "title": "Computer Science Course",
+      "description": "This is a new course for beginners to teach them computer science",
+      "price": 54.15,
+      "thumbnailUrl": "https://domain.org/image.png"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.body.status: eq DRAFT
+}
