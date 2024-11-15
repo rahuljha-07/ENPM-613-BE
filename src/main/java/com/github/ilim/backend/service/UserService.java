@@ -5,6 +5,7 @@ import com.github.ilim.backend.entity.AuditEntity;
 import com.github.ilim.backend.entity.InstructorApp;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.UserRole;
+import com.github.ilim.backend.exception.exceptions.BadRequestException;
 import com.github.ilim.backend.exception.exceptions.CantUpdateBlockedUserException;
 import com.github.ilim.backend.exception.exceptions.UserIsAlreadyBlockedException;
 import com.github.ilim.backend.exception.exceptions.UserIsNotAdminException;
@@ -51,6 +52,15 @@ public class UserService {
         user.setBio(application.getInstructorBio());
         user.setTitle(application.getInstructorTitle());
         user.setRole(UserRole.INSTRUCTOR);
+        userRepo.save(user);
+    }
+
+    @Transactional
+    public void demoteToStudent(User user) {
+        if (user.getRole() != UserRole.INSTRUCTOR) {
+            throw new BadRequestException("User(%s) is not instructor!".formatted(user.getId()));
+        }
+        user.setRole(UserRole.STUDENT);
         userRepo.save(user);
     }
 

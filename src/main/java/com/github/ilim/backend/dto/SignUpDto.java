@@ -1,5 +1,6 @@
 package com.github.ilim.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.github.ilim.backend.exception.exceptions.MissingBirthdateException;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -16,6 +17,7 @@ public class SignUpDto {
     @NotNull(message = "name cannot be null")
     private String name;
     @NotNull(message = "birthdate cannot be null")
+    @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate birthdate;
 
     public String getBirthdateString() {

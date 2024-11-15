@@ -111,4 +111,12 @@ public class AdminController {
         return Reply.ok(courses);
     }
 
+    @PostMapping("/admin/integration-tests/demote-instructor/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiRes<Res<String>> testingDemoteInstructor(@AuthenticationPrincipal Jwt jwt, @PathVariable String userId) {
+        var admin = userService.findById(jwt.getClaimAsString("sub"));
+        courseService.testingDemoteInstructor(admin, userId);
+        return Reply.ok("[testing only] Instructor became student again");
+    }
+
 }

@@ -1,0 +1,26 @@
+meta {
+  name: Admin rejects inst app
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://{{ilim-url}}/admin/reject-instructor-application
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "instructorApplicationId": "{{instAppId}}",
+    "message": "Too short"
+  }
+}
+
+assert {
+  res.status: eq 200
+}

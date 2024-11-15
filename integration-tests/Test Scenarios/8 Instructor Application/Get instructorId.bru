@@ -1,0 +1,30 @@
+meta {
+  name: Get instructorId
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://{{ilim-url}}/user
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+      "email": "{{instructorEmail}}",
+      "password": "{{eduPassword}}"
+  }
+}
+
+vars:post-response {
+  instructorId: res.body.body.id
+}
+
+assert {
+  res.status: eq 200
+}

@@ -198,6 +198,22 @@ Resources:
             tar -xzf kafka_2.13-2.8.0.tgz
             mv kafka_2.13-2.8.0 kafka
             cd kafka
+            
+            echo "----- Configuring Kafka Retention Policies"
+            sed -i 's/^#*log\.retention\.hours=.*/log.retention.hours=1/' config/server.properties
+            sed -i 's/^#*log\.cleanup\.policy=.*/log.cleanup.policy=delete/' config/server.properties
+            cat >> config/server.properties <<EOL
+            log.cleanup.policy=delete
+            EOL
+
+            sed -i 's/^#*log\.retention\.bytes=.*/log.retention.bytes=104857600/' config/server.properties
+            cat >> config/server.properties <<EOL
+            
+            # Retention Policies
+            log.retention.hours=1
+            log.cleanup.policy=delete
+            log.retention.bytes=104857600
+            EOL
   
             echo "----- Starting Zookeeper and Kafka (in the background)"
             nohup bin/zookeeper-server-start.sh config/zookeeper.properties > /home/ec2-user/zookeeper.log 2>&1 &

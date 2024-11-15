@@ -1,0 +1,26 @@
+meta {
+  name: Admin cant double reject
+  type: http
+  seq: 10
+}
+
+post {
+  url: http://{{ilim-url}}/admin/reject-instructor-application
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "instructorApplicationId": "{{instAppId}}",
+    "message": "Too expensive"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

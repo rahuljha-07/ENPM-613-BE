@@ -13,6 +13,7 @@ public class InstructorAppDto {
     private ApplicationStatus status = ApplicationStatus.PENDING;
     private String schoolName;
     private String degreeTitle;
+    @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate graduateDate;
     private String professionalTitle;
     private String teachingExperience;
@@ -28,9 +29,6 @@ public class InstructorAppDto {
     private String videoApplicationUrl;
     private String profileImageUrl;
     private String resumeUrl;
-
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime submittedAt = LocalDateTime.now();
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime reviewedAt;

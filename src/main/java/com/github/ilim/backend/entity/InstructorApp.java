@@ -11,12 +11,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,10 +24,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "instructor_applications")
 @NoArgsConstructor
-public class InstructorApp {
-
-    @Transient
-    public static final Sort SORT_BY_SUBMITTED_AT_DESC = Sort.by(Sort.Direction.DESC, "submittedAt");
+public class InstructorApp extends AuditEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -42,6 +36,7 @@ public class InstructorApp {
 
     private String schoolName;
     private String degreeTitle;
+    @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate graduateDate;
 
     private String professionalTitle;
@@ -64,9 +59,6 @@ public class InstructorApp {
     private String adminMessage; // in case of rejection
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime submittedAt;
-
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime reviewedAt;
 
     public static InstructorApp from(InstructorAppDto dto) {
@@ -84,7 +76,6 @@ public class InstructorApp {
         application.videoApplicationUrl = dto.getVideoApplicationUrl();
         application.status = dto.getStatus();
         application.adminMessage = dto.getAdminMessage();
-        application.submittedAt = dto.getSubmittedAt();
         application.reviewedAt = dto.getReviewedAt();
         return application;
     }

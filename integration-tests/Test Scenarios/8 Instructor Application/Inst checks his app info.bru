@@ -1,0 +1,29 @@
+meta {
+  name: Inst checks his app info
+  type: http
+  seq: 15
+}
+
+get {
+  url: http://{{ilim-url}}/student/instructor-application
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+      "email": "admin@mail.com",
+      "password": "!Admin123"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.body.length: neq 0
+  res.body.body[0].status: eq APPROVED
+  res.body.body[1].status: eq REJECTED
+}

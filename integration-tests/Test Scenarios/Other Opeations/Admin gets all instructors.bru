@@ -1,0 +1,20 @@
+meta {
+  name: Admin gets all instructors
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://{{ilim-url}}/student/instructor-application/all
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.body.body.length: neq 0
+  res.status: eq 200
+}

@@ -1,0 +1,24 @@
+meta {
+  name: Admin gets all users
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://{{ilim-url}}/admin/user/all
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+vars:post-response {
+  userId: res.body.body[0].id
+}
+
+assert {
+  res.body.body.length: neq 0
+  res.status: eq 200
+}

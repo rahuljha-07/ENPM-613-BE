@@ -1,0 +1,22 @@
+meta {
+  name: Admin deomotes instructor
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://{{ilim-url}}/admin/integration-tests/demote-instructor/{{instructorId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+      "email": "admin@mail.com",
+      "password": "!Admin123"
+  }
+}

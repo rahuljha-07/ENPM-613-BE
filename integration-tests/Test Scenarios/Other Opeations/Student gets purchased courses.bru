@@ -1,0 +1,20 @@
+meta {
+  name: Student gets purchased courses
+  type: http
+  seq: 7
+}
+
+get {
+  url: http://{{ilim-url}}/student/course/purchased
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{studentToken}}
+}
+
+assert {
+  res.body.body.length: neq 0
+  res.status: eq 200
+}

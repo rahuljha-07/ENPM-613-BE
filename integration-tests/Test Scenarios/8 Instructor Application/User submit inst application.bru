@@ -1,0 +1,36 @@
+meta {
+  name: User submit inst application
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://{{ilim-url}}/student/instructor-application/submit
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+      "schoolName": "BAD NYU",
+      "degreeTitle": "PhD in Choreographic Systems",
+      "graduateDate": "1997-05-17",
+      "professionalTitle": "Movement Theorist",
+      "experienceYears": "70",
+      "teachingExperience": "A few years.",
+      "instructorTitle": "Senior Dance Instructor",
+      "instructorBio": "Simple Bio.",
+      "videoApplicationUrl": null,
+      "profileImageUrl": null,
+      "resumeUrl": null
+  }
+  
+}
+
+assert {
+  res.status: eq 201
+}

@@ -1,0 +1,20 @@
+meta {
+  name: Admin gets user by id
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://{{ilim-url}}/admin/user/{{userId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.body.body: isDefined 0
+  res.status: eq 200
+}
