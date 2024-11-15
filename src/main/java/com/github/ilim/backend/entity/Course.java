@@ -21,14 +21,17 @@ import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "courses")
 @NoArgsConstructor

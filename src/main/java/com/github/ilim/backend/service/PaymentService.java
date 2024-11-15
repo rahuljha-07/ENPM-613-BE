@@ -17,20 +17,20 @@ public class PaymentService {
 
     private static final Logger logger = Logger.getLogger(PaymentService.class.getName());
 
-    private final WebClient.Builder webClientBuilder;
+    private final WebClient webClient;
 
     @Value("${paymentServiceUrl}")
     private String paymentServiceUrl;
 
     public String createCheckoutSession(PaymentRequestDto paymentRequestDto) {
         try {
-            PaymentResponseDto response = webClientBuilder.build()
-                    .post()
-                    .uri(paymentServiceUrl)
-                    .bodyValue(paymentRequestDto)
-                    .retrieve()
-                    .bodyToMono(PaymentResponseDto.class)
-                    .block();
+            PaymentResponseDto response = webClient
+                .post()
+                .uri(paymentServiceUrl)
+                .bodyValue(paymentRequestDto)
+                .retrieve()
+                .bodyToMono(PaymentResponseDto.class)
+                .block();
 
             if (response == null) {
                 throw new PaymentProcessingException("The response was null");

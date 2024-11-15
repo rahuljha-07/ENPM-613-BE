@@ -13,3 +13,15 @@ aws.cognito.userPoolId=${CognitoUserPoolId}
 aws.cognito.clientId=${CognitoClientId}
 aws.cognito.region=${CognitoRegion}
 aws.cognito.jwkUrl=${CognitoJwkUrl}
+
+# Kafka
+spring.kafka.bootstrap-servers=localhost:9092
+spring.kafka.consumer.group-id=ilim-backend-group
+spring.kafka.consumer.auto-offset-reset=earliest
+spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+spring.kafka.consumer.value-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+kafka.topic.payment=paymentQueue
+  
+# Other services
+emailServiceUrl=http://localhost:8080/api/email/send
+paymentServiceUrl=http://localhost:8081/api/checkout

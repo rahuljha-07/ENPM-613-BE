@@ -9,14 +9,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminGetUserResponse;
 
 import java.time.LocalDate;
 
 
-@Data
-@EqualsAndHashCode(callSuper = false)
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "users")

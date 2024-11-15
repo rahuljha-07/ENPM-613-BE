@@ -18,24 +18,24 @@ public class EmailSenderService {
 
     private static final Logger logger = Logger.getLogger(EmailSenderService.class.getName());
 
-    private final WebClient.Builder webClientBuilder;
+    private final WebClient webClient;
 
     @Value("${emailServiceUrl}")
     private String emailServiceUrl;
 
     public void sendEmail(EmailDto emailDto) {
         try {
-            EmailResponseDto response = webClientBuilder.build()
-                    .post()
-                    .uri(emailServiceUrl)
-                    .bodyValue(emailDto)
-                    .retrieve()
-                    .bodyToMono(EmailResponseDto.class)
-                    .block();
+            EmailResponseDto response = webClient
+                .post()
+                .uri(emailServiceUrl)
+                .bodyValue(emailDto)
+                .retrieve()
+                .bodyToMono(EmailResponseDto.class)
+                .block();
 
             if (response == null || response.getStatus() != HttpStatus.OK.value()) {
                 throw new EmailSendingException("Email sending failed with status: " +
-                        (response != null ? response.getStatus() : "null response"));
+                    (response != null ? response.getStatus() : "null response"));
             }
 
             logger.log(Level.INFO, "Email sent successfully with message: {0}", response.getMessage());
