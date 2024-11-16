@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .requestMatchers("/quiz/**").authenticated()                               // Secure quiz endpoints
                 .requestMatchers("/module/**").authenticated()                             // Secure module endpoints
                 .requestMatchers("/video/**").authenticated()                              // Secure video endpoints
+                .requestMatchers("/support/**").authenticated()                            // Secure support endpoints
                 .anyRequest().permitAll()                                                    // Permit all other requests
             )
             .oauth2ResourceServer(oauth2 -> oauth2
