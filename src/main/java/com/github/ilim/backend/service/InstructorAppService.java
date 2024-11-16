@@ -8,11 +8,14 @@ import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.AdminCannotBeInstructorException;
 import com.github.ilim.backend.exception.exceptions.InstructorAppAlreadyExistsException;
 import com.github.ilim.backend.exception.exceptions.InstructorAppNotFoundException;
+import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
+import com.github.ilim.backend.exception.exceptions.UnknownApplicationStatusException;
 import com.github.ilim.backend.exception.exceptions.UserAlreadyInstructorException;
 import com.github.ilim.backend.repo.InstructorAppRepo;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,8 +47,20 @@ public class InstructorAppService {
         appRepo.save(application);
     }
 
-    public List<InstructorApp> findByUserId(String id) {
-        return appRepo.findByUserId(id, InstructorApp.SORT_BY_CREATED_AT_DESC);
+    public List<InstructorApp> findByUserId(String id, @Nullable String statusString) {
+        var applications = appRepo.findByUserId(id, InstructorApp.SORT_BY_CREATED_AT_DESC);
+        if (statusString == null) {
+            return applications;
+        }
+        ApplicationStatus status;
+        try {
+            status = ApplicationStatus.valueOf(statusString.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new UnknownApplicationStatusException(statusString);
+        }
+        return applications.stream()
+            .filter(app -> app.getStatus().equals(status))
+            .toList();
     }
 
     public InstructorApp findById(UUID id) {
@@ -66,4 +81,16 @@ public class InstructorAppService {
         appRepo.save(application);
     }
 
+    @Transactional
+    public void cancelPendingInstructorApplication(User user) {
+        var applications = findByUserId(user.getId(), ApplicationStatus.PENDING.name());
+        if (applications.isEmpty()) {
+            throw new InstructorAppNotFoundException(null);
+        }
+        var application = applications.getFirst();
+        application.setStatus(ApplicationStatus.REJECTED);
+        application.setAdminMessage("Cancelled by the user");
+        appRepo.save(application);
+    }
 }
+

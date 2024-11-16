@@ -1,6 +1,6 @@
 package com.github.ilim.backend.controller;
 
-import com.github.ilim.backend.dto.CourseQuizProgress;
+import com.github.ilim.backend.dto.CourseProgressDto;
 import com.github.ilim.backend.service.StudentService;
 import com.github.ilim.backend.service.UserService;
 import com.github.ilim.backend.util.response.ApiRes;
@@ -25,7 +25,7 @@ public class StudentController {
 
     @GetMapping("/student/{courseId}")
     @PreAuthorize("isAuthenticated()")
-    public ApiRes<Res<CourseQuizProgress>> getStudentQuiz(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+    public ApiRes<Res<CourseProgressDto>> getStudentQuiz(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
         var progress = studentService.getCourseQuizProgress(user, courseId);
         return Reply.ok(progress);

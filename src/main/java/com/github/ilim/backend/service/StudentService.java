@@ -1,6 +1,6 @@
 package com.github.ilim.backend.service;
 
-import com.github.ilim.backend.dto.CourseQuizProgress;
+import com.github.ilim.backend.dto.CourseProgressDto;
 import com.github.ilim.backend.dto.StudentCourseDto;
 import com.github.ilim.backend.dto.StudentCourseModuleDto;
 import com.github.ilim.backend.dto.StudentQuizDto;
@@ -25,7 +25,7 @@ public class StudentService {
     private final CourseService courseService;
     private final QuizAttemptService attemptService;
 
-    public CourseQuizProgress getCourseQuizProgress(@NonNull User student, @NonNull UUID courseId) {
+    public CourseProgressDto getCourseQuizProgress(@NonNull User student, @NonNull UUID courseId) {
         var course = (StudentCourseDto) findPurchasedCourse(student, courseId);
 
         if (student.getRole() == UserRole.ADMIN || course.getInstructor().getId().equals(student.getId())) {
@@ -46,7 +46,7 @@ public class StudentService {
             .filter(isPassed -> isPassed)
             .count();
 
-        return new CourseQuizProgress(courseId, (int) successfulAttemptCount, quizzes.size());
+        return new CourseProgressDto(courseId, (int) successfulAttemptCount, quizzes.size());
     }
 
     private Course findPurchasedCourse(User student, UUID courseId) {

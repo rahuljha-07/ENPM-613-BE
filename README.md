@@ -160,13 +160,13 @@ For Example:
 - [x] http://{{ilim-url}}/admin/course/all
 - [x] http://{{ilim-url}}/admin/user/all
 - [x] http://{{ilim-url}}/admin/user/{{userId}}
-- [x] http://{{ilim-url}}/student/instructor-application/all
-- [x] http://{{ilim-url}}/student/instructor-application/all-pending
+- [x] http://{{ilim-url}}/admin/instructor-application/all
+- [x] http://{{ilim-url}}/admin/instructor-application/all-pending
 - [x] http://{{ilim-url}}/admin/approve-instructor-application
 - [x] http://{{ilim-url}}/admin/reject-instructor-application
 - [x] http://{{ilim-url}}/student/instructor-application/submit
 - [x] http://{{ilim-url}}/student/instructor-application
-- [ ] http://{{ilim-url}}/student/course/purchased
+- [X] http://{{ilim-url}}/student/course/purchased
 
 ##### Not yet covered in the Integrations tests
 - [ ] http://{{ilim-url}}/admin/course/wait-for-approval
@@ -176,6 +176,7 @@ For Example:
 - [ ] http://{{ilim-url}}/auth/reset-password
 - [ ] http://{{ilim-url}}/student/course/{{courseId}}/certificate
 - [ ] http://{{ilim-url}}/student/{{courseId}}
+- [ ] http://{{ilim-url}}/student/course/{courseId}/check-progress
 - [ ] http://{{ilim-url}}/course/published?contains={{$random.alphanumeric(8)}}
 - [ ] http://{{ilim-url}}/instructor/course/{{courseId}}/reorder-modules
 - [ ] http://{{ilim-url}}/instructor/update-course/{{courseId}}

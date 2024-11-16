@@ -1,5 +1,6 @@
 package com.github.ilim.backend.service;
 
+import com.github.ilim.backend.dto.CourseProgressDto;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.exception.exceptions.CantGenerateCertificateException;
 import com.github.ilim.backend.exception.exceptions.StudentDidNotCompleteCourseException;
@@ -53,6 +54,12 @@ public class CertificateService {
         builder.toStream(pdfStream);
         builder.run();
         return pdfStream.toByteArray();
+    }
+
+    public CourseProgressDto checkCourseProgress(User student, UUID courseId) {
+        // check course availability and user access
+        var course = courseService.findCourseByIdAndUser(student, courseId);
+        return studentService.getCourseQuizProgress(student, course.getId());
     }
 }
 
