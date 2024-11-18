@@ -3,7 +3,6 @@ package com.github.ilim.backend.dto;
 import com.github.ilim.backend.entity.Course;
 import com.github.ilim.backend.entity.CourseModule;
 import com.github.ilim.backend.enums.CourseStatus;
-import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.CantCreatePublicCourseException;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +10,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class StudentCourseDtoTest {
 
