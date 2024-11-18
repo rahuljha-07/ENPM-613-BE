@@ -4,7 +4,7 @@ Welcome to the **ilim-backend**!
 
 - Refer to [ILIM User Guide.pdf](docs/ILIM%20User%20Guide.pdf) for the User Guide.
 - Refer to [ILIM Backend - Installation and Operation Guide.pdf](docs/ILIM%20Backend%20-%20Installation%20and%20Operation%20Guide.pdf) to learn how to set up the backend.
-- Refer to [feature-list.md](docs/feature-list.md) to see a bullet list of completed tasks.
+- Refer to [feature-list.md](docs/feature-list.md) to see a bullet list of implemented features.
 - Refer to [javadocs](docs/javadocs) to see a comprehensive Java Documentation of ilim-backend, covering all business logic code.
 - Refer to [tests](src/test/java/com/github/ilim/backend) to see a comprehensive set of unit-tests, that covers 80% of the code.
 - Refer to [integration-tests](integration-tests) to see 10 Integration Test Scenarios consisting of 184 tests.
