@@ -1,0 +1,14 @@
+com.github.ilim.backend
+com.github.ilim.backend.auth
+com.github.ilim.backend.config
+com.github.ilim.backend.controller
+com.github.ilim.backend.dto
+com.github.ilim.backend.entity
+com.github.ilim.backend.enums
+com.github.ilim.backend.exception
+com.github.ilim.backend.exception.exceptions
+com.github.ilim.backend.kafka
+com.github.ilim.backend.repo
+com.github.ilim.backend.service
+com.github.ilim.backend.util
+com.github.ilim.backend.util.response
