@@ -8,7 +8,6 @@ import com.github.ilim.backend.enums.UserRole;
 import com.github.ilim.backend.exception.exceptions.AdminCannotBeInstructorException;
 import com.github.ilim.backend.exception.exceptions.InstructorAppAlreadyExistsException;
 import com.github.ilim.backend.exception.exceptions.InstructorAppNotFoundException;
-import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
 import com.github.ilim.backend.exception.exceptions.UnknownApplicationStatusException;
 import com.github.ilim.backend.exception.exceptions.UserAlreadyInstructorException;
 import com.github.ilim.backend.repo.InstructorAppRepo;

@@ -7,7 +7,7 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeTy
 import java.time.LocalDate;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserTest {
 

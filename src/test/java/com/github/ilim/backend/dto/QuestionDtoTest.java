@@ -2,10 +2,12 @@ package com.github.ilim.backend.dto;
 
 import com.github.ilim.backend.enums.QuestionType;
 import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.UUID;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class QuestionDtoTest {
 

@@ -2,9 +2,12 @@ package com.github.ilim.backend.dto;
 
 import com.github.ilim.backend.enums.ApplicationStatus;
 import org.junit.jupiter.api.Test;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class InstructorAppDtoTest {
 

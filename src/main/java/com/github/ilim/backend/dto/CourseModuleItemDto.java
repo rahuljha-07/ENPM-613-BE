@@ -19,7 +19,7 @@ public class CourseModuleItemDto {
         var dto = new CourseModuleItemDto();
         dto.setId(item.getId());
         dto.setCourseModuleId(item.getCourseModule().getId());
-        dto.setItemId(item.getId());
+        dto.setItemId(item.getItemType() == ModuleItemType.QUIZ ? item.getQuiz().getId() : item.getVideo().getId());
         dto.setItemType(item.getItemType());
         dto.setOrderIndex(item.getOrderIndex());
         if (item.getItemType() == ModuleItemType.QUIZ) {

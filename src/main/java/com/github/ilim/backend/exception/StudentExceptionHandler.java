@@ -28,7 +28,7 @@ public class StudentExceptionHandler {
     }
 
     @ExceptionHandler(InstructorAppNotFoundException.class)
-    public ApiRes<Res<String>> InstructorAppNotFoundException(InstructorAppNotFoundException e) {
+    public ApiRes<Res<String>> handleInstructorAppNotFoundException(InstructorAppNotFoundException e) {
         logger.warning(e.getMessage());
         return Reply.notFound(e.getMessage());
     }

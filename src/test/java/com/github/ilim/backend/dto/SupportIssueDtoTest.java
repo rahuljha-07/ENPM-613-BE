@@ -2,7 +2,8 @@ package com.github.ilim.backend.dto;
 
 import com.github.ilim.backend.enums.PriorityLevel;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SupportIssueDtoTest {
 

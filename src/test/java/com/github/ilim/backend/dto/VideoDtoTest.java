@@ -2,7 +2,8 @@ package com.github.ilim.backend.dto;
 
 import com.github.ilim.backend.entity.Video;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class VideoDtoTest {
 

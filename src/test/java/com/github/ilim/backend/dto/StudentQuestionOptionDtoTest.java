@@ -1,10 +1,12 @@
 package com.github.ilim.backend.dto;
 
-import com.github.ilim.backend.entity.*;
+import com.github.ilim.backend.entity.Question;
+import com.github.ilim.backend.entity.QuestionOption;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StudentQuestionOptionDtoTest {
 

@@ -2,8 +2,11 @@ package com.github.ilim.backend.dto;
 
 import com.github.ilim.backend.exception.exceptions.MissingBirthdateException;
 import org.junit.jupiter.api.Test;
+
 import java.time.LocalDate;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SignUpDtoTest {
 

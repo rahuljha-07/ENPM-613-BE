@@ -26,7 +26,7 @@ public class CourseModuleExceptionHandler {
     }
 
     @ExceptionHandler(NotCourseInstructorException.class)
-    public ApiRes<Res<String>> handleUserIsNotInstructorOfCourseException(NotCourseInstructorException e) {
+    public ApiRes<Res<String>> handleNotCourseInstructorException(NotCourseInstructorException e) {
         logger.warning(e.getMessage());
         return Reply.unauthorized(e.getMessage());
     }

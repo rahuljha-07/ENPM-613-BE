@@ -3,7 +3,7 @@ package com.github.ilim.backend.entity;
 import com.github.ilim.backend.enums.ModuleItemType;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CourseModuleItemTest {
 
