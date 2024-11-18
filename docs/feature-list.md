@@ -37,9 +37,8 @@
 - [x] Edit Courses
 - [x] Remove Courses
 - [x] View User Profile Page
-- [ ] Edit the TOS for users
 ### System
-- [ ] Handle Payments
+- [x] Handle Payments
 - [x] Grade Quizzes
 - [x] Generate Certificates
 - [x] Enforce Access Control in all cases
