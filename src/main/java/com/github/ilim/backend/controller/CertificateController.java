@@ -21,7 +21,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-
+/**
+ * REST controller for handling certificate-related operations.
+ * <p>
+ * Provides endpoints for checking course progress and generating PDF certificates for students.
+ * </p>
+ *
+ * @see CertificateService
+ * @see UserService
+ */
 @RestController
 @RequiredArgsConstructor
 public class CertificateController {
@@ -30,6 +38,17 @@ public class CertificateController {
     private final UserService userService;
 
 
+    /**
+     * Checks the progress of a user in a specific course.
+     * <p>
+     * Extracts the user's information from the JWT, invokes the {@link CertificateService#checkCourseProgress(User, UUID)}
+     * method, and returns the course progress details.
+     * </p>
+     *
+     * @param jwt      the JWT token containing the user's authentication details
+     * @param courseId the ID of the course to check progress for
+     * @return an {@link ApiRes} containing the {@link CourseProgressDto} with progress details
+     */
     @GetMapping("/student/course/{courseId}/check-progress")
     @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR')")
     public ApiRes<Res<CourseProgressDto>> checkCourseProgress(
@@ -41,6 +60,17 @@ public class CertificateController {
         return Reply.ok(progress);
     }
 
+    /**
+     * Generates a PDF certificate for a user upon course completion.
+     * <p>
+     * Extracts the user's information from the JWT, invokes the {@link CertificateService#generatePdfCertificate(User, UUID)}
+     * method to generate the certificate, and returns the PDF as a downloadable file.
+     * </p>
+     *
+     * @param jwt      the JWT token containing the user's authentication details
+     * @param courseId the ID of the course for which the certificate is to be generated
+     * @return a {@link ResponseEntity} containing the PDF certificate as a byte array
+     */
     @PostMapping("/student/course/{courseId}/certificate")
     @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR')")
     public ResponseEntity<byte[]> generateCertificate(
@@ -54,6 +84,16 @@ public class CertificateController {
             .body(pdfCertificateBytes);
     }
 
+    /**
+     * Creates HTTP headers for the PDF response.
+     * <p>
+     * Sets the content type to PDF, specifies the content disposition as an attachment with the given filename,
+     * and configures cache control.
+     * </p>
+     *
+     * @param filename the name of the PDF file to be downloaded
+     * @return the configured {@link HttpHeaders} instance
+     */
     private static HttpHeaders createPdfResponseHeaders(@NonNull String filename) {
         var headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);

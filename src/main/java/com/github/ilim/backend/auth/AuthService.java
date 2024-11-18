@@ -23,6 +23,15 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpReque
 
 import java.util.Map;
 
+/**
+ * Service class responsible for handling authentication-related operations using AWS Cognito.
+ * <p>
+ * Provides functionalities such as user sign-in, sign-up, account verification, password reset,
+ * and password change by interacting with AWS Cognito Identity Provider.
+ * </p>
+ *
+ * @author
+ */
 @Service
 public class AuthService {
 
@@ -38,6 +47,15 @@ public class AuthService {
     @Value("${aws.cognito.region}")
     private String region;
 
+    /**
+     * Constructs an instance of {@code AuthService} with the specified AWS region and user service.
+     * <p>
+     * Initializes the {@link CognitoIdentityProviderClient} with the provided region and default credentials.
+     * </p>
+     *
+     * @param region      the AWS region for Cognito services
+     * @param userService the user service for managing user-related operations
+     */
     public AuthService(@Value("${aws.cognito.region}") String region, UserService userService) {
         this.cognitoClient = CognitoIdentityProviderClient.builder()
             .region(Region.of(region))
@@ -46,6 +64,19 @@ public class AuthService {
         this.userService = userService;
     }
 
+    /**
+     * Authenticates a user with the provided email and password.
+     * <p>
+     * Validates the input credentials, checks if the user is blocked, and initiates the authentication
+     * process with AWS Cognito.
+     * </p>
+     *
+     * @param email    the user's email address
+     * @param password the user's password
+     * @return an {@link AdminInitiateAuthResponse} containing authentication tokens
+     * @throws MissingEmailOrPasswordException if the email or password is missing or blank
+     * @throws BlockedUserCantSignInException if the user is blocked from signing in
+     */
     public AdminInitiateAuthResponse signIn(String email, String password) {
         if (email == null || email.isBlank() || password == null || password.isBlank()) {
             throw new MissingEmailOrPasswordException();
@@ -65,6 +96,14 @@ public class AuthService {
         return cognitoClient.adminInitiateAuth(authRequest);
     }
 
+    /**
+     * Registers a new user using the provided sign-up data.
+     * <p>
+     * Constructs a {@link SignUpRequest} with the user's details and sends it to AWS Cognito for registration.
+     * </p>
+     *
+     * @param dto the sign-up data transfer object containing user registration details
+     */
     public void signUp(SignUpDto dto) {
         try (var unauthenticatedClient = CognitoIdentityProviderClient.builder()
             .region(Region.of(region))
@@ -84,6 +123,16 @@ public class AuthService {
         }
     }
 
+    /**
+     * Verifies a user's account using their email and confirmation code.
+     * <p>
+     * Sends a {@link ConfirmSignUpRequest} to AWS Cognito to confirm the user's account and subsequently
+     * saves the user in the application's database.
+     * </p>
+     *
+     * @param email            the user's email address
+     * @param confirmationCode the confirmation code sent to the user's email
+     */
     public void verifyAccount(String email, String confirmationCode) {
         var request = ConfirmSignUpRequest.builder()
             .clientId(clientId)
@@ -95,6 +144,15 @@ public class AuthService {
         saveUserInDatabase(email);
     }
 
+    /**
+     * Saves the authenticated user in the application's database.
+     * <p>
+     * Retrieves the user information from AWS Cognito using the provided email and creates a corresponding
+     * user entity in the application's database.
+     * </p>
+     *
+     * @param email the user's email address
+     */
     private void saveUserInDatabase(String email) {
         var getUserRequest = AdminGetUserRequest.builder() // from Cognito
             .userPoolId(userPoolId)
@@ -106,6 +164,14 @@ public class AuthService {
         userService.create(user);
     }
 
+    /**
+     * Initiates the password reset process for a user.
+     * <p>
+     * Sends a {@link ForgotPasswordRequest} to AWS Cognito to initiate the password reset process.
+     * </p>
+     *
+     * @param email the user's email address requesting a password reset
+     */
     public void ForgotPassword(String email) {
         var request = ForgotPasswordRequest.builder()
             .clientId(clientId)
@@ -115,6 +181,16 @@ public class AuthService {
         cognitoClient.forgotPassword(request);
     }
 
+    /**
+     * Completes the password reset process by confirming the reset with a verification code.
+     * <p>
+     * Sends a {@link ConfirmForgotPasswordRequest} to AWS Cognito to set a new password for the user.
+     * </p>
+     *
+     * @param email           the user's email address
+     * @param confirmationCode the confirmation code sent to the user's email
+     * @param newPassword     the new password to be set for the user
+     */
     public void resetPassword(String email, String confirmationCode, String newPassword) {
         var request = ConfirmForgotPasswordRequest.builder()
             .clientId(clientId)
@@ -126,6 +202,16 @@ public class AuthService {
         cognitoClient.confirmForgotPassword(request);
     }
 
+    /**
+     * Changes the password for an authenticated user.
+     * <p>
+     * Sends a {@link ChangePasswordRequest} to AWS Cognito to update the user's password.
+     * </p>
+     *
+     * @param accessToken       the access token of the authenticated user
+     * @param previousPassword  the user's current password
+     * @param proposedPassword  the new password to be set
+     */
     public void changePassword(String accessToken, String previousPassword, String proposedPassword) {
         var request = ChangePasswordRequest.builder()
             .accessToken(accessToken)
@@ -136,4 +222,3 @@ public class AuthService {
         cognitoClient.changePassword(request);
     }
 }
-

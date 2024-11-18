@@ -15,6 +15,15 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.ArrayList;
 
+/**
+ * Configuration class for Spring Security.
+ * <p>
+ * Defines security filter chains, JWT decoding, and authentication converters.
+ * Configures CORS, CSRF, authorization rules, and OAuth2 resource server settings.
+ * </p>
+ *
+ * @author
+ */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -25,6 +34,17 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final CorsConfigurationSourceImpl corsConfigurationSource;
 
+    /**
+     * Configures the security filter chain for HTTP requests.
+     * <p>
+     * Sets up CORS configurations, disables CSRF protection, defines authorization rules for various endpoints,
+     * configures OAuth2 resource server with JWT support, and integrates the custom user details service.
+     * </p>
+     *
+     * @param http the {@link HttpSecurity} to modify
+     * @return the configured {@link SecurityFilterChain}
+     * @throws Exception if an error occurs while configuring security
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -54,11 +74,27 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Configures the JWT decoder using the specified JWK Set URI.
+     * <p>
+     * Utilizes {@link NimbusJwtDecoder} to decode JWT tokens based on the JWK set provided by AWS Cognito.
+     * </p>
+     *
+     * @return the configured {@link JwtDecoder} instance
+     */
     @Bean
     public JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder.withJwkSetUri(jwkUrl).build();
     }
 
+    /**
+     * Configures the JWT authentication converter.
+     * <p>
+     * Converts JWT tokens into Spring Security authorities by loading user details and extracting their roles.
+     * </p>
+     *
+     * @return the configured {@link JwtAuthenticationConverter} instance
+     */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         var converter = new JwtAuthenticationConverter();

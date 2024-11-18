@@ -35,6 +35,18 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Service class responsible for managing quiz attempts.
+ * <p>
+ * Provides functionalities such as submitting quiz attempts, retrieving quiz attempt results,
+ * and allowing instructors and admins to view all attempts for a specific quiz.
+ * </p>
+ *
+ * @see QuizAttemptRepo
+ * @see UserAnswerOptionRepo
+ * @see QuestionOptionRepo
+ * @see QuizService
+ */
 @Service
 @RequiredArgsConstructor
 public class QuizAttemptService {
@@ -45,6 +57,14 @@ public class QuizAttemptService {
     private final UserAnswerRepo userAnswerRepo;
     private final QuizService quizService;
 
+    /**
+     * Retrieves all quiz attempts made by a student for a specific quiz.
+     *
+     * @param student the {@link User} entity representing the student
+     * @param quizId  the unique identifier of the quiz
+     * @return a list of {@link QuizAttemptResultDto} containing the results of each attempt
+     * @throws QuizAttemptsNotFoundException if no attempts are found for the given quiz ID
+     */
     public List<QuizAttemptResultDto> getAllStudentQuizAttempts(@NonNull User student, @NonNull UUID quizId) {
         var quiz = quizService.findQuizById(student, quizId);
         var attempts = quizAttemptRepo.findQuizAttemptsByQuizAndStudent(
@@ -58,6 +78,14 @@ public class QuizAttemptService {
             .toList();
     }
 
+    /**
+     * Retrieves the most recent quiz attempt made by a student for a specific quiz.
+     *
+     * @param student the {@link User} entity representing the student
+     * @param quizId  the unique identifier of the quiz
+     * @return a {@link QuizAttemptResultDto} containing the result of the last attempt
+     * @throws QuizAttemptsNotFoundException if no attempts are found for the given quiz ID
+     */
     public QuizAttemptResultDto getLastStudentQuizAttempt(@NonNull User student, @NonNull UUID quizId) {
         var quiz = quizService.findQuizById(student, quizId);
         var attempts = quizAttemptRepo.findQuizAttemptsByQuizAndStudent(
@@ -69,11 +97,33 @@ public class QuizAttemptService {
         return QuizAttemptResultDto.from(lastAttempt);
     }
 
+    /**
+     * Retrieves all quiz attempts for a specific quiz, accessible by instructors and admins.
+     *
+     * @param user    the {@link User} entity representing the instructor or admin
+     * @param quizId  the unique identifier of the quiz
+     * @return a list of {@link QuizAttempt} representing all attempts made by students
+     */
     public List<QuizAttempt> getAllQuizAttemptsForQuiz(User user, UUID quizId) {
         var quiz = quizService.findQuizById(user, quizId);
         return quizAttemptRepo.findQuizAttemptsByQuiz(quiz, AuditEntity.SORT_BY_CREATED_AT_DESC);
     }
 
+    /**
+     * Processes a quiz attempt submitted by a student.
+     * <p>
+     * Evaluates the student's answers, calculates the score, determines pass/fail status,
+     * and records the attempt in the repository.
+     * </p>
+     *
+     * @param user the {@link User} entity representing the student
+     * @param dto  the data transfer object containing quiz attempt details and user answers
+     * @return a {@link QuizAttemptResultDto} containing the results of the attempt
+     * @throws CantAttemptOwnQuizException    if a user attempts their own quiz
+     * @throws AdminCantAttemptQuizzesException if an admin attempts a quiz
+     * @throws MissingAnswerException         if an answer is missing for a question
+     * @throws QuestionOptionNotFoundException if a selected question option does not exist
+     */
     @Transactional
     public QuizAttemptResultDto processQuizAttempt(@NonNull User user, @Valid QuizAttemptDto dto) {
         var quiz = quizService.findQuizById(user, dto.getQuizId());
@@ -99,6 +149,16 @@ public class QuizAttemptService {
         return QuizAttemptResultDto.from(attempt);
     }
 
+    /**
+     * Grades a quiz attempt by evaluating the user's answers against correct options.
+     *
+     * @param dto     the {@link QuizAttemptDto} containing the user's answers
+     * @param quiz    the {@link Quiz} entity being attempted
+     * @param attempt the {@link QuizAttempt} entity representing the attempt
+     * @return a {@link GradingResult} containing the user's score and the total possible score
+     * @throws MissingAnswerException         if an answer is missing for a question
+     * @throws QuestionOptionNotFoundException if a selected question option does not exist
+     */
     private GradingResult gradeQuiz(QuizAttemptDto dto, Quiz quiz, QuizAttempt attempt) {
         var userScore = BigDecimal.ZERO;
         var quizScore = BigDecimal.ZERO;
@@ -122,6 +182,13 @@ public class QuizAttemptService {
         return new GradingResult(userScore, quizScore);
     }
 
+    /**
+     * Saves the user's selected answer options for a given question.
+     *
+     * @param answer             the {@link UserAnswer} entity representing the user's answer to a question
+     * @param selectedOptionIds  the list of {@link UUID} identifiers for the selected question options
+     * @throws QuestionOptionNotFoundException if a selected question option does not exist
+     */
     private void saveUserAnswer(UserAnswer answer, List<UUID> selectedOptionIds) {
         for (UUID optionId : selectedOptionIds) {
             var option = findQuestionOptionById(optionId);
@@ -130,11 +197,27 @@ public class QuizAttemptService {
         }
     }
 
+    /**
+     * Finds a {@link QuestionOption} by its unique identifier.
+     *
+     * @param optionId the unique identifier of the question option
+     * @return the {@link QuestionOption} entity corresponding to the provided ID
+     * @throws QuestionOptionNotFoundException if no question option is found with the given ID
+     */
     private QuestionOption findQuestionOptionById(UUID optionId) {
         return questionOptionRepo.findById(optionId)
             .orElseThrow(() -> new QuestionOptionNotFoundException(optionId));
     }
 
+    /**
+     * Retrieves the user's answer for a specific question within a quiz attempt.
+     *
+     * @param dto      the {@link QuizAttemptDto} containing all user answers
+     * @param question the {@link Question} entity being answered
+     * @param attempt  the {@link QuizAttempt} entity representing the attempt
+     * @return the {@link UserAnswerDto} containing the user's selected option IDs for the question
+     * @throws MissingAnswerException if no answer is found for the given question within the attempt
+     */
     private static UserAnswerDto pickThisQuestionAnswer(QuizAttemptDto dto, Question question, QuizAttempt attempt) {
         return dto.getAnswers().stream()
             .filter(a -> a.getQuestionId().equals(question.getId()))
@@ -142,6 +225,16 @@ public class QuizAttemptService {
             .orElseThrow(() -> new MissingAnswerException(attempt.getId(), question.getId()));
     }
 
+    /**
+     * Determines if the user's selected answers are correct.
+     * <p>
+     * The user must select all correct options and no incorrect ones to be considered correct.
+     * </p>
+     *
+     * @param correctOptions     the collection of {@link QuestionOption} entities that are correct for the question
+     * @param selectedOptionIds  the list of {@link UUID} identifiers for the options selected by the user
+     * @return {@code true} if the selected options exactly match the correct options, {@code false} otherwise
+     */
     private boolean isAnswerCorrect(Collection<QuestionOption> correctOptions, List<UUID> selectedOptionIds) {
         // student must select all correct options, no less no more
         var correctOptionIds = correctOptions.stream()
@@ -151,5 +244,11 @@ public class QuizAttemptService {
         return correctOptionIds.equals(selectedIds);
     }
 
+    /**
+     * Represents the result of grading a quiz attempt.
+     *
+     * @param userScore  the total score obtained by the user
+     * @param totalScore the total possible score for the quiz
+     */
     private record GradingResult(BigDecimal userScore, BigDecimal totalScore) {}
 }

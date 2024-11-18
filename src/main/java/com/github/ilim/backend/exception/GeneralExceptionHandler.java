@@ -40,7 +40,7 @@ public class GeneralExceptionHandler {
     }
 
     @ExceptionHandler(UnknownApplicationStatusException.class)
-    public ApiRes<Res<String>> UnknownApplicationStatusException(UnknownApplicationStatusException e) {
+    public ApiRes<Res<String>> handleUnknownApplicationStatusException(UnknownApplicationStatusException e) {
         logger.warning(e.getMessage());
         return Reply.badRequest(e.getMessage());
     }

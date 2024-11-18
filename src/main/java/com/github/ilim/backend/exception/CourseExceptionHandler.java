@@ -3,6 +3,7 @@ package com.github.ilim.backend.exception;
 
 import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
 import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
+import com.github.ilim.backend.exception.exceptions.CantCreatePublicCourseException;
 import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
 import com.github.ilim.backend.exception.exceptions.CourseAlreadyPublished;
 import com.github.ilim.backend.exception.exceptions.CourseIsNotWaitingApprovalException;
@@ -104,6 +105,12 @@ public class CourseExceptionHandler {
 
     @ExceptionHandler(CourseIsNotWaitingApprovalException.class)
     public ApiRes<Res<String>> handleCourseIsNotWaitingApprovalException(CourseIsNotWaitingApprovalException e) {
+        logger.warning(e.getMessage());
+        return Reply.forbidden(e.getMessage());
+    }
+
+    @ExceptionHandler(CantCreatePublicCourseException.class)
+    public ApiRes<Res<String>> handleCantCreatePublicCourseException(CantCreatePublicCourseException e) {
         logger.warning(e.getMessage());
         return Reply.forbidden(e.getMessage());
     }

@@ -29,6 +29,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Entity representing a course in the system.
+ * <p>
+ * Contains course details such as title, thumbnail URL, description, price, status, deletion flag,
+ * associated modules, and the instructor.
+ * </p>
+ */
 @Getter
 @Setter
 @Entity
@@ -74,6 +81,12 @@ public class Course extends AuditEntity {
         this.status = status != null ? status : CourseStatus.DRAFT;
     }
 
+    /**
+     * Creates a {@link Course} entity from a {@link CourseDto}.
+     *
+     * @param dto the {@link CourseDto} containing course details
+     * @return a new {@link Course} entity populated with data from the DTO
+     */
     public static Course from(CourseDto dto) {
         var course = new Course();
         course.setTitle(dto.getTitle());
@@ -83,6 +96,11 @@ public class Course extends AuditEntity {
         return course;
     }
 
+    /**
+     * Updates the course's details based on the provided {@link CourseDto}.
+     *
+     * @param dto the {@link CourseDto} containing updated course details
+     */
     public void updateFrom(@Valid CourseDto dto) {
         setTitle(dto.getTitle());
         setThumbnailUrl(dto.getThumbnailUrl());
@@ -90,12 +108,31 @@ public class Course extends AuditEntity {
         setPrice(dto.getPrice());
     }
 
+    /**
+     * Adds a new module to the course.
+     * <p>
+     * Sets the order index of the module, associates it with the course,
+     * and adds it to the course's module list.
+     * </p>
+     *
+     * @param module the {@link CourseModule} entity to add
+     */
     public void addCourseModule(CourseModule module) {
         module.setOrderIndex(courseModules.size());
         courseModules.add(module);
         module.setCourse(this);
     }
 
+    /**
+     * Deletes a module from the course.
+     * <p>
+     * Removes the specified module, disassociates it from the course,
+     * and re-indexes the remaining modules.
+     * </p>
+     *
+     * @param module the {@link CourseModule} entity to delete
+     * @throws CourseModuleNotFoundException if the module is not found within the course
+     */
     public void deleteCourseModule(CourseModule module) {
         int deletedIndex = module.getOrderIndex();
         courseModules.remove(module);
@@ -107,11 +144,16 @@ public class Course extends AuditEntity {
         }
     }
 
+    /**
+     * Finds a module within the course by its unique identifier.
+     *
+     * @param moduleId the unique identifier of the module to find
+     * @return the {@link CourseModule} entity corresponding to the provided ID
+     * @throws CourseModuleNotFoundException if no module is found with the given ID
+     */
     public CourseModule findModule(UUID moduleId) {
-        return courseModules.stream()
-            .filter(mod -> mod.getId().equals(moduleId))
-            .findFirst()
-            .orElseThrow(() -> new CourseModuleNotFoundException(moduleId));
+        return courseModules.stream().filter(mod -> mod.getId().equals(moduleId)).findFirst().orElseThrow(() -> new CourseModuleNotFoundException(moduleId));
     }
 
 }
+

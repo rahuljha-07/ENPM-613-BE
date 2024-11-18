@@ -12,6 +12,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Service class responsible for sending emails.
+ * <p>
+ * Utilizes a {@link WebClient} to communicate with an external email service.
+ * </p>
+ *
+ * @see WebClient
+ */
 @Service
 @RequiredArgsConstructor
 public class EmailSenderService {
@@ -23,6 +31,16 @@ public class EmailSenderService {
     @Value("${emailServiceUrl}")
     private String emailServiceUrl;
 
+    /**
+     * Sends an email based on the provided {@link EmailDto}.
+     * <p>
+     * Constructs and sends an HTTP POST request to the configured email service URL with the email details.
+     * Logs the outcome and handles any exceptions that may occur during the process.
+     * </p>
+     *
+     * @param emailDto the data transfer object containing email details such as recipient, subject, and body
+     * @throws EmailSendingException if the email service returns a non-OK status or if an error occurs during sending
+     */
     public void sendEmail(EmailDto emailDto) {
         try {
             EmailResponseDto response = webClient

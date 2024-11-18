@@ -18,6 +18,15 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Service class responsible for managing student-related operations.
+ * <p>
+ * Provides functionalities such as retrieving course progress based on quiz attempts.
+ * </p>
+ *
+ * @see CourseService
+ * @see QuizAttemptService
+ */
 @Service
 @RequiredArgsConstructor
 public class StudentService {
@@ -25,6 +34,18 @@ public class StudentService {
     private final CourseService courseService;
     private final QuizAttemptService attemptService;
 
+    /**
+     * Retrieves the quiz progress for a student in a specific course.
+     * <p>
+     * Calculates the number of quizzes passed and the total number of quizzes in the course.
+     * </p>
+     *
+     * @param student  the {@link User} entity representing the student
+     * @param courseId the unique identifier of the course
+     * @return a {@link CourseProgressDto} containing the progress details
+     * @throws CourseNotFoundException          if the course is not found or not purchased by the student
+     * @throws UserCantHaveQuizProgress        if the user is an admin or the course instructor
+     */
     public CourseProgressDto getCourseQuizProgress(@NonNull User student, @NonNull UUID courseId) {
         var course = (StudentCourseDto) findPurchasedCourse(student, courseId);
 
@@ -49,6 +70,14 @@ public class StudentService {
         return new CourseProgressDto(courseId, (int) successfulAttemptCount, quizzes.size());
     }
 
+    /**
+     * Finds a purchased course by a student based on the course ID.
+     *
+     * @param student  the {@link User} entity representing the student
+     * @param courseId the unique identifier of the course
+     * @return the {@link Course} entity corresponding to the purchased course
+     * @throws CourseNotFoundException if the course is not found or not purchased by the student
+     */
     private Course findPurchasedCourse(User student, UUID courseId) {
         return courseService.findPurchasedCourses(student)
             .stream()
