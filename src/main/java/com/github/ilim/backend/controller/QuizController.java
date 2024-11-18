@@ -21,6 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+/**
+ * REST controller responsible for managing quizzes.
+ * <p>
+ * Provides endpoints for retrieving quizzes, adding new quizzes to modules,
+ * updating existing quizzes, and removing quizzes from modules.
+ * </p>
+ *
+ * @see QuizService
+ * @see UserService
+ */
 @RestController
 @RequiredArgsConstructor
 public class QuizController {
@@ -28,6 +38,16 @@ public class QuizController {
     private final QuizService quizService;
     private final UserService userService;
 
+    /**
+     * Retrieves a quiz by its unique identifier.
+     * <p>
+     * Fetches the quiz details for the specified quiz ID, accessible to authenticated users.
+     * </p>
+     *
+     * @param jwt    the JWT token representing the authenticated user
+     * @param quizId the unique identifier of the quiz to retrieve
+     * @return an {@link ApiRes} containing the {@link QuizDto} representing the quiz details
+     */
     @GetMapping("/quiz/{quizId}")
     public ApiRes<Res<QuizDto>> findQuizById(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID quizId) {
         var user = userService.findById(jwt.getClaimAsString("sub"));
@@ -35,6 +55,18 @@ public class QuizController {
         return Reply.ok(quizDto);
     }
 
+    /**
+     * Adds a new quiz to a specific module.
+     * <p>
+     * Accepts a {@link QuizDto} containing quiz details, associates it with the specified module ID,
+     * and adds the quiz to the module.
+     * </p>
+     *
+     * @param jwt      the JWT token representing the authenticated instructor
+     * @param moduleId the unique identifier of the module to which the quiz will be added
+     * @param dto      the quiz data transfer object containing quiz details
+     * @return an {@link ApiRes} containing a success message upon successful addition of the quiz
+     */
     @PostMapping("/instructor/module/{moduleId}/add-quiz")
     @PreAuthorize("hasRole('INSTRUCTOR')")
     public ApiRes<Res<String>> addQuizToModule(
@@ -47,6 +79,18 @@ public class QuizController {
         return Reply.created("Quiz added successfully.");
     }
 
+    /**
+     * Updates an existing quiz with new details.
+     * <p>
+     * Accepts a {@link QuizDto} containing updated quiz details, associates it with the specified quiz ID,
+     * and updates the quiz accordingly.
+     * </p>
+     *
+     * @param jwt    the JWT token representing the authenticated instructor
+     * @param quizId the unique identifier of the quiz to update
+     * @param dto    the quiz data transfer object containing updated quiz details
+     * @return an {@link ApiRes} containing a success message upon successful update of the quiz
+     */
     @PutMapping("/instructor/update-quiz/{quizId}")
     @PreAuthorize("hasRole('INSTRUCTOR')")
     public ApiRes<Res<String>> updateQuiz(
@@ -59,6 +103,16 @@ public class QuizController {
         return Reply.ok("Quiz updated successfully");
     }
 
+    /**
+     * Removes a quiz from a specific module.
+     * <p>
+     * Deletes the association between the specified quiz ID and its module, effectively removing the quiz.
+     * </p>
+     *
+     * @param jwt    the JWT token representing the authenticated instructor
+     * @param quizId the unique identifier of the quiz to remove
+     * @return an {@link ApiRes} containing a success message upon successful removal of the quiz
+     */
     @DeleteMapping("/instructor/delete-quiz/{quizId}")
     @PreAuthorize("hasRole('INSTRUCTOR')")
     public ApiRes<Res<String>> removeQuizFromModule(

@@ -14,6 +14,17 @@ import java.io.ByteArrayOutputStream;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Service class responsible for generating and managing certificates.
+ * <p>
+ * Provides functionalities to generate PDF certificates for students who have completed courses,
+ * and to check a student's progress in a course.
+ * </p>
+ *
+ * @see TemplateEngine
+ * @see CourseService
+ * @see StudentService
+ */
 @Service
 @RequiredArgsConstructor
 public class CertificateService {
@@ -22,6 +33,18 @@ public class CertificateService {
     private final CourseService courseService;
     private final StudentService studentService;
 
+    /**
+     * Generates a PDF certificate for a student who has completed a course.
+     * <p>
+     * Validates the student's completion of the course and generates a PDF certificate using Thymeleaf templates.
+     * </p>
+     *
+     * @param student  the {@link User} entity representing the student
+     * @param courseId the unique identifier of the course for which the certificate is to be generated
+     * @return a byte array representing the generated PDF certificate
+     * @throws StudentDidNotCompleteCourseException if the student has not completed all quizzes in the course
+     * @throws CantGenerateCertificateException      if an error occurs during PDF generation
+     */
     public byte[] generatePdfCertificate(User student, UUID courseId) {
         var course = courseService.findCourseByIdAndUser(student, courseId);
         var certificate = new Certificate(UUID.randomUUID(), student.getName(), course.getTitle());
@@ -37,6 +60,16 @@ public class CertificateService {
         }
     }
 
+    /**
+     * Generates a PDF from the provided certificate data.
+     * <p>
+     * Utilizes Thymeleaf to render HTML content and OpenHTMLToPDF to convert the HTML to a PDF byte array.
+     * </p>
+     *
+     * @param certificate the {@link Certificate} record containing certificate details
+     * @return a byte array representing the generated PDF
+     * @throws Exception if an error occurs during PDF generation
+     */
     private byte[] generatePdf(Certificate certificate) throws Exception {
         var context = new Context();
         context.setVariable("certificate", certificate);
@@ -56,6 +89,16 @@ public class CertificateService {
         return pdfStream.toByteArray();
     }
 
+    /**
+     * Checks the progress of a student in a specific course.
+     * <p>
+     * Retrieves the course details and returns the student's progress, including the number of completed quizzes.
+     * </p>
+     *
+     * @param student  the {@link User} entity representing the student
+     * @param courseId the unique identifier of the course
+     * @return a {@link CourseProgressDto} containing the student's progress in the course
+     */
     public CourseProgressDto checkCourseProgress(User student, UUID courseId) {
         // check course availability and user access
         var course = courseService.findCourseByIdAndUser(student, courseId);
@@ -63,4 +106,11 @@ public class CertificateService {
     }
 }
 
+/**
+ * Record representing a certificate.
+ *
+ * @param certificateId the unique identifier of the certificate
+ * @param studentName   the name of the student receiving the certificate
+ * @param courseTitle    the title of the course for which the certificate is issued
+ */
 record Certificate(UUID certificateId, String studentName, String courseTitle) {}

@@ -11,6 +11,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Service class responsible for processing payments.
+ * <p>
+ * Utilizes a {@link WebClient} to communicate with an external payment service.
+ * </p>
+ *
+ * @see WebClient
+ */
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
@@ -22,6 +30,16 @@ public class PaymentService {
     @Value("${paymentServiceUrl}")
     private String paymentServiceUrl;
 
+    /**
+     * Creates a checkout session for a payment request.
+     * <p>
+     * Sends a payment request to the payment service and retrieves the checkout URL for the transaction.
+     * </p>
+     *
+     * @param paymentRequestDto the data transfer object containing payment details such as user, course, and currency
+     * @return the checkout URL as a {@link String} where the user can complete the payment
+     * @throws PaymentProcessingException if the payment service returns a null response or an error occurs during processing
+     */
     public String createCheckoutSession(PaymentRequestDto paymentRequestDto) {
         try {
             PaymentResponseDto response = webClient

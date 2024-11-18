@@ -14,6 +14,15 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Component responsible for consuming payment events from Kafka topics.
+ * <p>
+ * Listens to payment-related Kafka topics, processes incoming payment events,
+ * and triggers appropriate actions in the {@link CoursePurchaseService} based on the payment status.
+ * </p>
+ *
+ * @see CoursePurchaseService
+ */
 @Component
 @RequiredArgsConstructor
 public class PaymentEventConsumer {
@@ -23,6 +32,16 @@ public class PaymentEventConsumer {
     private final CoursePurchaseService coursePurchaseService;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Consumes payment events from the configured Kafka topic.
+     * <p>
+     * Parses the incoming JSON message into a {@link PaymentEventDto} object,
+     * determines the payment intent status, and invokes the corresponding method
+     * in {@link CoursePurchaseService} to confirm or reject the purchase.
+     * </p>
+     *
+     * @param record the {@link ConsumerRecord} containing the payment event message
+     */
     @KafkaListener(topics = "${kafka.topic.payment}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumePaymentEvent(ConsumerRecord<String, String> record) {
         String message = record.value();

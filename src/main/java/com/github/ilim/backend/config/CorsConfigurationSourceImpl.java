@@ -8,8 +8,28 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Implementation of {@link CorsConfigurationSource} to define Cross-Origin Resource Sharing (CORS) configurations.
+ * <p>
+ * Configures allowed headers, origins, methods, credentials, and exposed headers for incoming HTTP requests.
+ * </p>
+ *
+ * @author
+ */
 @Configuration
 public class CorsConfigurationSourceImpl implements CorsConfigurationSource {
+
+    /**
+     * Provides the CORS configuration based on the incoming HTTP request.
+     * <p>
+     * Sets the allowed headers to "Authorization", "Cache-Control", and "Content-Type".
+     * Allows origins matching "http://localhost:3000". Permits HTTP methods GET, POST, PUT, DELETE, OPTIONS, PATCH.
+     * Enables credentials and exposes specific headers in the response.
+     * </p>
+     *
+     * @param request the incoming HTTP request
+     * @return the configured {@link CorsConfiguration} instance
+     */
     @Override
     public CorsConfiguration getCorsConfiguration(@NonNull HttpServletRequest request) {
         CorsConfiguration corsConfiguration = new CorsConfiguration();

@@ -21,6 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * REST controller for managing instructor applications.
+ * <p>
+ * Provides endpoints for students to submit, cancel, and retrieve their instructor applications,
+ * and for admins to retrieve all instructor applications.
+ * </p>
+ *
+ * @see InstructorAppService
+ * @see UserService
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping
@@ -29,6 +39,17 @@ public class InstructorAppController {
     private final InstructorAppService appService;
     private final UserService userService;
 
+    /**
+     * Retrieves the current user's instructor applications, optionally filtering by status.
+     * <p>
+     * Extracts the user's information from the JWT, invokes the {@link InstructorAppService#findByUserId(String, String)}
+     * method, and returns a list of {@link InstructorApp} entities.
+     * </p>
+     *
+     * @param jwt    the JWT token containing the user's authentication details
+     * @param status an optional status filter to retrieve specific instructor applications
+     * @return an {@link ApiRes} containing a list of {@link InstructorApp} entities
+     */
     @GetMapping("/student/instructor-application")
     @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR')")
     public ApiRes<Res<List<InstructorApp>>> getCurrentUserInstructorApp(
@@ -40,6 +61,17 @@ public class InstructorAppController {
         return Reply.ok(applications);
     }
 
+    /**
+     * Submits a new instructor application for the authenticated user.
+     * <p>
+     * Extracts the user's information from the JWT, invokes the {@link InstructorAppService#saveInstructorApp(User, InstructorAppDto)}
+     * method to save the application, and returns a response indicating successful submission.
+     * </p>
+     *
+     * @param jwt the JWT token containing the user's authentication details
+     * @param dto the instructor application data transfer object containing application details
+     * @return an {@link ApiRes} containing a success message
+     */
     @PostMapping("/student/instructor-application/submit")
     @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR')")
     public ApiRes<Res<String>> submitInstructorApp(
@@ -51,6 +83,16 @@ public class InstructorAppController {
         return Reply.created("Application submitted successfully");
     }
 
+    /**
+     * Cancels the pending instructor application for the authenticated user.
+     * <p>
+     * Extracts the user's information from the JWT, invokes the {@link InstructorAppService#cancelPendingInstructorApplication(User)}
+     * method to cancel the application, and returns a response indicating successful cancellation.
+     * </p>
+     *
+     * @param jwt the JWT token containing the user's authentication details
+     * @return an {@link ApiRes} containing a success message
+     */
     @PostMapping("/student/instructor-application/cancel")
     @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR')")
     public ApiRes<Res<String>> submitInstructorApp(
@@ -61,12 +103,28 @@ public class InstructorAppController {
         return Reply.created("Pending Instructor Application has been canceled successfully");
     }
 
+    /**
+     * Retrieves all instructor applications in the system.
+     * <p>
+     * Invokes the {@link InstructorAppService#findAll()} method and returns a list of all {@link InstructorApp} entities.
+     * </p>
+     *
+     * @return an {@link ApiRes} containing a list of all {@link InstructorApp} entities
+     */
     @GetMapping("/admin/instructor-application/all")
     @PreAuthorize("hasRole('ADMIN')")
     public  ApiRes<Res<List<InstructorApp>>> getAll() {
         return Reply.ok(appService.findAll());
     }
 
+    /**
+     * Retrieves all pending instructor applications in the system.
+     * <p>
+     * Invokes the {@link InstructorAppService#findPendingApplications()} method and returns a list of pending {@link InstructorApp} entities.
+     * </p>
+     *
+     * @return an {@link ApiRes} containing a list of pending {@link InstructorApp} entities
+     */
     @GetMapping("/admin/instructor-application/all-pending")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiRes<Res<List<InstructorApp>>> getAllPending() {

@@ -16,6 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+/**
+ * REST controller responsible for managing student-related functionalities.
+ * <p>
+ * Provides endpoints for students to view their course quiz progress.
+ * </p>
+ *
+ * @see StudentService
+ * @see UserService
+ */
 @RestController
 @RequiredArgsConstructor
 public class StudentController {
@@ -23,6 +32,16 @@ public class StudentController {
     private final StudentService studentService;
     private final UserService userService;
 
+    /**
+     * Retrieves the quiz progress of a student for a specific course.
+     * <p>
+     * Fetches the progress details of the authenticated student for the given course ID.
+     * </p>
+     *
+     * @param jwt      the JWT token representing the authenticated student
+     * @param courseId the unique identifier of the course
+     * @return an {@link ApiRes} containing the {@link CourseProgressDto} with the student's quiz progress
+     */
     @GetMapping("/student/{courseId}")
     @PreAuthorize("isAuthenticated()")
     public ApiRes<Res<CourseProgressDto>> getStudentQuiz(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
