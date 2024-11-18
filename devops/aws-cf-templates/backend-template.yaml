@@ -225,11 +225,11 @@ Resources:
   
             #echo "----- Starting Payment Service"
             #cd /home/ec2-user/paymentservice
-            #nohup java -jar target/*.jar --server.port=8081 > /home/ec2-user/paymentservice.log 2>&1 &
+            nohup java -jar target/*.jar --server.port=8081 > /home/ec2-user/paymentservice.log 2>&1 &
             
             #echo "----- Starting ilim Delivery Service"
             #cd /home/ec2-user/ilimdeliveryserv
-            #nohup java -jar target/*.jar --server.port=8082 > /home/ec2-user/ilimdeliveryserv.log 2>&1 &
+            nohup java -jar target/*.jar --server.port=8082 > /home/ec2-user/ilimdeliveryserv.log 2>&1 &
             EOF
           - AwsRdsEndpoint: !Ref AwsRdsEndpoint
             IlimDbName: !Ref IlimDbName
