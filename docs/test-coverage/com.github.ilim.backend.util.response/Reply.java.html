@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Reply.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.util.response</a> &gt; <span class="el_source">Reply.java</span></div><h1>Reply.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.util.response;
+
+import org.springframework.http.HttpStatus;
+
+<span class="nc" id="L5">public class Reply {</span>
+
+    public static &lt;T&gt; ApiRes&lt;Res&lt;T&gt;&gt; create(HttpStatus status) {
+<span class="nc" id="L8">        return create(status, null);</span>
+    }
+
+    public static &lt;T&gt; ApiRes&lt;Res&lt;T&gt;&gt; create(HttpStatus status, T message) {
+<span class="fc" id="L12">        return new ApiRes&lt;Res&lt;T&gt;&gt;(Res.of(status, message), status);</span>
+    }
+
+    public static ApiRes&lt;Res&lt;String&gt;&gt; ok() {
+<span class="fc" id="L16">        return ok(null);</span>
+    }
+
+    public static &lt;T&gt; ApiRes&lt;Res&lt;T&gt;&gt; ok(T body) {
+<span class="fc" id="L20">        return create(HttpStatus.OK, body);</span>
+    }
+
+    public static &lt;T&gt; ApiRes&lt;Res&lt;T&gt;&gt; created() {
+<span class="nc" id="L24">        return created(null);</span>
+    }
+
+    public static &lt;T&gt; ApiRes&lt;Res&lt;T&gt;&gt; created(T body) {
+<span class="fc" id="L28">        return create(HttpStatus.CREATED, body);</span>
+    }
+
+    public static ApiRes&lt;Res&lt;String&gt;&gt; badRequest() {
+<span class="nc" id="L32">        return badRequest(null);</span>
+    }
+
+    public static ApiRes&lt;Res&lt;String&gt;&gt; badRequest(String message) {
+<span class="fc" id="L36">        return create(HttpStatus.BAD_REQUEST, message);</span>
+    }
+
+    public static ApiRes&lt;Res&lt;String&gt;&gt; conflict() {
+<span class="nc" id="L40">        return conflict(null);</span>
+    }
+
+    public static ApiRes&lt;Res&lt;String&gt;&gt; conflict(String message) {
+<span class="fc" id="L44">        return create(HttpStatus.CONFLICT, message);</span>
+    }
+
+    public static ApiRes&lt;Res&lt;String&gt;&gt; notFound() {
+<span class="nc" id="L48">        return notFound(null);</span>
+    }
+
+    public static ApiRes&lt;Res&lt;String&gt;&gt; notFound(String message) {
+<span class="fc" id="L52">        return create(HttpStatus.NOT_FOUND, message);</span>
+    }
+
+    public static ApiRes&lt;Res&lt;String&gt;&gt; unauthorized() {
+<span class="nc" id="L56">        return unauthorized(null);</span>
+    }
+
+    public static ApiRes&lt;Res&lt;String&gt;&gt; unauthorized(String message) {
+<span class="fc" id="L60">        return create(HttpStatus.UNAUTHORIZED, message);</span>
+    }
+
+    public static ApiRes&lt;Res&lt;String&gt;&gt; forbidden() {
+<span class="nc" id="L64">        return forbidden(null);</span>
+    }
+
+    public static ApiRes&lt;Res&lt;String&gt;&gt; forbidden(String message) {
+<span class="fc" id="L68">        return create(HttpStatus.FORBIDDEN, message);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

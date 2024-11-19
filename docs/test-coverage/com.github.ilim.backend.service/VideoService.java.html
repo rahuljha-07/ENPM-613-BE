@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VideoService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.service</a> &gt; <span class="el_source">VideoService.java</span></div><h1>VideoService.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.service;
+
+import com.github.ilim.backend.dto.VideoDto;
+import com.github.ilim.backend.entity.CourseModuleItem;
+import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.entity.Video;
+import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
+import com.github.ilim.backend.exception.exceptions.VideoNotFoundException;
+import com.github.ilim.backend.repo.VideoRepo;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class VideoService {
+
+    private final VideoRepo videoRepo;
+    private final CourseService courseService;
+    private final ModuleService moduleService;
+    private final ModuleItemService moduleItemService;
+
+    @Transactional
+    public void addVideoToModule(User instructor, UUID moduleId, @Valid VideoDto dto) {
+<span class="fc" id="L28">        var module = moduleService.findModuleByIdAsInstructor(instructor, moduleId);</span>
+
+        // create video record
+<span class="fc" id="L31">        var video = Video.from(dto);</span>
+<span class="fc" id="L32">        video.setCourseModule(module);</span>
+<span class="fc" id="L33">        videoRepo.save(video);</span>
+
+        // add it to module
+<span class="fc" id="L36">        var moduleItem = CourseModuleItem.create(video);</span>
+<span class="fc" id="L37">        module.addModuleItem(moduleItem);</span>
+<span class="fc" id="L38">        moduleService.saveModule(module);</span>
+<span class="fc" id="L39">    }</span>
+
+    @Transactional
+    public void removeVideoFromModule(User instructor, UUID videoId) {
+<span class="fc" id="L43">        var video = findVideoByIdAsInstructor(instructor, videoId);</span>
+<span class="fc" id="L44">        var module = video.getCourseModule();</span>
+<span class="fc" id="L45">        var moduleItem = moduleItemService.findModuleItemByVideo(video);</span>
+<span class="fc" id="L46">        module.removeModuleItem(moduleItem);</span>
+<span class="fc" id="L47">        videoRepo.delete(video);</span>
+<span class="fc" id="L48">    }</span>
+
+    @Transactional
+    public void updateVideo(User instructor, UUID videoId, @Valid VideoDto dto) {
+<span class="fc" id="L52">        var video = findVideoByIdAsInstructor(instructor, videoId);</span>
+<span class="fc" id="L53">        video.updateFrom(dto);</span>
+<span class="fc" id="L54">        videoRepo.save(video);</span>
+<span class="fc" id="L55">    }</span>
+
+    public Video findVideoByIdAsInstructor(User instructor, UUID videoId) {
+<span class="fc" id="L58">        var video = findVideoById(instructor, videoId);</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (!video.getCourseModule().getCourse().getInstructor().equals(instructor)) {</span>
+<span class="fc" id="L60">            throw new NotCourseInstructorException(instructor, video);</span>
+        }
+<span class="fc" id="L62">        return video;</span>
+    }
+
+    public Video findVideoById(User instructor, UUID videoId) {
+<span class="fc" id="L66">        var video = videoRepo.findById(videoId)</span>
+<span class="fc" id="L67">            .orElseThrow(() -&gt; new VideoNotFoundException(videoId));</span>
+<span class="fc" id="L68">        var course = video.getCourseModule().getCourse();</span>
+<span class="fc" id="L69">        courseService.assertUserHasAccessToCourseContent(instructor, course);</span>
+<span class="fc" id="L70">        return video;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

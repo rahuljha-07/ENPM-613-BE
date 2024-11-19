@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InstructorApp.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.entity</a> &gt; <span class="el_source">InstructorApp.java</span></div><h1>InstructorApp.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.entity;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.github.ilim.backend.dto.InstructorAppDto;
+import com.github.ilim.backend.enums.ApplicationStatus;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Getter
+@Setter
+@Entity
+@Table(name = &quot;instructor_applications&quot;)
+@NoArgsConstructor
+public class InstructorApp extends AuditEntity{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    private String userId;
+
+    private String profileImageUrl;
+
+    private String schoolName;
+    private String degreeTitle;
+    @JsonFormat(pattern=&quot;yyyy-MM-dd&quot;)
+    private LocalDate graduateDate;
+
+    private String professionalTitle;
+    private int experienceYears;
+    private String resumeUrl;
+
+    @Column(length = 2000)
+    private String teachingExperience;
+
+    private String instructorTitle;
+
+    @Column(length = 2000)
+    private String instructorBio;
+
+    private String videoApplicationUrl;
+
+    @Enumerated(EnumType.STRING)
+    private ApplicationStatus status;
+
+    private String adminMessage; // in case of rejection
+
+    @JsonFormat(pattern=&quot;yyyy-MM-dd HH:mm:ss&quot;)
+    private LocalDateTime reviewedAt;
+
+    public static InstructorApp from(InstructorAppDto dto) {
+<span class="fc" id="L65">        var application = new InstructorApp();</span>
+<span class="fc" id="L66">        application.profileImageUrl = dto.getProfileImageUrl();</span>
+<span class="fc" id="L67">        application.schoolName = dto.getSchoolName();</span>
+<span class="fc" id="L68">        application.degreeTitle = dto.getDegreeTitle();</span>
+<span class="fc" id="L69">        application.graduateDate = dto.getGraduateDate();</span>
+<span class="fc" id="L70">        application.professionalTitle = dto.getProfessionalTitle();</span>
+<span class="fc" id="L71">        application.experienceYears = dto.getExperienceYears();</span>
+<span class="fc" id="L72">        application.resumeUrl = dto.getResumeUrl();</span>
+<span class="fc" id="L73">        application.teachingExperience = dto.getTeachingExperience();</span>
+<span class="fc" id="L74">        application.instructorTitle = dto.getInstructorTitle();</span>
+<span class="fc" id="L75">        application.instructorBio = dto.getInstructorBio();</span>
+<span class="fc" id="L76">        application.videoApplicationUrl = dto.getVideoApplicationUrl();</span>
+<span class="fc" id="L77">        application.status = dto.getStatus();</span>
+<span class="fc" id="L78">        application.adminMessage = dto.getAdminMessage();</span>
+<span class="fc" id="L79">        application.reviewedAt = dto.getReviewedAt();</span>
+<span class="fc" id="L80">        return application;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

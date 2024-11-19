@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModuleController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.controller</a> &gt; <span class="el_source">ModuleController.java</span></div><h1>ModuleController.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.controller;
+
+import com.github.ilim.backend.dto.ModuleDto;
+import com.github.ilim.backend.service.ModuleService;
+import com.github.ilim.backend.service.UserService;
+import com.github.ilim.backend.util.response.ApiRes;
+import com.github.ilim.backend.util.response.Reply;
+import com.github.ilim.backend.util.response.Res;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
+
+@RestController
+@RequiredArgsConstructor
+public class ModuleController {
+
+    private final ModuleService moduleService;
+    private final UserService userService;
+
+    @GetMapping(&quot;/module/{moduleId}&quot;)
+    @PreAuthorize(&quot;isAuthenticated()&quot;)
+    public ApiRes&lt;Res&lt;Object&gt;&gt; findModuleByIdAsStudent(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID moduleId
+    ) {
+<span class="fc" id="L37">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L38">        var module = moduleService.findCourseModuleById(user, moduleId);</span>
+<span class="fc" id="L39">        return Reply.ok(module);</span>
+    }
+
+    @PostMapping(&quot;/instructor/course/{courseId}/add-module&quot;)
+    @PreAuthorize(&quot;hasRole('INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; addModuleToCourse(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID courseId,
+        @Valid @RequestBody ModuleDto dto
+    ) {
+<span class="fc" id="L49">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L50">        moduleService.addModuleToCourse(user, courseId, dto);</span>
+<span class="fc" id="L51">        return Reply.created(&quot;Module added successfully to course.&quot;);</span>
+    }
+
+    @PutMapping(&quot;/instructor/update-module/{moduleId}&quot;)
+    @PreAuthorize(&quot;hasRole('INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; updateModule(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID moduleId,
+        @Valid @RequestBody ModuleDto dto
+    ) {
+<span class="fc" id="L61">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L62">        moduleService.updateCourseModule(user, moduleId, dto);</span>
+<span class="fc" id="L63">        return Reply.ok(&quot;Module updated successfully.&quot;);</span>
+    }
+
+    @DeleteMapping(&quot;/instructor/delete-module/{moduleId}&quot;)
+    @PreAuthorize(&quot;hasRole('INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; deleteCourseModule(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID moduleId
+    ) {
+<span class="fc" id="L72">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L73">        moduleService.deleteCourseModule(user, moduleId);</span>
+<span class="fc" id="L74">        return Reply.ok(&quot;Module deleted successfully.&quot;);</span>
+    }
+
+//    @PutMapping(&quot;/instructor/module/{moduleId}/reorder-items&quot;)
+//    @PreAuthorize(&quot;hasRole('INSTRUCTOR')&quot;)
+//    public ApiRes&lt;Res&lt;String&gt;&gt; reorderModuleItems(
+//        @AuthenticationPrincipal Jwt jwt,
+//        @PathVariable UUID moduleId,
+//        @RequestBody List&lt;UUID&gt; itemsOrder
+//    ) {
+//        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));
+//        moduleService.reorderModuleItems(user, moduleId, itemsOrder);
+//        return Reply.ok(&quot;Course modules reordered successfully.&quot;);
+//    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

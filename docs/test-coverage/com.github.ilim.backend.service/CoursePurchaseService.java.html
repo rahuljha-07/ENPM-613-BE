@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CoursePurchaseService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.service</a> &gt; <span class="el_source">CoursePurchaseService.java</span></div><h1>CoursePurchaseService.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.service;
+
+import com.github.ilim.backend.dto.PaymentEventDto;
+import com.github.ilim.backend.dto.PaymentRequestDto;
+import com.github.ilim.backend.entity.AuditEntity;
+import com.github.ilim.backend.entity.Course;
+import com.github.ilim.backend.entity.CoursePurchase;
+import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.enums.PaymentIntentStatus;
+import com.github.ilim.backend.enums.PurchaseStatus;
+import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
+import com.github.ilim.backend.exception.exceptions.CantFindCoursePurchaseException;
+import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
+import com.github.ilim.backend.exception.exceptions.NoPurchasesException;
+import com.github.ilim.backend.exception.exceptions.PendingPurchaseExistsException;
+import com.github.ilim.backend.repo.CoursePurchaseRepo;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class CoursePurchaseService {
+
+    private final UserService userService;
+    private final CourseService courseService;
+    private final CoursePurchaseRepo purchaseRepo;
+    private final PaymentService paymentService;
+
+    private static final String DEFAULT_CURRENCY = &quot;USD&quot;;
+
+    public List&lt;CoursePurchase&gt; findAllByStudent(@NonNull User student) {
+<span class="nc" id="L37">        return purchaseRepo.findAllByStudent(student, AuditEntity.SORT_BY_CREATED_AT_DESC);</span>
+    }
+
+    public List&lt;CoursePurchase&gt; findByStudentAndCourse(@NonNull User student, @NonNull Course course) {
+<span class="nc" id="L41">        return purchaseRepo.findByStudentAndCourse(student, course, AuditEntity.SORT_BY_CREATED_AT_DESC);</span>
+    }
+
+    public CoursePurchase findPendingByStudentAndCourse(@NonNull User student, @NonNull Course course) {
+<span class="fc" id="L45">        return findPendingByStudentAndCourse(student, course, PurchaseStatus.PENDING);</span>
+    }
+
+    public CoursePurchase findPendingByStudentAndCourse(@NonNull User student, @NonNull Course course, PurchaseStatus status) {
+<span class="fc" id="L49">        return purchaseRepo.findByStudentAndCourseAndStatus(student, course, status)</span>
+<span class="pc" id="L50">            .orElseThrow(() -&gt; new CantFindCoursePurchaseException(student.getId(), course.getId(), status));</span>
+    }
+
+    @Transactional
+    public String purchaseCourse(User student, UUID courseId) {
+<span class="fc" id="L55">        var course = courseService.findPublishedCourse(courseId);</span>
+<span class="fc" id="L56">        assertStudentNotCreatorOfCourse(student, course);</span>
+<span class="fc" id="L57">        assertCourseNotAlreadyPurchased(student, course);</span>
+<span class="fc" id="L58">        assertNoPendingPurchaseRequest(student, course);</span>
+
+<span class="fc" id="L60">        var purchase = CoursePurchase.createPendingPurchase(student, course);</span>
+<span class="fc" id="L61">        purchaseRepo.save(purchase);</span>
+
+<span class="fc" id="L63">        var paymentRequestDto = PaymentRequestDto.createRequestDto(student, course, DEFAULT_CURRENCY);</span>
+<span class="fc" id="L64">        return paymentService.createCheckoutSession(paymentRequestDto);</span>
+    }
+
+    private void assertNoPendingPurchaseRequest(User student, Course course) {
+<span class="fc" id="L68">        var purchase = purchaseRepo.findByStudentAndCourseAndStatus(student, course, PurchaseStatus.PENDING);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (purchase.isPresent()) {</span>
+<span class="fc" id="L70">            throw new PendingPurchaseExistsException(student.getId(), course.getId(), purchase.get().geCourseId());</span>
+        }
+<span class="fc" id="L72">    }</span>
+
+    private void assertCourseNotAlreadyPurchased(User student, Course course) {
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if (didStudentPurchaseCourse(purchaseRepo, student, course)) {</span>
+<span class="fc" id="L76">            throw new AlreadyPurchasedCourseException(student.getId(), course.getId());</span>
+        }
+<span class="fc" id="L78">    }</span>
+
+    private static void assertStudentNotCreatorOfCourse(User student, Course course) {
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (course.getInstructor().getId().equals(student.getId())) {</span>
+<span class="fc" id="L82">            throw new CantPurchaseOwnCourseException(student.getId(), course.getId());</span>
+        }
+<span class="fc" id="L84">    }</span>
+
+    @Transactional
+    public void confirmPurchase(@NonNull PaymentEventDto paymentEventDto) {
+<span class="fc" id="L88">        var student = userService.findById(paymentEventDto.getUserId());</span>
+<span class="fc" id="L89">        var course = courseService.findPublishedCourse(UUID.fromString(paymentEventDto.getCourseId()));</span>
+
+<span class="fc" id="L91">        var purchase = findPendingByStudentAndCourse(student, course);</span>
+<span class="fc" id="L92">        purchase.setPaymentId(paymentEventDto.getPaymentId());</span>
+<span class="fc" id="L93">        purchase.setStatus(PurchaseStatus.SUCCEEDED);</span>
+<span class="fc" id="L94">        purchaseRepo.save(purchase);</span>
+<span class="fc" id="L95">    }</span>
+
+    public void rejectPurchase(PaymentEventDto paymentEventDto, PaymentIntentStatus status) {
+<span class="fc" id="L98">        var student = userService.findById(paymentEventDto.getUserId());</span>
+<span class="fc" id="L99">        var course = courseService.findPublishedCourse(UUID.fromString(paymentEventDto.getCourseId()));</span>
+
+<span class="fc" id="L101">        var purchase = findPendingByStudentAndCourse(student, course);</span>
+<span class="fc" id="L102">        purchase.setPaymentId(paymentEventDto.getPaymentId());</span>
+<span class="fc" id="L103">        purchase.setStatus(PurchaseStatus.FAILED);</span>
+<span class="fc" id="L104">        purchase.setFailedMessage(&quot;Course purchase failed due to %s&quot;.formatted(status));</span>
+<span class="fc" id="L105">        purchaseRepo.save(purchase);</span>
+<span class="fc" id="L106">    }</span>
+
+    public PurchaseStatus checkCoursePurchase(User student, UUID courseId) {
+<span class="nc" id="L109">        var course = courseService.findPublishedCourse(courseId);</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        if (didStudentPurchaseCourse(purchaseRepo, student, course)) {</span>
+<span class="nc" id="L111">            return PurchaseStatus.SUCCEEDED;</span>
+        }
+<span class="nc" id="L113">        var purchases = purchaseRepo.findByStudentAndCourse(student, course, AuditEntity.SORT_BY_CREATED_AT_DESC);</span>
+<span class="nc bnc" id="L114" title="All 4 branches missed.">        if (purchases.stream().anyMatch(purchase -&gt; purchase.getStatus() == PurchaseStatus.PENDING)) {</span>
+<span class="nc" id="L115">            return PurchaseStatus.PENDING;</span>
+        }
+<span class="nc bnc" id="L117" title="All 4 branches missed.">        if (purchases.stream().anyMatch(purchase -&gt; purchase.getStatus() == PurchaseStatus.FAILED)) {</span>
+<span class="nc" id="L118">            return PurchaseStatus.FAILED;</span>
+        }
+<span class="nc" id="L120">        throw new NoPurchasesException(student.getId(), courseId);</span>
+    }
+
+    public static boolean didStudentPurchaseCourse(CoursePurchaseRepo repo, User student, Course course) {
+<span class="fc" id="L124">        return repo.findByStudentAndCourseAndStatus(student, course, PurchaseStatus.SUCCEEDED).isPresent();</span>
+    }
+
+    public void cancelCoursePurchase(User student, UUID courseId) {
+<span class="fc" id="L128">        var course = courseService.findPublishedCourse(courseId);</span>
+<span class="fc" id="L129">        var purchase = findPendingByStudentAndCourse(student, course);</span>
+<span class="fc" id="L130">        purchase.setStatus(PurchaseStatus.FAILED);</span>
+<span class="fc" id="L131">        purchase.setFailedMessage(&quot;Course purchased cancelled by the student&quot;);</span>
+<span class="fc" id="L132">        purchaseRepo.save(purchase);</span>
+<span class="fc" id="L133">    }</span>
+
+    // This written mainly for the integration tests
+    // however it can be used by the admin to gift a course to a student for free
+    @Transactional
+    public void simulateCoursePurchaseConfirmation(PaymentEventDto dto) {
+<span class="nc" id="L139">        confirmPurchase(dto);</span>
+<span class="nc" id="L140">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

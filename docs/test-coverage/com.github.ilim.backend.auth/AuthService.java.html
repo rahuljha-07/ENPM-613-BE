@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.auth</a> &gt; <span class="el_source">AuthService.java</span></div><h1>AuthService.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.auth;
+
+import com.github.ilim.backend.dto.SignUpDto;
+import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.exception.exceptions.BlockedUserCantSignInException;
+import com.github.ilim.backend.exception.exceptions.MissingEmailOrPasswordException;
+import com.github.ilim.backend.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminGetUserRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminInitiateAuthRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminInitiateAuthResponse;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.ChangePasswordRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.ConfirmForgotPasswordRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.ConfirmSignUpRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.ForgotPasswordRequest;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpRequest;
+
+import java.util.Map;
+
+@Service
+public class AuthService {
+
+    private final CognitoIdentityProviderClient cognitoClient;
+    private final UserService userService;
+
+    @Value(&quot;${aws.cognito.clientId}&quot;)
+    private String clientId;
+
+    @Value(&quot;${aws.cognito.userPoolId}&quot;)
+    private String userPoolId;
+
+    @Value(&quot;${aws.cognito.region}&quot;)
+    private String region;
+
+<span class="fc" id="L41">    public AuthService(@Value(&quot;${aws.cognito.region}&quot;) String region, UserService userService) {</span>
+<span class="fc" id="L42">        this.cognitoClient = CognitoIdentityProviderClient.builder()</span>
+<span class="fc" id="L43">            .region(Region.of(region))</span>
+<span class="fc" id="L44">            .credentialsProvider(DefaultCredentialsProvider.create())</span>
+<span class="fc" id="L45">            .build();</span>
+<span class="fc" id="L46">        this.userService = userService;</span>
+<span class="fc" id="L47">    }</span>
+
+    public AdminInitiateAuthResponse signIn(String email, String password) {
+<span class="pc bpc" id="L50" title="2 of 8 branches missed.">        if (email == null || email.isBlank() || password == null || password.isBlank()) {</span>
+<span class="fc" id="L51">            throw new MissingEmailOrPasswordException();</span>
+        }
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (userService.isUserBlockedByEmail(email)) {</span>
+<span class="fc" id="L54">            throw new BlockedUserCantSignInException(email);</span>
+        }
+<span class="fc" id="L56">        var authRequest = AdminInitiateAuthRequest.builder()</span>
+<span class="fc" id="L57">            .authFlow(AuthFlowType.ADMIN_USER_PASSWORD_AUTH)</span>
+<span class="fc" id="L58">            .userPoolId(userPoolId)</span>
+<span class="fc" id="L59">            .clientId(clientId)</span>
+<span class="fc" id="L60">            .authParameters(Map.of(</span>
+                &quot;USERNAME&quot;, email,
+                &quot;PASSWORD&quot;, password
+            ))
+<span class="fc" id="L64">            .build();</span>
+<span class="nc" id="L65">        return cognitoClient.adminInitiateAuth(authRequest);</span>
+    }
+
+    public void signUp(SignUpDto dto) {
+<span class="nc" id="L69">        try (var unauthenticatedClient = CognitoIdentityProviderClient.builder()</span>
+<span class="nc" id="L70">            .region(Region.of(region))</span>
+<span class="nc" id="L71">            .build()</span>
+        ) {
+<span class="nc" id="L73">            var request = SignUpRequest.builder()</span>
+<span class="nc" id="L74">                .clientId(clientId)</span>
+<span class="nc" id="L75">                .username(dto.getEmail())</span>
+<span class="nc" id="L76">                .password(dto.getPassword())</span>
+<span class="nc" id="L77">                .userAttributes(</span>
+<span class="nc" id="L78">                    AttributeType.builder().name(&quot;name&quot;).value(dto.getName()).build(),</span>
+<span class="nc" id="L79">                    AttributeType.builder().name(&quot;birthdate&quot;).value(dto.getBirthdateString()).build()</span>
+                )
+<span class="nc" id="L81">                .build();</span>
+
+<span class="nc" id="L83">            unauthenticatedClient.signUp(request);</span>
+        }
+<span class="nc" id="L85">    }</span>
+
+    public void verifyAccount(String email, String confirmationCode) {
+<span class="fc" id="L88">        var request = ConfirmSignUpRequest.builder()</span>
+<span class="fc" id="L89">            .clientId(clientId)</span>
+<span class="fc" id="L90">            .username(email)</span>
+<span class="fc" id="L91">            .confirmationCode(confirmationCode)</span>
+<span class="fc" id="L92">            .build();</span>
+
+<span class="nc" id="L94">        cognitoClient.confirmSignUp(request);</span>
+<span class="nc" id="L95">        saveUserInDatabase(email);</span>
+<span class="nc" id="L96">    }</span>
+
+    private void saveUserInDatabase(String email) {
+<span class="nc" id="L99">        var getUserRequest = AdminGetUserRequest.builder() // from Cognito</span>
+<span class="nc" id="L100">            .userPoolId(userPoolId)</span>
+<span class="nc" id="L101">            .username(email)</span>
+<span class="nc" id="L102">            .build();</span>
+
+<span class="nc" id="L104">        var cognitoUser = cognitoClient.adminGetUser(getUserRequest);</span>
+<span class="nc" id="L105">        User user = User.from(cognitoUser);</span>
+<span class="nc" id="L106">        userService.create(user);</span>
+<span class="nc" id="L107">    }</span>
+
+    public void ForgotPassword(String email) {
+<span class="fc" id="L110">        var request = ForgotPasswordRequest.builder()</span>
+<span class="fc" id="L111">            .clientId(clientId)</span>
+<span class="fc" id="L112">            .username(email)</span>
+<span class="fc" id="L113">            .build();</span>
+
+<span class="nc" id="L115">        cognitoClient.forgotPassword(request);</span>
+<span class="nc" id="L116">    }</span>
+
+    public void resetPassword(String email, String confirmationCode, String newPassword) {
+<span class="fc" id="L119">        var request = ConfirmForgotPasswordRequest.builder()</span>
+<span class="fc" id="L120">            .clientId(clientId)</span>
+<span class="fc" id="L121">            .username(email)</span>
+<span class="fc" id="L122">            .confirmationCode(confirmationCode)</span>
+<span class="fc" id="L123">            .password(newPassword)</span>
+<span class="fc" id="L124">            .build();</span>
+
+<span class="nc" id="L126">        cognitoClient.confirmForgotPassword(request);</span>
+<span class="nc" id="L127">    }</span>
+
+    public void changePassword(String accessToken, String previousPassword, String proposedPassword) {
+<span class="fc" id="L130">        var request = ChangePasswordRequest.builder()</span>
+<span class="fc" id="L131">            .accessToken(accessToken)</span>
+<span class="fc" id="L132">            .previousPassword(previousPassword)</span>
+<span class="fc" id="L133">            .proposedPassword(proposedPassword)</span>
+<span class="fc" id="L134">            .build();</span>
+
+<span class="nc" id="L136">        cognitoClient.changePassword(request);</span>
+<span class="nc" id="L137">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

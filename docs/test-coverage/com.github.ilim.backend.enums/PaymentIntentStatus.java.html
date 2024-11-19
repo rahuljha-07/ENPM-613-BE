@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentIntentStatus.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.enums</a> &gt; <span class="el_source">PaymentIntentStatus.java</span></div><h1>PaymentIntentStatus.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.enums;
+
+<span class="fc" id="L3">public enum PaymentIntentStatus {</span>
+<span class="fc" id="L4">    SUCCEEDED,</span>
+<span class="fc" id="L5">    REQUIRES_ACTION,</span>
+<span class="fc" id="L6">    REQUIRES_PAYMENT_METHOD,</span>
+<span class="fc" id="L7">    PROCESSING,</span>
+<span class="fc" id="L8">    CANCELED,</span>
+<span class="fc" id="L9">    REQUIRES_CONFIRMATION,</span>
+<span class="fc" id="L10">    REQUIRES_CAPTURE,</span>
+<span class="fc" id="L11">    NULL;</span>
+
+    public static PaymentIntentStatus from(String status) {
+<span class="fc bfc" id="L14" title="All 8 branches covered.">        return switch (status) {</span>
+<span class="fc" id="L15">            case &quot;succeeded&quot; -&gt; SUCCEEDED;</span>
+<span class="fc" id="L16">            case &quot;requires_action&quot; -&gt; REQUIRES_ACTION;</span>
+<span class="fc" id="L17">            case &quot;requires_payment_method&quot; -&gt; REQUIRES_PAYMENT_METHOD;</span>
+<span class="fc" id="L18">            case &quot;processing&quot; -&gt; PROCESSING;</span>
+<span class="fc" id="L19">            case &quot;canceled&quot; -&gt; CANCELED;</span>
+<span class="fc" id="L20">            case &quot;requires_confirmation&quot; -&gt; REQUIRES_CONFIRMATION;</span>
+<span class="fc" id="L21">            case &quot;requires_capture&quot; -&gt; REQUIRES_CAPTURE;</span>
+<span class="fc" id="L22">            default -&gt; NULL;</span>
+        };
+    }
+
+    public static String toString(PaymentIntentStatus status) {
+<span class="fc bfc" id="L27" title="All 8 branches covered.">        return switch (status) {</span>
+<span class="fc" id="L28">            case SUCCEEDED -&gt; &quot;succeeded&quot;;</span>
+<span class="fc" id="L29">            case REQUIRES_ACTION -&gt; &quot;requires_action&quot;;</span>
+<span class="fc" id="L30">            case REQUIRES_PAYMENT_METHOD -&gt; &quot;requires_payment_method&quot;;</span>
+<span class="fc" id="L31">            case PROCESSING -&gt; &quot;processing&quot;;</span>
+<span class="fc" id="L32">            case CANCELED -&gt; &quot;canceled&quot;;</span>
+<span class="fc" id="L33">            case REQUIRES_CONFIRMATION -&gt; &quot;requires_confirmation&quot;;</span>
+<span class="fc" id="L34">            case REQUIRES_CAPTURE -&gt; &quot;requires_capture&quot;;</span>
+<span class="fc" id="L35">            default -&gt; null;</span>
+        };
+    }
+
+    public String toString() {
+<span class="fc" id="L40">        return toString(this);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VideoController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.controller</a> &gt; <span class="el_source">VideoController.java</span></div><h1>VideoController.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.controller;
+
+import com.github.ilim.backend.dto.VideoDto;
+import com.github.ilim.backend.entity.Video;
+import com.github.ilim.backend.service.UserService;
+import com.github.ilim.backend.service.VideoService;
+import com.github.ilim.backend.util.response.ApiRes;
+import com.github.ilim.backend.util.response.Reply;
+import com.github.ilim.backend.util.response.Res;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
+
+@RestController
+@RequiredArgsConstructor
+public class VideoController {
+
+    private final VideoService videoService;
+    private final UserService userService;
+
+    @GetMapping(&quot;/video/{videoId}&quot;)
+    @PreAuthorize(&quot;isAuthenticated()&quot;)
+    public ApiRes&lt;Res&lt;Video&gt;&gt; getCourseModuleVideo(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID videoId) {
+<span class="fc" id="L35">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L36">        var video = videoService.findVideoById(user, videoId);</span>
+<span class="fc" id="L37">        return Reply.ok(video);</span>
+    }
+
+    @PostMapping(&quot;/instructor/module/{moduleId}/add-video&quot;)
+    @PreAuthorize(&quot;hasRole('INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; addVideoToModule(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID moduleId,
+        @Valid @RequestBody VideoDto dto
+    ) {
+<span class="nc" id="L47">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="nc" id="L48">        videoService.addVideoToModule(user, moduleId, dto);</span>
+<span class="nc" id="L49">        return Reply.created(&quot;Video added successfully to the module&quot;);</span>
+    }
+
+    @PutMapping(&quot;/instructor/update-video/{videoId}&quot;)
+    @PreAuthorize(&quot;hasRole('INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; updateVideo(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID videoId,
+        @Valid @RequestBody VideoDto dto
+    ) {
+<span class="nc" id="L59">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="nc" id="L60">        videoService.updateVideo(user, videoId, dto);</span>
+<span class="nc" id="L61">        return Reply.ok(&quot;Video updated successfully&quot;);</span>
+    }
+
+    @DeleteMapping(&quot;/instructor/delete-video/{videoId}&quot;)
+    @PreAuthorize(&quot;hasRole('INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; removeVideoFromModule(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID videoId
+    ) {
+<span class="fc" id="L70">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L71">        videoService.removeVideoFromModule(user, videoId);</span>
+<span class="fc" id="L72">        return Reply.ok(&quot;Video removed successfully from the module&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

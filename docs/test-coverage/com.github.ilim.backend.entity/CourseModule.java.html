@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CourseModule.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.entity</a> &gt; <span class="el_source">CourseModule.java</span></div><h1>CourseModule.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.ilim.backend.dto.ModuleDto;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Getter
+@Setter
+@Entity
+@Table(name = &quot;course_modules&quot;)
+@NoArgsConstructor
+@JsonIgnoreProperties({&quot;course&quot;})
+public class CourseModule extends AuditEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(nullable = false)
+    private String title;
+
+    private String description;
+
+    @Column(nullable = false)
+    private int orderIndex;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;course_id&quot;)
+    @JsonIgnore
+    private Course course;
+
+    @OneToMany(mappedBy = &quot;courseModule&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = &quot;orderIndex&quot;)
+    private List&lt;CourseModuleItem&gt; moduleItems = new ArrayList&lt;&gt;();
+
+    @JsonProperty(&quot;courseId&quot;)
+    public UUID getCourseId() {
+<span class="fc" id="L58">        return course.getId();</span>
+    }
+
+    public static CourseModule from(ModuleDto dto) {
+<span class="fc" id="L62">        var module = new CourseModule();</span>
+<span class="fc" id="L63">        module.setTitle(dto.getTitle());</span>
+<span class="fc" id="L64">        module.setDescription(dto.getDescription());</span>
+<span class="fc" id="L65">        return module;</span>
+    }
+
+    public void addModuleItem(CourseModuleItem item) {
+<span class="fc" id="L69">        item.setOrderIndex(moduleItems.size() + 1);</span>
+<span class="fc" id="L70">        moduleItems.add(item);</span>
+<span class="fc" id="L71">        item.setCourseModule(this);</span>
+<span class="fc" id="L72">    }</span>
+
+    public void removeModuleItem(CourseModuleItem item) {
+<span class="fc" id="L75">        moduleItems.remove(item);</span>
+<span class="fc" id="L76">        item.setCourseModule(null);</span>
+<span class="fc" id="L77">    }</span>
+
+    public void updateFrom(ModuleDto dto) {
+<span class="fc" id="L80">        title = dto.getTitle();</span>
+<span class="fc" id="L81">        description = dto.getDescription();</span>
+
+        // use dtoIndex only if it's different and within the range, otherwise ignore it
+<span class="fc" id="L84">        var dtoIndex = dto.getOrderIndex();</span>
+<span class="fc" id="L85">        int modulesSize = course.getCourseModules().size();</span>
+<span class="pc bpc" id="L86" title="3 of 4 branches missed.">        if (dtoIndex != null &amp;&amp; dtoIndex != orderIndex) {</span>
+<span class="nc bnc" id="L87" title="All 4 branches missed.">            if (dtoIndex &gt;= 0 &amp;&amp; dtoIndex &lt; modulesSize) { // Changed to &lt; modulesSize</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                if (dtoIndex &lt; orderIndex) {</span>
+                    // moving up: Shift modules between dtoIndex and orderIndex -1 down by 1
+<span class="nc bnc" id="L90" title="All 2 branches missed.">                    for (int i = dtoIndex; i &lt; orderIndex; ++i) {</span>
+<span class="nc" id="L91">                        course.getCourseModules().get(i).setOrderIndex(i + 1);</span>
+                    }
+                } else {
+                    // moving down: Shift modules between orderIndex +1 and dtoIndex up by 1
+<span class="nc bnc" id="L95" title="All 2 branches missed.">                    for (int i = orderIndex + 1; i &lt;= dtoIndex; ++i) {</span>
+<span class="nc" id="L96">                        course.getCourseModules().get(i).setOrderIndex(i - 1);</span>
+                    }
+                }
+                // set the current module's orderIndex to dtoIndex
+<span class="nc" id="L100">                this.orderIndex = dtoIndex;</span>
+                // no need to manually sort modules due to @OrderColumn
+            }
+        }
+<span class="fc" id="L104">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

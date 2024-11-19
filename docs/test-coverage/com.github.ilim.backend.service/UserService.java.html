@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.service</a> &gt; <span class="el_source">UserService.java</span></div><h1>UserService.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.service;
+
+import com.github.ilim.backend.dto.UpdateUserDto;
+import com.github.ilim.backend.entity.AuditEntity;
+import com.github.ilim.backend.entity.InstructorApp;
+import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.enums.UserRole;
+import com.github.ilim.backend.exception.exceptions.BadRequestException;
+import com.github.ilim.backend.exception.exceptions.CantUpdateBlockedUserException;
+import com.github.ilim.backend.exception.exceptions.UserIsAlreadyBlockedException;
+import com.github.ilim.backend.exception.exceptions.UserIsNotAdminException;
+import com.github.ilim.backend.exception.exceptions.UserNotFoundException;
+import com.github.ilim.backend.repo.UserRepo;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class UserService {
+
+    private final UserRepo userRepo;
+
+    public List&lt;User&gt; getAll() {
+<span class="fc" id="L28">        return userRepo.findAll(AuditEntity.SORT_BY_CREATED_AT_DESC);</span>
+    }
+
+    public User findById(String userId) {
+<span class="fc" id="L32">        return userRepo.findById(userId)</span>
+<span class="fc" id="L33">                .orElseThrow(() -&gt; new UserNotFoundException(userId));</span>
+    }
+
+    public User findByIdAsAdmin(@NonNull User admin, String userId) {
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (admin.getRole() != UserRole.ADMIN) {</span>
+<span class="fc" id="L38">            throw new UserIsNotAdminException(admin.getId());</span>
+        }
+<span class="fc" id="L40">        return findById(userId);</span>
+    }
+
+    @Transactional
+    public User create(@NonNull User user) {
+<span class="nc" id="L45">        return userRepo.save(user);</span>
+    }
+
+    @Transactional
+    public void promoteToInstructor(InstructorApp application) {
+<span class="fc" id="L50">        var user = findById(application.getUserId());</span>
+<span class="fc" id="L51">        user.setProfileImageUrl(application.getProfileImageUrl());</span>
+<span class="fc" id="L52">        user.setBio(application.getInstructorBio());</span>
+<span class="fc" id="L53">        user.setTitle(application.getInstructorTitle());</span>
+<span class="fc" id="L54">        user.setRole(UserRole.INSTRUCTOR);</span>
+<span class="fc" id="L55">        userRepo.save(user);</span>
+<span class="fc" id="L56">    }</span>
+
+    @Transactional
+    public void demoteToStudent(User user) {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (user.getRole() != UserRole.INSTRUCTOR) {</span>
+<span class="nc" id="L61">            throw new BadRequestException(&quot;User(%s) is not instructor!&quot;.formatted(user.getId()));</span>
+        }
+<span class="nc" id="L63">        user.setRole(UserRole.STUDENT);</span>
+<span class="nc" id="L64">        userRepo.save(user);</span>
+<span class="nc" id="L65">    }</span>
+
+
+    public void updateFromDto(@NonNull User user, @NonNull UpdateUserDto dto) {
+<span class="fc" id="L69">        assertUserIsActive(user);</span>
+<span class="fc" id="L70">        user.setBio(dto.getBio());</span>
+<span class="fc" id="L71">        user.setTitle(dto.getTitle());</span>
+<span class="fc" id="L72">        user.setProfileImageUrl(dto.getProfileImageUrl());</span>
+        // Core attributes in cognito cannot be updated in the current implementation
+<span class="fc" id="L74">        userRepo.save(user);</span>
+<span class="fc" id="L75">    }</span>
+
+    private void assertUserIsActive(@NonNull User user) {
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        if (user.isBlocked()) {</span>
+<span class="fc" id="L79">            throw new CantUpdateBlockedUserException(user.getId());</span>
+        }
+<span class="fc" id="L81">    }</span>
+
+    public boolean isUserBlockedByEmail(String email) {
+<span class="nc" id="L84">        var user = userRepo.findByEmail(email);</span>
+<span class="nc bnc" id="L85" title="All 4 branches missed.">        return user.isPresent() &amp;&amp; user.get().isBlocked();</span>
+    }
+
+    public void blockUser(User user) {
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (user.isBlocked()) {</span>
+<span class="fc" id="L90">            throw new UserIsAlreadyBlockedException(user.getId());</span>
+        }
+<span class="fc" id="L92">        user.setBlocked(true);</span>
+<span class="fc" id="L93">        userRepo.save(user);</span>
+<span class="fc" id="L94">    }</span>
+
+    public List&lt;User&gt; findByRole(UserRole role) {
+<span class="fc" id="L97">        return userRepo.findByRole(role, AuditEntity.SORT_BY_CREATED_AT_DESC);</span>
+
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

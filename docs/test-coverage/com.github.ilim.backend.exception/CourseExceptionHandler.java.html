@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CourseExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.exception</a> &gt; <span class="el_source">CourseExceptionHandler.java</span></div><h1>CourseExceptionHandler.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.exception;
+
+
+import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
+import com.github.ilim.backend.exception.exceptions.AlreadyPurchasedCourseException;
+import com.github.ilim.backend.exception.exceptions.CantCreatePublicCourseException;
+import com.github.ilim.backend.exception.exceptions.CantPurchaseOwnCourseException;
+import com.github.ilim.backend.exception.exceptions.CourseAlreadyPublished;
+import com.github.ilim.backend.exception.exceptions.CourseIsNotWaitingApprovalException;
+import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
+import com.github.ilim.backend.exception.exceptions.CourseStatusNotDraftException;
+import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
+import com.github.ilim.backend.exception.exceptions.OnlyAdminAccessAllCourses;
+import com.github.ilim.backend.exception.exceptions.StudentDidNotCompleteCourseException;
+import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
+import com.github.ilim.backend.exception.exceptions.UserCantHaveQuizProgress;
+import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
+import com.github.ilim.backend.util.response.ApiRes;
+import com.github.ilim.backend.util.response.Reply;
+import com.github.ilim.backend.util.response.Res;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.logging.Logger;
+
+@Order(Ordered.HIGHEST_PRECEDENCE)
+@ControllerAdvice
+<span class="fc" id="L30">public class CourseExceptionHandler {</span>
+
+<span class="fc" id="L32">    private final Logger logger = Logger.getLogger(this.getClass().getSimpleName());</span>
+
+    @ExceptionHandler(UserCannotCreateCourseException.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleUserCannotCreateCourseException(UserCannotCreateCourseException e) {
+<span class="nc" id="L36">        logger.warning(e.getMessage());</span>
+<span class="nc" id="L37">        return Reply.forbidden(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(UserHasNoAccessToCourseException.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleUserHasNoAccessToCourseException(UserHasNoAccessToCourseException e) {
+<span class="nc" id="L42">        logger.warning(e.getMessage());</span>
+<span class="nc" id="L43">        return Reply.unauthorized(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(NoAccessToCourseContentException.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleNoAccessToCourseContentException(NoAccessToCourseContentException e) {
+<span class="fc" id="L48">        logger.warning(e.getMessage());</span>
+<span class="fc" id="L49">        return Reply.unauthorized(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(CourseNotFoundException.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleCourseNotFoundException(CourseNotFoundException e) {
+<span class="fc" id="L54">        logger.warning(e.getMessage());</span>
+<span class="fc" id="L55">        return Reply.notFound(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(AccessDeletedCourseException.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleAccessDeletedCourseException(AccessDeletedCourseException e) {
+<span class="fc" id="L60">        logger.warning(e.getMessage());</span>
+<span class="fc" id="L61">        return Reply.forbidden(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(AlreadyPurchasedCourseException.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleAlreadyPurchasedCourseException(AlreadyPurchasedCourseException e) {
+<span class="nc" id="L66">        logger.warning(e.getMessage());</span>
+<span class="nc" id="L67">        return Reply.forbidden(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(CantPurchaseOwnCourseException.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleCantPurchaseOwnCourseException(CantPurchaseOwnCourseException e) {
+<span class="nc" id="L72">        logger.warning(e.getMessage());</span>
+<span class="nc" id="L73">        return Reply.forbidden(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(OnlyAdminAccessAllCourses.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleOnlyAdminAccessAllCourses(OnlyAdminAccessAllCourses e) {
+<span class="nc" id="L78">        logger.warning(e.getMessage());</span>
+<span class="nc" id="L79">        return Reply.unauthorized(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(UserCantHaveQuizProgress.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleUserCantHaveQuizProgress(UserCantHaveQuizProgress e) {
+<span class="nc" id="L84">        logger.warning(e.getMessage());</span>
+<span class="nc" id="L85">        return Reply.forbidden(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(StudentDidNotCompleteCourseException.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleStudentDidNotCompleteCourseException(StudentDidNotCompleteCourseException e) {
+<span class="fc" id="L90">        logger.warning(e.getMessage());</span>
+<span class="fc" id="L91">        return Reply.forbidden(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(CourseAlreadyPublished.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleCourseAlreadyPublished(CourseAlreadyPublished e) {
+<span class="fc" id="L96">        logger.warning(e.getMessage());</span>
+<span class="fc" id="L97">        return Reply.forbidden(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(CourseStatusNotDraftException.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleCourseStatusNotDraftException(CourseStatusNotDraftException e) {
+<span class="fc" id="L102">        logger.warning(e.getMessage());</span>
+<span class="fc" id="L103">        return Reply.forbidden(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(CourseIsNotWaitingApprovalException.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleCourseIsNotWaitingApprovalException(CourseIsNotWaitingApprovalException e) {
+<span class="fc" id="L108">        logger.warning(e.getMessage());</span>
+<span class="fc" id="L109">        return Reply.forbidden(e.getMessage());</span>
+    }
+
+    @ExceptionHandler(CantCreatePublicCourseException.class)
+    public ApiRes&lt;Res&lt;String&gt;&gt; handleCantCreatePublicCourseException(CantCreatePublicCourseException e) {
+<span class="fc" id="L114">        logger.warning(e.getMessage());</span>
+<span class="fc" id="L115">        return Reply.forbidden(e.getMessage());</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

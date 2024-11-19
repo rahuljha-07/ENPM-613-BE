@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CertificateController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.controller</a> &gt; <span class="el_source">CertificateController.java</span></div><h1>CertificateController.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.controller;
+
+import com.github.ilim.backend.dto.CourseProgressDto;
+import com.github.ilim.backend.service.CertificateService;
+import com.github.ilim.backend.service.UserService;
+import com.github.ilim.backend.util.response.ApiRes;
+import com.github.ilim.backend.util.response.Reply;
+import com.github.ilim.backend.util.response.Res;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
+
+
+@RestController
+@RequiredArgsConstructor
+public class CertificateController {
+
+    private final CertificateService certificateService;
+    private final UserService userService;
+
+
+    @GetMapping(&quot;/student/course/{courseId}/check-progress&quot;)
+    @PreAuthorize(&quot;hasAnyRole('STUDENT', 'INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;CourseProgressDto&gt;&gt; checkCourseProgress(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable @NonNull UUID courseId
+    ) {
+<span class="fc" id="L39">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L40">        var progress = certificateService.checkCourseProgress(user, courseId);</span>
+<span class="fc" id="L41">        return Reply.ok(progress);</span>
+    }
+
+    @PostMapping(&quot;/student/course/{courseId}/certificate&quot;)
+    @PreAuthorize(&quot;hasAnyRole('STUDENT', 'INSTRUCTOR')&quot;)
+    public ResponseEntity&lt;byte[]&gt; generateCertificate(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable(&quot;courseId&quot;) UUID courseId
+    ) {
+<span class="fc" id="L50">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L51">        var pdfCertificateBytes = certificateService.generatePdfCertificate(user, courseId);</span>
+<span class="fc" id="L52">        return ResponseEntity.ok()</span>
+<span class="fc" id="L53">            .headers(createPdfResponseHeaders(&quot;certificate.pdf&quot;))</span>
+<span class="fc" id="L54">            .body(pdfCertificateBytes);</span>
+    }
+
+    private static HttpHeaders createPdfResponseHeaders(@NonNull String filename) {
+<span class="fc" id="L58">        var headers = new HttpHeaders();</span>
+<span class="fc" id="L59">        headers.setContentType(MediaType.APPLICATION_PDF);</span>
+<span class="fc" id="L60">        headers.setContentDispositionFormData(&quot;attachment&quot;, filename);</span>
+<span class="fc" id="L61">        headers.setCacheControl(&quot;must-revalidate, post-check=0, pre-check=0&quot;);</span>
+<span class="fc" id="L62">        return headers;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModuleService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.service</a> &gt; <span class="el_source">ModuleService.java</span></div><h1>ModuleService.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.service;
+
+import com.github.ilim.backend.dto.ModuleDto;
+import com.github.ilim.backend.dto.StudentCourseModuleDto;
+import com.github.ilim.backend.entity.CourseModule;
+import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.enums.UserRole;
+import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
+import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
+import com.github.ilim.backend.repo.ModuleRepo;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
+
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class ModuleService {
+
+    private final ModuleRepo moduleRepo;
+    private final CourseService courseService;
+
+    @Transactional
+    public void addModuleToCourse(User instructor, UUID courseId, ModuleDto moduleDto) {
+<span class="fc" id="L27">        var course = courseService.findCourseByIdAndUser(instructor, courseId);</span>
+<span class="fc" id="L28">        var module = CourseModule.from(moduleDto);</span>
+<span class="fc" id="L29">        course.addCourseModule(module);</span>
+<span class="fc" id="L30">        courseService.saveCourse(course);</span>
+<span class="fc" id="L31">    }</span>
+
+    @Transactional
+    public void deleteCourseModule(User instructor, UUID moduleId) {
+<span class="fc" id="L35">        var module = findModuleByIdAsInstructor(instructor, moduleId);</span>
+<span class="fc" id="L36">        var course = module.getCourse();</span>
+<span class="fc" id="L37">        course.deleteCourseModule(module);</span>
+<span class="fc" id="L38">        courseService.saveCourse(course);</span>
+<span class="fc" id="L39">    }</span>
+
+//    public void reorderModuleItems(User instructor, UUID moduleId, List&lt;UUID&gt; itemsOrder) {
+//        if (itemsOrder.isEmpty()) {
+//            return;
+//        }
+//        // TODO: Implement this
+//        throw new NotImplementedException();
+//    }
+
+    @Transactional
+    public void updateCourseModule(User instructor, UUID moduleId, ModuleDto dto) {
+<span class="fc" id="L51">        var module = findModuleByIdAsInstructor(instructor, moduleId);</span>
+<span class="fc" id="L52">        module.updateFrom(dto);</span>
+<span class="fc" id="L53">        courseService.saveCourse(module.getCourse());</span>
+<span class="fc" id="L54">    }</span>
+
+    @Transactional
+    public void saveModule(CourseModule module) {
+<span class="nc" id="L58">        moduleRepo.save(module);</span>
+<span class="nc" id="L59">    }</span>
+
+    public CourseModule findModuleByIdAsInstructor(User instructor, UUID moduleId) {
+<span class="fc" id="L62">        var module = findById(instructor, moduleId);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (!module.getCourse().getInstructor().equals(instructor)) {</span>
+<span class="fc" id="L64">            throw new NotCourseInstructorException(instructor, module);</span>
+        }
+<span class="fc" id="L66">        return module;</span>
+    }
+
+    public Object findCourseModuleById(User instructor, UUID moduleId) {
+<span class="nc" id="L70">        var module = findById(instructor, moduleId);</span>
+<span class="nc bnc" id="L71" title="All 4 branches missed.">        if (module.getCourse().getInstructor().equals(instructor) || instructor.getRole() == UserRole.ADMIN) {</span>
+<span class="nc" id="L72">            return module;</span>
+        }
+<span class="nc" id="L74">        return StudentCourseModuleDto.from(module);</span>
+    }
+
+    private CourseModule findById(User student, @NonNull UUID moduleId) {
+<span class="fc" id="L78">        var module = moduleRepo.findById(moduleId)</span>
+<span class="pc" id="L79">            .orElseThrow(() -&gt; new CourseModuleNotFoundException(moduleId));</span>
+<span class="fc" id="L80">        courseService.assertUserHasAccessToCourseContent(student, module.getCourse());</span>
+<span class="fc" id="L81">        return module;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuizDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.dto</a> &gt; <span class="el_source">QuizDto.java</span></div><h1>QuizDto.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.dto;
+
+import com.github.ilim.backend.entity.Question;
+import com.github.ilim.backend.entity.Quiz;
+import com.github.ilim.backend.enums.UserRole;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Data
+public class QuizDto {
+
+    private UUID id;
+
+    @NotBlank
+    private String title;
+
+    private String description;
+
+    @NotNull
+    private BigDecimal passingScore;
+
+    @NotNull
+    private List&lt;QuestionDto&gt; questions;
+
+    public static QuizDto from(Quiz quiz, UserRole role) {
+<span class="fc" id="L32">        var dto = new QuizDto();</span>
+<span class="fc" id="L33">        dto.setId(quiz.getId());</span>
+<span class="fc" id="L34">        dto.setTitle(quiz.getTitle());</span>
+<span class="fc" id="L35">        dto.setDescription(quiz.getDescription());</span>
+<span class="fc" id="L36">        dto.setPassingScore(quiz.getPassingScore());</span>
+<span class="fc" id="L37">        dto.setQuestions(createQuestionDtos(quiz, role));</span>
+<span class="fc" id="L38">        return dto;</span>
+    }
+
+    private static ArrayList&lt;QuestionDto&gt; createQuestionDtos(Quiz quiz, UserRole role) {
+<span class="fc" id="L42">        var questionDtos = new ArrayList&lt;QuestionDto&gt;();</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        for (var question : quiz.getQuestions()) {</span>
+<span class="fc" id="L44">            var questionDto = new QuestionDto();</span>
+<span class="fc" id="L45">            questionDto.setId(question.getId());</span>
+<span class="fc" id="L46">            questionDto.setText(question.getText());</span>
+<span class="fc" id="L47">            questionDto.setType(question.getType());</span>
+<span class="fc" id="L48">            questionDto.setPoints(question.getPoints());</span>
+<span class="fc" id="L49">            questionDto.setOptions(createOptionsDtos(role, question));</span>
+<span class="fc" id="L50">            questionDtos.add(questionDto);</span>
+<span class="fc" id="L51">        }</span>
+<span class="fc" id="L52">        return questionDtos;</span>
+    }
+
+    private static List&lt;QuestionOptionDto&gt; createOptionsDtos(UserRole role, Question question) {
+<span class="fc" id="L56">        var optionDtos = new ArrayList&lt;QuestionOptionDto&gt;();</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        for (var option : question.getOptions()) {</span>
+<span class="nc" id="L58">            var optionDto = new QuestionOptionDto();</span>
+<span class="nc" id="L59">            optionDto.setId(option.getId());</span>
+<span class="nc" id="L60">            optionDto.setText(option.getText());</span>
+            // Do not expose isCorrect to students
+<span class="nc bnc" id="L62" title="All 4 branches missed.">            if (role.equals(UserRole.ADMIN) || role.equals(UserRole.INSTRUCTOR)) {</span>
+<span class="nc" id="L63">                optionDto.setIsCorrect(option.getIsCorrect());</span>
+            }
+<span class="nc" id="L65">            optionDtos.add(optionDto);</span>
+<span class="nc" id="L66">        }</span>
+<span class="fc" id="L67">        return optionDtos;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

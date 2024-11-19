@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.controller</a> &gt; <span class="el_source">AdminController.java</span></div><h1>AdminController.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.controller;
+
+import com.github.ilim.backend.dto.CourseRejectionDto;
+import com.github.ilim.backend.dto.RespondToInstructorAppDto;
+import com.github.ilim.backend.entity.Course;
+import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.service.AdminService;
+import com.github.ilim.backend.service.CourseService;
+import com.github.ilim.backend.service.UserService;
+import com.github.ilim.backend.util.response.ApiRes;
+import com.github.ilim.backend.util.response.Reply;
+import com.github.ilim.backend.util.response.Res;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.UUID;
+
+@RequiredArgsConstructor
+@RestController
+public class AdminController {
+
+    private final AdminService adminService;
+    private final UserService userService;
+    private final CourseService courseService;
+
+    @PostMapping(&quot;/admin/approve-instructor-application&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; approveInstructorApplication(@Valid @RequestBody RespondToInstructorAppDto dto) {
+<span class="fc" id="L39">        adminService.approveInstructorApp(dto.getInstructorApplicationId());</span>
+<span class="fc" id="L40">        return Reply.ok(&quot;Application approved&quot;);</span>
+    }
+
+    @PostMapping(&quot;/admin/reject-instructor-application&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; rejectInstructorApplication(@Valid @RequestBody RespondToInstructorAppDto dto) {
+<span class="fc" id="L46">        adminService.rejectInstructorApp(dto.getInstructorApplicationId(), dto.getMessage());</span>
+<span class="fc" id="L47">        return Reply.ok(&quot;Application rejected&quot;);</span>
+    }
+
+    @PostMapping(&quot;/admin/block-user/{userId}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; blockUser(@AuthenticationPrincipal Jwt jwt, @PathVariable String userId) {
+<span class="fc" id="L53">        var admin = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L54">        adminService.blockUser(admin, userId);</span>
+<span class="fc" id="L55">        return Reply.ok(&quot;User has been blocked successfully&quot;);</span>
+    }
+
+    @GetMapping(&quot;/admin/user/all&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiRes&lt;Res&lt;List&lt;User&gt;&gt;&gt; getAllUsers() {
+<span class="fc" id="L61">        return Reply.ok(userService.getAll());</span>
+    }
+
+    @GetMapping(&quot;/admin/user/{userId}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiRes&lt;Res&lt;User&gt;&gt; getUser(@AuthenticationPrincipal Jwt jwt, @PathVariable String userId) {
+<span class="fc" id="L67">        var admin = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L68">        return Reply.ok(userService.findByIdAsAdmin(admin, userId));</span>
+    }
+
+    @DeleteMapping(&quot;/admin/delete-course/{courseId}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; deleteCourseAsAdmin(@PathVariable UUID courseId) {
+<span class="fc" id="L74">        courseService.deleteCourseAsAdmin(courseId);</span>
+<span class="fc" id="L75">        return Reply.ok(&quot;Course deleted successfully&quot;);</span>
+    }
+
+    @PostMapping(&quot;/admin/approve-course/{courseId}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; approveCourse(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+<span class="fc" id="L81">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L82">        courseService.approveCourse(user, courseId);</span>
+<span class="fc" id="L83">        return Reply.ok(&quot;Course Approved successfully&quot;);</span>
+    }
+
+    @PostMapping(&quot;/admin/reject-course/{courseId}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; rejectCourse(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID courseId,
+        @Valid @RequestBody CourseRejectionDto dto
+        ) {
+<span class="fc" id="L93">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L94">        courseService.rejectCourse(user, courseId, dto);</span>
+<span class="fc" id="L95">        return Reply.ok(&quot;Course Rejected successfully&quot;);</span>
+    }
+
+    @GetMapping(&quot;/admin/course/all&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ApiRes&lt;Res&lt;List&lt;Course&gt;&gt;&gt; findAllCourses(@AuthenticationPrincipal Jwt jwt) {
+<span class="fc" id="L101">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L102">        var courses = courseService.findAllCourses(user);</span>
+<span class="fc" id="L103">        return Reply.ok(courses);</span>
+    }
+
+    @GetMapping(&quot;/admin/course/wait-for-approval&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    ApiRes&lt;Res&lt;List&lt;Course&gt;&gt;&gt; findCoursesWaitingForApproval(@AuthenticationPrincipal Jwt jwt) {
+<span class="fc" id="L109">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L110">        var courses = courseService.findCoursesWaitingForApproval(user);</span>
+<span class="fc" id="L111">        return Reply.ok(courses);</span>
+    }
+
+    @PostMapping(&quot;/admin/integration-tests/demote-instructor/{userId}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    ApiRes&lt;Res&lt;String&gt;&gt; testingDemoteInstructor(@AuthenticationPrincipal Jwt jwt, @PathVariable String userId) {
+<span class="fc" id="L117">        var admin = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L118">        courseService.testingDemoteInstructor(admin, userId);</span>
+<span class="fc" id="L119">        return Reply.ok(&quot;[testing only] Instructor became student again&quot;);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

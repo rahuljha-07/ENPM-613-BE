@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CertificateService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.service</a> &gt; <span class="el_source">CertificateService.java</span></div><h1>CertificateService.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.service;
+
+import com.github.ilim.backend.dto.CourseProgressDto;
+import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.exception.exceptions.CantGenerateCertificateException;
+import com.github.ilim.backend.exception.exceptions.StudentDidNotCompleteCourseException;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.io.ByteArrayOutputStream;
+import java.util.Objects;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class CertificateService {
+
+    private final TemplateEngine templateEngine;
+    private final CourseService courseService;
+    private final StudentService studentService;
+
+    public byte[] generatePdfCertificate(User student, UUID courseId) {
+<span class="fc" id="L26">        var course = courseService.findCourseByIdAndUser(student, courseId);</span>
+<span class="fc" id="L27">        var certificate = new Certificate(UUID.randomUUID(), student.getName(), course.getTitle());</span>
+<span class="fc" id="L28">        var result = studentService.getCourseQuizProgress(student, courseId);</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        if (result.completedQuizzes() &lt; result.totalQuizzes()) {</span>
+<span class="fc" id="L30">            throw new StudentDidNotCompleteCourseException(student.getId(), courseId);</span>
+        }
+        try {
+<span class="fc" id="L33">            return generatePdf(certificate);</span>
+        }
+<span class="fc" id="L35">        catch (Exception e) {</span>
+<span class="fc" id="L36">            throw new CantGenerateCertificateException(course, e);</span>
+        }
+    }
+
+    private byte[] generatePdf(Certificate certificate) throws Exception {
+<span class="fc" id="L41">        var context = new Context();</span>
+<span class="fc" id="L42">        context.setVariable(&quot;certificate&quot;, certificate);</span>
+
+        // Render HTML using Thymeleaf
+<span class="fc" id="L45">        String htmlContent = templateEngine.process(&quot;certificate&quot;, context);</span>
+
+        // Convert to PDF
+<span class="fc" id="L48">        var pdfStream = new ByteArrayOutputStream();</span>
+<span class="fc" id="L49">        var builder = new PdfRendererBuilder();</span>
+<span class="fc" id="L50">        builder.withHtmlContent(</span>
+            htmlContent,
+<span class="fc" id="L52">            Objects.requireNonNull(getClass().getResource(&quot;/templates/&quot;)).toString()</span>
+        );
+<span class="fc" id="L54">        builder.toStream(pdfStream);</span>
+<span class="fc" id="L55">        builder.run();</span>
+<span class="fc" id="L56">        return pdfStream.toByteArray();</span>
+    }
+
+    public CourseProgressDto checkCourseProgress(User student, UUID courseId) {
+        // check course availability and user access
+<span class="fc" id="L61">        var course = courseService.findCourseByIdAndUser(student, courseId);</span>
+<span class="fc" id="L62">        return studentService.getCourseQuizProgress(student, course.getId());</span>
+    }
+}
+
+<span class="fc" id="L66">record Certificate(UUID certificateId, String studentName, String courseTitle) {}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

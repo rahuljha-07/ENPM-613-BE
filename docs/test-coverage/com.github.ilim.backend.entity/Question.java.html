@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Question.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.entity</a> &gt; <span class="el_source">Question.java</span></div><h1>Question.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.ilim.backend.dto.QuestionDto;
+import com.github.ilim.backend.enums.QuestionType;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+
+@Getter
+@Setter
+@Entity
+@Table(name = &quot;questions&quot;)
+@NoArgsConstructor
+@JsonIgnoreProperties({&quot;quiz&quot;})
+public class Question extends AuditEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;quiz_id&quot;)
+    @JsonIgnore
+    private Quiz quiz;
+
+    @OneToMany(mappedBy = &quot;question&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List&lt;QuestionOption&gt; options;
+
+    @Column(nullable = false)
+    private String text;
+
+    @Column(nullable = false)
+    private QuestionType type;
+
+    @Column(nullable = false)
+    private BigDecimal points;
+
+    @Column(nullable = false)
+    private int orderIndex;
+
+    public static Question from(QuestionDto dto) {
+<span class="fc" id="L60">        Question question = new Question();</span>
+<span class="fc" id="L61">        question.setText(dto.getText());</span>
+<span class="fc" id="L62">        question.setType(dto.getType());</span>
+<span class="fc" id="L63">        question.setPoints(dto.getPoints());</span>
+<span class="fc" id="L64">        return question;</span>
+    }
+
+    @JsonProperty(&quot;quizId&quot;)
+    public UUID getQuizId() {
+<span class="fc" id="L69">        return quiz.getId();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

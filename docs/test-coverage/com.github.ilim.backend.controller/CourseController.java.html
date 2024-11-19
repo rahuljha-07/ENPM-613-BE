@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CourseController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.controller</a> &gt; <span class="el_source">CourseController.java</span></div><h1>CourseController.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.controller;
+
+import com.github.ilim.backend.dto.CourseDto;
+import com.github.ilim.backend.dto.PaymentEventDto;
+import com.github.ilim.backend.dto.PublicCourseDto;
+import com.github.ilim.backend.entity.Course;
+import com.github.ilim.backend.enums.PurchaseStatus;
+import com.github.ilim.backend.service.CoursePurchaseService;
+import com.github.ilim.backend.service.CourseService;
+import com.github.ilim.backend.service.UserService;
+import com.github.ilim.backend.util.response.ApiRes;
+import com.github.ilim.backend.util.response.Reply;
+import com.github.ilim.backend.util.response.Res;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.UUID;
+
+@RequiredArgsConstructor
+@RestController
+public class CourseController {
+
+    private final CoursePurchaseService coursePurchaseService;
+    private final CourseService courseService;
+    private final UserService userService;
+
+    // TODO: Use pagination for any `findAll` endpoints
+    @GetMapping(&quot;/course/published&quot;)
+    public ApiRes&lt;Res&lt;List&lt;PublicCourseDto&gt;&gt;&gt; filterPublishedCourses(
+        @RequestParam(value = &quot;contains&quot;, required = false) String contains
+    ) {
+<span class="fc" id="L43">        var courses = courseService.filterPublishedCourses(contains);</span>
+<span class="fc" id="L44">        return Reply.ok(courses);</span>
+    }
+
+    @GetMapping(&quot;/course/{courseId}&quot;)
+    public ApiRes&lt;Res&lt;Course&gt;&gt; findCourseById(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        var user = jwt == null</span>
+<span class="nc" id="L50">            ? null</span>
+<span class="fc" id="L51">            : userService.findById(jwt.getClaim(&quot;sub&quot;).toString());</span>
+<span class="fc" id="L52">        var course = courseService.findCourseByIdAndUser(user, courseId);</span>
+<span class="fc" id="L53">        return Reply.ok(course);</span>
+    }
+
+    @GetMapping(&quot;/student/course/purchased&quot;)
+    @PreAuthorize(&quot;hasAnyRole('Student', 'INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;List&lt;Course&gt;&gt;&gt; findPurchasedCourses(@AuthenticationPrincipal Jwt jwt) {
+<span class="fc" id="L59">        var user = userService.findById(jwt.getClaim(&quot;sub&quot;).toString());</span>
+<span class="fc" id="L60">        var courses = courseService.findPurchasedCourses(user);</span>
+<span class="fc" id="L61">        return Reply.ok(courses);</span>
+    }
+
+    @GetMapping(&quot;/instructor/course/created&quot;)
+    @PreAuthorize(&quot;hasRole('INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;List&lt;Course&gt;&gt;&gt; findCreatedCourses(@AuthenticationPrincipal Jwt jwt) {
+<span class="fc" id="L67">        var user = userService.findById(jwt.getClaim(&quot;sub&quot;).toString());</span>
+<span class="fc" id="L68">        var courses = courseService.findCreatedCourses(user);</span>
+<span class="fc" id="L69">        return Reply.ok(courses);</span>
+    }
+
+    @PostMapping(&quot;/instructor/create-course&quot;)
+    @PreAuthorize(&quot;hasRole('INSTRUCTOR')&quot;)
+    ApiRes&lt;Res&lt;String&gt;&gt; createCourse(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CourseDto dto) {
+<span class="nc" id="L75">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="nc" id="L76">        courseService.create(user, dto);</span>
+<span class="nc" id="L77">        return Reply.created(&quot;Course created successfully&quot;);</span>
+    }
+
+    @PutMapping(&quot;/instructor/update-course/{courseId}&quot;)
+    @PreAuthorize(&quot;hasAnyRole('INSTRUCTOR', 'ADMIN')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; updateCourse(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID courseId,
+        @Valid @RequestBody CourseDto dto
+    ) {
+<span class="nc" id="L87">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="nc" id="L88">        courseService.updateCourse(user, courseId, dto);</span>
+<span class="nc" id="L89">        return Reply.ok(&quot;Course updated successfully&quot;);</span>
+    }
+
+    @PostMapping(&quot;/instructor/course/{courseId}/submit-for-approval&quot;)
+    @PreAuthorize(&quot;hasRole('INSTRUCTOR')&quot;)
+    ApiRes&lt;Res&lt;String&gt;&gt; submitCourseForApproval(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+<span class="fc" id="L95">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L96">        courseService.submitCourseForApproval(user, courseId);</span>
+<span class="fc" id="L97">        return Reply.ok(&quot;Course submitted successfully to the admin to review it.&quot;);</span>
+    }
+
+    @PostMapping(&quot;/student/purchase-course/{courseId}&quot;)
+    @PreAuthorize(&quot;hasAnyRole('STUDENT', 'INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; purchaseCourse(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+<span class="fc" id="L103">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L104">        String checkoutUrl = coursePurchaseService.purchaseCourse(user, courseId);</span>
+<span class="fc" id="L105">        return Reply.ok(checkoutUrl);</span>
+    }
+
+    @PutMapping(&quot;/instructor/course/{courseId}/reorder-modules&quot;)
+    @PreAuthorize(&quot;hasRole('INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; reorderCourseModules(
+        @AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID courseId,
+        @RequestBody List&lt;UUID&gt; modulesOrder
+    ) {
+<span class="fc" id="L115">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L116">        courseService.reorderCourseModules(user, courseId, modulesOrder);</span>
+<span class="fc" id="L117">        return Reply.ok(&quot;Course modules reordered successfully.&quot;);</span>
+    }
+
+    @PostMapping(&quot;/student/course/{courseId}/check-purchase&quot;)
+    @PreAuthorize(&quot;hasAnyRole('STUDENT', 'INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;PurchaseStatus&gt;&gt; checkCoursePurchase(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+<span class="fc" id="L123">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L124">        PurchaseStatus purchaseStatus = coursePurchaseService.checkCoursePurchase(user, courseId);</span>
+<span class="fc" id="L125">        return Reply.ok(purchaseStatus);</span>
+    }
+
+    @PostMapping(&quot;/student/course/{courseId}/cancel-purchase&quot;)
+    @PreAuthorize(&quot;hasAnyRole('STUDENT', 'INSTRUCTOR')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; cancelCoursePurchase(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID courseId) {
+<span class="fc" id="L131">        var user = userService.findById(jwt.getClaimAsString(&quot;sub&quot;));</span>
+<span class="fc" id="L132">        coursePurchaseService.cancelCoursePurchase(user, courseId);</span>
+<span class="fc" id="L133">        return Reply.ok(&quot;All pending requests has been canceled&quot;);</span>
+    }
+
+    @PostMapping(&quot;/admin/confirm-course-purchase&quot;)
+    @PreAuthorize(&quot;hasAnyRole('ADMIN')&quot;)
+    public ApiRes&lt;Res&lt;String&gt;&gt; simulateCoursePurchaseConfirmation(@Valid @RequestBody PaymentEventDto dto) {
+<span class="fc" id="L139">        coursePurchaseService.simulateCoursePurchaseConfirmation(dto);</span>
+<span class="fc" id="L140">        return Reply.ok();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

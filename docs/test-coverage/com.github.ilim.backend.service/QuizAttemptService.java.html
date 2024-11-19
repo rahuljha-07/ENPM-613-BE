@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuizAttemptService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.service</a> &gt; <span class="el_source">QuizAttemptService.java</span></div><h1>QuizAttemptService.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.service;
+
+import com.github.ilim.backend.dto.QuizAttemptDto;
+import com.github.ilim.backend.dto.QuizAttemptResultDto;
+import com.github.ilim.backend.dto.UserAnswerDto;
+import com.github.ilim.backend.entity.AuditEntity;
+import com.github.ilim.backend.entity.Question;
+import com.github.ilim.backend.entity.QuestionOption;
+import com.github.ilim.backend.entity.Quiz;
+import com.github.ilim.backend.entity.QuizAttempt;
+import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.entity.UserAnswer;
+import com.github.ilim.backend.entity.UserAnswerOption;
+import com.github.ilim.backend.enums.UserRole;
+import com.github.ilim.backend.exception.exceptions.AdminCantAttemptQuizzesException;
+import com.github.ilim.backend.exception.exceptions.CantAttemptOwnQuizException;
+import com.github.ilim.backend.exception.exceptions.MissingAnswerException;
+import com.github.ilim.backend.exception.exceptions.QuestionOptionNotFoundException;
+import com.github.ilim.backend.exception.exceptions.QuizAttemptsNotFoundException;
+import com.github.ilim.backend.repo.QuestionOptionRepo;
+import com.github.ilim.backend.repo.QuizAttemptRepo;
+import com.github.ilim.backend.repo.UserAnswerOptionRepo;
+import com.github.ilim.backend.repo.UserAnswerRepo;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class QuizAttemptService {
+
+    private final UserAnswerOptionRepo userAnswerOptionRepo;
+    private final QuestionOptionRepo questionOptionRepo;
+    private final QuizAttemptRepo quizAttemptRepo;
+    private final UserAnswerRepo userAnswerRepo;
+    private final QuizService quizService;
+
+    public List&lt;QuizAttemptResultDto&gt; getAllStudentQuizAttempts(@NonNull User student, @NonNull UUID quizId) {
+<span class="fc" id="L49">        var quiz = quizService.findQuizById(student, quizId);</span>
+<span class="fc" id="L50">        var attempts = quizAttemptRepo.findQuizAttemptsByQuizAndStudent(</span>
+            quiz, student, AuditEntity.SORT_BY_CREATED_AT_DESC
+        );
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if (attempts.isEmpty()) {</span>
+<span class="fc" id="L54">            throw new QuizAttemptsNotFoundException(quizId);</span>
+        }
+<span class="fc" id="L56">        return attempts.stream()</span>
+<span class="fc" id="L57">            .map(QuizAttemptResultDto::from)</span>
+<span class="fc" id="L58">            .toList();</span>
+    }
+
+    public QuizAttemptResultDto getLastStudentQuizAttempt(@NonNull User student, @NonNull UUID quizId) {
+<span class="fc" id="L62">        var quiz = quizService.findQuizById(student, quizId);</span>
+<span class="fc" id="L63">        var attempts = quizAttemptRepo.findQuizAttemptsByQuizAndStudent(</span>
+            quiz, student, AuditEntity.SORT_BY_CREATED_AT_DESC
+        );
+<span class="fc" id="L66">        var lastAttempt = attempts.stream()</span>
+<span class="fc" id="L67">            .max(Comparator.comparing(AuditEntity::getCreatedAt))</span>
+<span class="fc" id="L68">            .orElseThrow(() -&gt; new QuizAttemptsNotFoundException(quizId));</span>
+<span class="fc" id="L69">        return QuizAttemptResultDto.from(lastAttempt);</span>
+    }
+
+    public List&lt;QuizAttempt&gt; getAllQuizAttemptsForQuiz(User user, UUID quizId) {
+<span class="fc" id="L73">        var quiz = quizService.findQuizById(user, quizId);</span>
+<span class="fc" id="L74">        return quizAttemptRepo.findQuizAttemptsByQuiz(quiz, AuditEntity.SORT_BY_CREATED_AT_DESC);</span>
+    }
+
+    @Transactional
+    public QuizAttemptResultDto processQuizAttempt(@NonNull User user, @Valid QuizAttemptDto dto) {
+<span class="fc" id="L79">        var quiz = quizService.findQuizById(user, dto.getQuizId());</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        if (quiz.getCourseModule().getCourse().getInstructor().getId().equals(user.getId())) {</span>
+<span class="fc" id="L81">            throw new CantAttemptOwnQuizException(user.getId(), dto.getQuizId());</span>
+        }
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (user.getRole().equals(UserRole.ADMIN)) {</span>
+<span class="fc" id="L84">            throw new AdminCantAttemptQuizzesException(user.getId(),  quiz.getId());</span>
+        }
+
+        // create a QuizAttempt record
+<span class="fc" id="L88">        var attempt = QuizAttempt.from(user, quiz);</span>
+<span class="fc" id="L89">        quizAttemptRepo.save(attempt);  // save to get generated ID</span>
+
+        // Determine passed or not, then save the attempt
+<span class="fc" id="L92">        var score = gradeQuiz(dto, quiz, attempt);</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        var passed = score.userScore.compareTo(quiz.getPassingScore()) &gt;= 0;</span>
+<span class="fc" id="L94">        attempt.setUserScore(score.userScore);</span>
+<span class="fc" id="L95">        attempt.setTotalScore(score.totalScore);</span>
+<span class="fc" id="L96">        attempt.setPassed(passed);</span>
+<span class="fc" id="L97">        quizAttemptRepo.save(attempt);</span>
+
+<span class="fc" id="L99">        return QuizAttemptResultDto.from(attempt);</span>
+    }
+
+    private GradingResult gradeQuiz(QuizAttemptDto dto, Quiz quiz, QuizAttempt attempt) {
+<span class="fc" id="L103">        var userScore = BigDecimal.ZERO;</span>
+<span class="fc" id="L104">        var quizScore = BigDecimal.ZERO;</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        for (var question : quiz.getQuestions()) {</span>
+<span class="fc" id="L106">            quizScore = quizScore.add(question.getPoints());</span>
+<span class="fc" id="L107">            var answerDto = pickThisQuestionAnswer(dto, question, attempt);</span>
+
+            // create a UserAnswer record
+<span class="fc" id="L110">            var userAnswer = UserAnswer.from(question, attempt);</span>
+<span class="fc" id="L111">            userAnswerRepo.save(userAnswer);</span>
+
+            // evaluate answers
+<span class="fc" id="L114">            var correctOptions = questionOptionRepo.findByQuestionAndIsCorrect(</span>
+                question, true, AuditEntity.SORT_BY_CREATED_AT_DESC
+            );
+<span class="fc bfc" id="L117" title="All 2 branches covered.">            if (isAnswerCorrect(correctOptions, answerDto.getSelectedOptionIds())) {</span>
+<span class="fc" id="L118">                userScore = userScore.add(question.getPoints());</span>
+            }
+<span class="fc" id="L120">            saveUserAnswer(userAnswer, answerDto.getSelectedOptionIds());</span>
+<span class="fc" id="L121">        }</span>
+<span class="fc" id="L122">        return new GradingResult(userScore, quizScore);</span>
+    }
+
+    private void saveUserAnswer(UserAnswer answer, List&lt;UUID&gt; selectedOptionIds) {
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        for (UUID optionId : selectedOptionIds) {</span>
+<span class="fc" id="L127">            var option = findQuestionOptionById(optionId);</span>
+<span class="fc" id="L128">            var answerOption = UserAnswerOption.from(answer, option);</span>
+<span class="fc" id="L129">            userAnswerOptionRepo.save(answerOption);</span>
+<span class="fc" id="L130">        }</span>
+<span class="fc" id="L131">    }</span>
+
+    private QuestionOption findQuestionOptionById(UUID optionId) {
+<span class="fc" id="L134">        return questionOptionRepo.findById(optionId)</span>
+<span class="pc" id="L135">            .orElseThrow(() -&gt; new QuestionOptionNotFoundException(optionId));</span>
+    }
+
+    private static UserAnswerDto pickThisQuestionAnswer(QuizAttemptDto dto, Question question, QuizAttempt attempt) {
+<span class="fc" id="L139">        return dto.getAnswers().stream()</span>
+<span class="fc" id="L140">            .filter(a -&gt; a.getQuestionId().equals(question.getId()))</span>
+<span class="fc" id="L141">            .findFirst()</span>
+<span class="fc" id="L142">            .orElseThrow(() -&gt; new MissingAnswerException(attempt.getId(), question.getId()));</span>
+    }
+
+    private boolean isAnswerCorrect(Collection&lt;QuestionOption&gt; correctOptions, List&lt;UUID&gt; selectedOptionIds) {
+        // student must select all correct options, no less no more
+<span class="fc" id="L147">        var correctOptionIds = correctOptions.stream()</span>
+<span class="fc" id="L148">            .map(QuestionOption::getId)</span>
+<span class="fc" id="L149">            .collect(Collectors.toSet());</span>
+<span class="fc" id="L150">        var selectedIds = new HashSet&lt;&gt;(selectedOptionIds);</span>
+<span class="fc" id="L151">        return correctOptionIds.equals(selectedIds);</span>
+    }
+
+<span class="fc" id="L154">    private record GradingResult(BigDecimal userScore, BigDecimal totalScore) {}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

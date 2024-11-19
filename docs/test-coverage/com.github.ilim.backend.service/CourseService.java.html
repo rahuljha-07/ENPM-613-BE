@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CourseService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ilim-backend</a> &gt; <a href="index.source.html" class="el_package">com.github.ilim.backend.service</a> &gt; <span class="el_source">CourseService.java</span></div><h1>CourseService.java</h1><pre class="source lang-java linenums">package com.github.ilim.backend.service;
+
+import com.github.ilim.backend.dto.CourseDto;
+import com.github.ilim.backend.dto.CourseRejectionDto;
+import com.github.ilim.backend.dto.PublicCourseDto;
+import com.github.ilim.backend.entity.AuditEntity;
+import com.github.ilim.backend.entity.Course;
+import com.github.ilim.backend.entity.CoursePurchase;
+import com.github.ilim.backend.entity.User;
+import com.github.ilim.backend.enums.CourseStatus;
+import com.github.ilim.backend.enums.PurchaseStatus;
+import com.github.ilim.backend.enums.UserRole;
+import com.github.ilim.backend.exception.exceptions.AccessDeletedCourseException;
+import com.github.ilim.backend.exception.exceptions.BadRequestException;
+import com.github.ilim.backend.exception.exceptions.CourseAlreadyPublished;
+import com.github.ilim.backend.exception.exceptions.CourseIsNotWaitingApprovalException;
+import com.github.ilim.backend.exception.exceptions.CourseModuleNotFoundException;
+import com.github.ilim.backend.exception.exceptions.CourseNotFoundException;
+import com.github.ilim.backend.exception.exceptions.CourseStatusNotDraftException;
+import com.github.ilim.backend.exception.exceptions.NoAccessToCourseContentException;
+import com.github.ilim.backend.exception.exceptions.NotCourseInstructorException;
+import com.github.ilim.backend.exception.exceptions.OnlyAdminAccessAllCourses;
+import com.github.ilim.backend.exception.exceptions.UserCannotCreateCourseException;
+import com.github.ilim.backend.exception.exceptions.UserHasNoAccessToCourseException;
+import com.github.ilim.backend.repo.CoursePurchaseRepo;
+import com.github.ilim.backend.repo.CourseRepo;
+import com.github.ilim.backend.util.CourseUtil;
+import jakarta.annotation.Nullable;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class CourseService {
+
+    private final CourseRepo courseRepo;
+    private final CoursePurchaseRepo purchaseRepo;
+    private final UserService userService;
+
+    @Transactional
+    public Course create(User instructor, CourseDto dto) {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (instructor.getRole() != UserRole.INSTRUCTOR) {</span>
+<span class="fc" id="L50">            throw new UserCannotCreateCourseException(instructor.getRole());</span>
+        }
+<span class="fc" id="L52">        var course = Course.from(dto);</span>
+<span class="fc" id="L53">        course.setInstructor(instructor);</span>
+<span class="fc" id="L54">        return courseRepo.save(course);</span>
+    }
+
+    @Transactional
+    public void approveCourse(User admin, UUID courseId) {
+<span class="fc" id="L59">        var course = findCourseByIdAndUser(admin, courseId);</span>
+<span class="fc" id="L60">        assertCourseNotDeleted(course);</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (course.getStatus() == CourseStatus.PUBLISHED) {</span>
+<span class="fc" id="L62">            throw new CourseAlreadyPublished(course);</span>
+        }
+<span class="fc" id="L64">        course.setStatus(CourseStatus.PUBLISHED);</span>
+<span class="fc" id="L65">        courseRepo.save(course);</span>
+<span class="fc" id="L66">    }</span>
+
+    @Transactional
+    public void rejectCourse(User admin, UUID courseId, @Valid CourseRejectionDto dto) {
+<span class="fc" id="L70">        var course = findCourseByIdAndUser(admin, courseId);</span>
+<span class="fc" id="L71">        assertCourseNotDeleted(course);</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (course.getStatus() != CourseStatus.WAIT_APPROVAL) {</span>
+<span class="fc" id="L73">            throw new CourseIsNotWaitingApprovalException(course.getId(), course.getStatus());</span>
+        }
+<span class="fc" id="L75">        course.setStatus(CourseStatus.DRAFT);</span>
+        // TODO: Use the DTO to notify the user by email about the reason of rejection
+<span class="fc" id="L77">        courseRepo.save(course);</span>
+<span class="fc" id="L78">    }</span>
+
+    @Transactional
+    public void updateCourse(User user, UUID courseId, @Valid CourseDto dto) {
+<span class="fc" id="L82">        var course = findCourseByIdAndUser(user, courseId);</span>
+<span class="fc" id="L83">        assertCourseNotDeleted(course);</span>
+<span class="fc" id="L84">        course.updateFrom(dto);</span>
+<span class="fc" id="L85">        courseRepo.save(course);</span>
+<span class="fc" id="L86">    }</span>
+
+    @Transactional
+    public void saveCourse(Course course) {
+<span class="fc" id="L90">        courseRepo.save(course);</span>
+<span class="fc" id="L91">    }</span>
+
+    public Course findPublishedCourse(UUID courseId) {
+<span class="fc" id="L94">        var course = courseRepo.findByIdAndStatusAndIsDeleted(courseId, CourseStatus.PUBLISHED, false)</span>
+<span class="fc" id="L95">            .orElseThrow(() -&gt; new CourseNotFoundException(courseId));</span>
+<span class="fc" id="L96">        return enforceCourseAccess(null, course);</span>
+    }
+
+    public Course findCourseByIdAndUser(@Nullable User user, UUID courseId) {
+<span class="fc" id="L100">        var course = courseRepo.findById(courseId)</span>
+<span class="fc" id="L101">            .orElseThrow(() -&gt; new CourseNotFoundException(courseId));</span>
+<span class="fc" id="L102">        return enforceCourseAccess(user, course);</span>
+    }
+
+    public void assertUserHasAccessToCourse(User user, Course course) {
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        if (!userHasAccessToCourse(user, course)) {</span>
+<span class="fc" id="L107">            throw new UserHasNoAccessToCourseException(user, course.getId());</span>
+        }
+<span class="fc" id="L109">    }</span>
+
+    private boolean userHasAccessToCourse(@Nullable User user, Course course) {
+<span class="fc" id="L112">        assertCourseNotDeleted(course);</span>
+        // No need for further checks if it's a published course
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        if (course.getStatus().equals(CourseStatus.PUBLISHED)) {</span>
+<span class="fc" id="L115">            return true;</span>
+        }
+        // DRAFT courses are not accessible publicly
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">        if (user == null) {</span>
+<span class="nc" id="L119">            return false;</span>
+        }
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">        if (user.getRole() == UserRole.ADMIN) {</span>
+<span class="nc" id="L122">            return true;</span>
+        }
+        // is user is the creator of the course?
+<span class="fc" id="L125">        return user.getId().equals(course.getInstructor().getId());</span>
+    }
+
+    public void assertUserHasAccessToCourseContent(User user, Course course) {
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (!userHasAccessToCourseContent(user, course)) {</span>
+<span class="nc" id="L130">            throw new NoAccessToCourseContentException(user, course.getId());</span>
+        }
+<span class="nc" id="L132">    }</span>
+
+    private boolean userHasAccessToCourseContent(@Nullable User user, @NonNull Course course) {
+<span class="fc" id="L135">        assertCourseNotDeleted(course);</span>
+        // Visitors cannot access any course content
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if (user == null) {</span>
+<span class="fc" id="L138">            return false;</span>
+        }
+        // Admin can access everything
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (user.getRole() == UserRole.ADMIN) {</span>
+<span class="fc" id="L142">            return true;</span>
+        }
+        // The instructor who created the course can access ite material
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if (user.getId().equals(course.getInstructor().getId())){</span>
+<span class="fc" id="L146">            return true;</span>
+        }
+        // All other users cannot access non-published course content
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        if (!course.getStatus().equals(CourseStatus.PUBLISHED)) {</span>
+<span class="fc" id="L150">            return false;</span>
+        }
+        // Finally, a student who purchase the course can access its content
+<span class="nc" id="L153">        return CoursePurchaseService.didStudentPurchaseCourse(purchaseRepo, user, course);</span>
+    }
+
+    public List&lt;Course&gt; findAllCourses(@NonNull User admin) {
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">        if (admin.getRole() != UserRole.ADMIN) {</span>
+<span class="nc" id="L158">            throw new OnlyAdminAccessAllCourses(admin.getId());</span>
+        }
+<span class="fc" id="L160">        return courseRepo.findAll(AuditEntity.SORT_BY_CREATED_AT_DESC);</span>
+    }
+
+    public List&lt;Course&gt; findCoursesWaitingForApproval(User user) {
+<span class="fc" id="L164">        return findAllCourses(user).stream()</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">            .filter(course -&gt; course.getStatus() == CourseStatus.WAIT_APPROVAL)</span>
+<span class="fc" id="L166">            .toList();</span>
+    }
+
+    public List&lt;PublicCourseDto&gt; findPublishedCourses() {
+<span class="nc" id="L170">        boolean isDeleted = false;</span>
+<span class="nc" id="L171">        var courses = courseRepo.findAllByStatusAndIsDeleted(</span>
+            CourseStatus.PUBLISHED, isDeleted, AuditEntity.SORT_BY_CREATED_AT_DESC
+        );
+<span class="nc" id="L174">        return CourseUtil.toPublicCourseDtos(courses);</span>
+    }
+
+    public List&lt;Course&gt; findPurchasedCourses(User student) {
+<span class="nc" id="L178">        boolean isDeleted = false;</span>
+<span class="nc" id="L179">        var purchasedCoursesIds = purchaseRepo.findAllByStudent(student, AuditEntity.SORT_BY_CREATED_AT_DESC).stream()</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">            .filter(purchase -&gt; purchase.getStatus() == PurchaseStatus.SUCCEEDED)</span>
+<span class="nc" id="L181">            .map(CoursePurchase::getCourse)</span>
+<span class="nc" id="L182">            .filter(Objects::nonNull)</span>
+<span class="nc" id="L183">            .map(Course::getId)</span>
+<span class="nc" id="L184">            .toList();</span>
+<span class="nc" id="L185">        var courses = courseRepo.findAllByIdInAndIsDeleted(purchasedCoursesIds, isDeleted);</span>
+<span class="nc" id="L186">        return enforceCoursesAccess(student, courses);</span>
+    }
+
+    public List&lt;Course&gt; findCreatedCourses(User instructor) {
+<span class="nc" id="L190">        boolean isDeleted = false;</span>
+<span class="nc" id="L191">        var courses = courseRepo.findAllByInstructorAndIsDeleted(</span>
+            instructor, isDeleted, AuditEntity.SORT_BY_CREATED_AT_DESC
+        );
+<span class="nc" id="L194">        return enforceCoursesAccess(instructor, courses);</span>
+    }
+
+    @Transactional
+    public void deleteCourseAsAdmin(UUID courseId) {
+<span class="fc" id="L199">        var course = courseRepo.findById(courseId)</span>
+<span class="fc" id="L200">            .orElseThrow(() -&gt; new CourseNotFoundException(courseId));</span>
+<span class="fc" id="L201">        course.setDeleted(true);</span>
+<span class="fc" id="L202">        courseRepo.save(course);</span>
+<span class="fc" id="L203">    }</span>
+
+    private static void assertCourseNotDeleted(@NonNull Course course) {
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">        if (course.isDeleted()) {</span>
+<span class="nc" id="L207">            throw new AccessDeletedCourseException(course.getId());</span>
+        }
+<span class="fc" id="L209">    }</span>
+
+
+    @Transactional
+    public void reorderCourseModules(User instructor, UUID courseId, List&lt;UUID&gt; modulesOrder) {
+<span class="fc" id="L214">        var course = findCourseByIdAndUser(instructor, courseId);</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">        if (modulesOrder.size() != course.getCourseModules().size()) {</span>
+<span class="fc" id="L216">            throw new BadRequestException(</span>
+                &quot;reorderCourseModules request must have exactly the same number of modules as the parent course!&quot;
+            );
+        }
+<span class="fc" id="L220">        var modulesInNewOrder = modulesOrder.stream()</span>
+<span class="fc" id="L221">            .map(id -&gt; {</span>
+<span class="fc" id="L222">                var module = course.findModule(id);</span>
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">                if (module == null) {</span>
+<span class="nc" id="L224">                    throw new CourseModuleNotFoundException(id);</span>
+                }
+<span class="fc" id="L226">                return module;</span>
+            })
+<span class="fc" id="L228">            .toList();</span>
+<span class="fc" id="L229">        course.getCourseModules().clear();</span>
+<span class="fc" id="L230">        course.getCourseModules().addAll(modulesInNewOrder);</span>
+<span class="fc" id="L231">        saveCourse(course);</span>
+<span class="fc" id="L232">    }</span>
+
+    public List&lt;PublicCourseDto&gt; filterPublishedCourses(@Nullable String containsFilter) {
+<span class="nc" id="L235">        var courses = findPublishedCourses();</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">        if (containsFilter == null) {</span>
+<span class="nc" id="L237">            return courses;</span>
+        }
+<span class="nc" id="L239">        return courses.stream()</span>
+<span class="nc" id="L240">            .filter(course -&gt; course.getTitle().toLowerCase().contains(containsFilter.toLowerCase()))</span>
+<span class="nc" id="L241">            .toList();</span>
+    }
+
+    public Course enforceCourseAccess(@Nullable User user, Course course) {
+<span class="fc bfc" id="L245" title="All 2 branches covered.">        if (userHasAccessToCourseContent(user, course)) {</span>
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">            if (user == null) {</span>
+<span class="nc" id="L247">                throw new IllegalStateException(&quot;userHasAccessToCourseContent failed to work!&quot;);</span>
+            }
+            // hide answers for students of the course
+<span class="pc bpc" id="L250" title="1 of 4 branches missed.">            if (!user.getRole().equals(UserRole.ADMIN) &amp;&amp; !user.getId().equals(course.getInstructor().getId())) {</span>
+<span class="nc" id="L251">                return CourseUtil.toStudentCourseDto(course);</span>
+            }
+<span class="fc" id="L253">            return course;</span>
+        }
+<span class="fc" id="L255">        assertUserHasAccessToCourse(user, course);</span>
+<span class="fc" id="L256">        return CourseUtil.toPublicCourseDto(course);</span>
+    }
+
+    public List&lt;Course&gt; enforceCoursesAccess(@Nullable User user, List&lt;Course&gt; courses) {
+<span class="nc" id="L260">        return courses.stream()</span>
+<span class="nc" id="L261">            .map(course -&gt; enforceCourseAccess(user, course))</span>
+<span class="nc" id="L262">            .toList();</span>
+    }
+
+    public void submitCourseForApproval(User instructor, UUID courseId) {
+<span class="fc" id="L266">        var course = findCourseByIdAndUser(instructor, courseId);</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">        if (!course.getInstructor().getId().equals(instructor.getId())) {</span>
+<span class="nc" id="L268">            throw new NotCourseInstructorException(instructor, course);</span>
+        }
+<span class="pc bpc" id="L270" title="1 of 2 branches missed.">        if (course.getStatus() != CourseStatus.DRAFT) {</span>
+<span class="nc" id="L271">            throw new CourseStatusNotDraftException(course);</span>
+        }
+<span class="fc" id="L273">        course.setStatus(CourseStatus.WAIT_APPROVAL);</span>
+<span class="fc" id="L274">        courseRepo.save(course);</span>
+<span class="fc" id="L275">    }</span>
+
+    public void testingDemoteInstructor(@NonNull User admin, @NonNull String userId) {
+<span class="nc" id="L278">        var user = userService.findById(userId);</span>
+<span class="nc" id="L279">        userService.demoteToStudent(user);</span>
+<span class="nc" id="L280">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
