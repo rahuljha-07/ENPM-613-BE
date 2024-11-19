@@ -30,6 +30,12 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
             .allowedOriginPatterns("http://localhost:3000")
+            .allowedOriginPatterns("http://3.219.29.76:3000")
+            .allowedOriginPatterns("https://3.219.29.76:3000")
+            .allowedOriginPatterns("http://3.219.29.76")
+            .allowedOriginPatterns("https://3.219.29.76")
+            .allowedOriginPatterns("http://ilim.online")
+            .allowedOriginPatterns("https://ilim.online")
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
     }
 }
