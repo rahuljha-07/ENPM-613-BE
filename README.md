@@ -1,15 +1,15 @@
-# ilim-backend
+# ilim Documentation
 
-Welcome to the **ilim-backend**! 
+Welcome to the **ilim!** 
 
-- **Code**
+### **Code**
 - Ilim Backend [repository](https://github.com/rahuljha-07/ENPM-613-BE)
 - Ilim Payment Service [repository](https://github.com/praveendran-tech/ilimPaymentHandlerServ/tree/master)
 - Ilim Email Service [repository](https://github.com/praveendran-tech/ilimDeliveryServ)
 - Ilim Frontend [repository](https://github.com/rahuljha-07/ENPM-613-FE)
 - Ilim AWS CloudFormation Templates ([code](devops/aws-cf-templates)) and [screenshots]([aws-stack.md](docs/aws-stack.md)).
 
-**More resources**
+### **More resources**
 - Refer to [ILIM User Guide.pdf](docs/ILIM%20User%20Guide.pdf) for the User Guide.
 - Refer to [ILIM Backend - Installation and Operation Guide.pdf](docs/ILIM%20Backend%20-%20Installation%20and%20Operation%20Guide.pdf) to learn how to set up the backend.
 - Refer to [feature-list.md](docs/feature-list.md) to see a bullet list of implemented features.
