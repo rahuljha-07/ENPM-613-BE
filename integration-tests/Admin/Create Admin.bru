@@ -1,5 +1,5 @@
 meta {
-  name: Sign Up User
+  name: Create Admin
   type: http
   seq: 1
 }
@@ -12,7 +12,7 @@ post {
 
 body:json {
   {
-      "name": "shareef-instructor",
+      "name": "shareef1",
       "birthdate": "2011-02-04",
       "email": "{{eduEmail}}",
       "password": "{{eduPassword}}"
@@ -20,5 +20,5 @@ body:json {
 }
 
 assert {
-  res.status: eq 201
+  res.status: eq 200
 }

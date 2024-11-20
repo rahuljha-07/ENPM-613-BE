@@ -1,17 +1,17 @@
 meta {
-  name: Get All Courses
+  name: Cancel Instructor Application
   type: http
-  seq: 8
+  seq: 4
 }
 
-get {
-  url: http://{{ilim-url}}/api/admin/course/all
+post {
+  url: http://{{ilim-url}}/api/student/instructor-application/cancel
   body: none
   auth: bearer
 }
 
 auth:bearer {
-  token: {{token}}
+  token: {{instructorToken}}
 }
 
 body:json {
@@ -32,5 +32,5 @@ body:json {
 }
 
 assert {
-  res.status: eq 200
+  status: eq 200
 }
