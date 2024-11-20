@@ -1,4 +1,4 @@
-# ILIM Backend Documentation
+# ILIM User Manual
 
 This documentation includes the **User's Manual** for the ILIM backend system.
 
