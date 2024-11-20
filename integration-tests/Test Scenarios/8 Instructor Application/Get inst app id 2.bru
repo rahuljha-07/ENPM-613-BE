@@ -5,13 +5,17 @@ meta {
 }
 
 get {
-  url: http://{{ilim-url}}/student/instructor-application/all-pending
+  url: http://{{ilim-url}}/api/student/instructor-application?status=PENDING
   body: json
   auth: bearer
 }
 
+params:query {
+  status: PENDING
+}
+
 auth:bearer {
-  token: {{adminToken}}
+  token: {{instructorToken}}
 }
 
 body:json {

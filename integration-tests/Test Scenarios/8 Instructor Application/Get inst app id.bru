@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: http://{{ilim-url}}/student/instructor-application/all-pending
+  url: http://{{ilim-url}}/api/student/instructor-application
   body: json
   auth: bearer
 }
 
 auth:bearer {
-  token: {{adminToken}}
+  token: {{instructorToken}}
 }
 
 body:json {

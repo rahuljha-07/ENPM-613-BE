@@ -1,17 +1,17 @@
 meta {
-  name: Get All Courses
+  name: Get Course Progress
   type: http
-  seq: 8
+  seq: 3
 }
 
 get {
-  url: http://{{ilim-url}}/api/admin/course/all
+  url: http://{{ilim-url}}/api/student/{{courseId}}
   body: none
   auth: bearer
 }
 
 auth:bearer {
-  token: {{token}}
+  token: {{studentToken}}
 }
 
 body:json {
@@ -32,5 +32,5 @@ body:json {
 }
 
 assert {
-  res.status: eq 200
+  status: eq 200
 }
