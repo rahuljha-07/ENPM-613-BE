@@ -136,8 +136,10 @@ public class CourseService {
         var instructor = course.getInstructor();
         var emailRequest = EmailDto.builder()
             .subject("You course submission is rejected!")
-            .content("Ilim admin rejected your course titled '%s' and moved it back to DRAFT status. " +
-                "Checkout the reason below and update your course then submit it again.\n Rejection Reason:\n" + dto.getReason())
+            .content("Ilim admin rejected your course titled '%s' and moved it back to DRAFT status. ".formatted(course.getTitle()) +
+                "Checkout the reason below and update your course then submit it again.\n Rejection Reason:\n%s"
+                    .formatted(dto.getReason())
+            )
             .toAddress(instructor.getEmail())
             .build();
         emailSenderService.sendEmail(emailRequest);
