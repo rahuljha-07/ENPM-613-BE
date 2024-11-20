@@ -2,6 +2,7 @@ package com.github.ilim.backend.service;
 
 import com.github.ilim.backend.dto.CourseDto;
 import com.github.ilim.backend.dto.CourseRejectionDto;
+import com.github.ilim.backend.dto.EmailDto;
 import com.github.ilim.backend.dto.PublicCourseDto;
 import com.github.ilim.backend.entity.AuditEntity;
 import com.github.ilim.backend.entity.Course;
@@ -56,6 +57,7 @@ public class CourseService {
     private final CourseRepo courseRepo;
     private final CoursePurchaseRepo purchaseRepo;
     private final UserService userService;
+    private final EmailSenderService emailSenderService;
 
     /**
      * Creates a new course.
@@ -100,6 +102,13 @@ public class CourseService {
         }
         course.setStatus(CourseStatus.PUBLISHED);
         courseRepo.save(course);
+        var instructor = course.getInstructor();
+        var emailRequest = EmailDto.builder()
+            .subject("You course is online!")
+            .content("Ilim admin approved your course titled '%s' and it's now published!".formatted(course.getTitle()))
+            .toAddress(instructor.getEmail())
+            .build();
+        emailSenderService.sendEmail(emailRequest);
     }
 
     /**
@@ -123,8 +132,15 @@ public class CourseService {
             throw new CourseIsNotWaitingApprovalException(course.getId(), course.getStatus());
         }
         course.setStatus(CourseStatus.DRAFT);
-        // TODO: Use the DTO to notify the user by email about the reason of rejection
         courseRepo.save(course);
+        var instructor = course.getInstructor();
+        var emailRequest = EmailDto.builder()
+            .subject("You course submission is rejected!")
+            .content("Ilim admin rejected your course titled '%s' and moved it back to DRAFT status. " +
+                "Checkout the reason below and update your course then submit it again.\n Rejection Reason:\n" + dto.getReason())
+            .toAddress(instructor.getEmail())
+            .build();
+        emailSenderService.sendEmail(emailRequest);
     }
 
     /**
