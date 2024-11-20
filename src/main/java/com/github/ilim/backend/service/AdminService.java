@@ -55,7 +55,7 @@ public class AdminService {
         userService.promoteToInstructor(application);
         var instructor = userService.findById(application.getUserId());
         var emailRequest = EmailDto.builder()
-            .subject("You Instructor Application is approved")
+            .subject("Your Instructor Application is approved")
             .content("Ilim admin has approved you instructor application. Go to ilim and start creating courses!")
             .toAddress(instructor.getEmail())
             .build();
@@ -82,7 +82,7 @@ public class AdminService {
         updateInstructorAppStatus(application, ApplicationStatus.REJECTED, reason);
         var instructor = userService.findById(application.getUserId());
         var emailRequest = EmailDto.builder()
-            .subject("You Instructor Application is rejected")
+            .subject("Your Instructor Application is rejected")
             .content("Ilim admin has rejected you instructor application and gave the following reason:\n" + reason)
             .toAddress(instructor.getEmail())
             .build();
