@@ -1,5 +1,6 @@
 package com.github.ilim.backend.service;
 
+import com.github.ilim.backend.dto.EmailDto;
 import com.github.ilim.backend.entity.InstructorApp;
 import com.github.ilim.backend.entity.User;
 import com.github.ilim.backend.enums.ApplicationStatus;
@@ -32,6 +33,7 @@ public class AdminService {
 
     private final InstructorAppService instructorAppService;
     private final UserService userService;
+    private final EmailSenderService emailSenderService;
 
     /**
      * Approves an instructor application.
@@ -51,7 +53,13 @@ public class AdminService {
         }
         updateInstructorAppStatus(application, ApplicationStatus.APPROVED, null);
         userService.promoteToInstructor(application);
-        // TODO: notify user
+        var instructor = userService.findById(application.getUserId());
+        var emailRequest = EmailDto.builder()
+            .subject("You Instructor Application is approved")
+            .content("Ilim admin has approved you instructor application. Go to ilim and start creating courses!")
+            .toAddress(instructor.getEmail())
+            .build();
+        emailSenderService.sendEmail(emailRequest);
     }
 
     /**
@@ -72,7 +80,13 @@ public class AdminService {
             throw new BadRequestException("Application already rejected");
         }
         updateInstructorAppStatus(application, ApplicationStatus.REJECTED, reason);
-        // TODO: notify user
+        var instructor = userService.findById(application.getUserId());
+        var emailRequest = EmailDto.builder()
+            .subject("You Instructor Application is rejected")
+            .content("Ilim admin has rejected you instructor application and gave the following reason:\n" + reason)
+            .toAddress(instructor.getEmail())
+            .build();
+        emailSenderService.sendEmail(emailRequest);
     }
 
     /**
